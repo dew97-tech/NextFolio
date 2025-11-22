@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Custom Palette */
+  --color-cream: #F1F3E0;
+  --color-sage-light: #D2DCB6;
+  --color-sage-medium: #A1BC98;
+  --color-sage-dark: #778873;
+
+  /* Semantic Colors - Light Mode */
+  --background: var(--color-cream);
+  --foreground: #1a1a1a;
+  
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  
+  --primary: var(--color-sage-dark);
+  --primary-foreground: var(--color-cream);
+  
+  --secondary: var(--color-sage-medium);
+  --secondary-foreground: #1a1a1a;
+  
+  --muted: var(--color-sage-light);
+  --muted-foreground: #4a554a;
+  
+  --accent: var(--color-sage-light);
+  --accent-foreground: #1a1a1a;
+  
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: var(--color-sage-medium);
+  --input: var(--color-sage-medium);
+  --ring: var(--color-sage-dark);
+  
+  --radius: 0.5rem;
+}
+
+.dark {
+  /* Semantic Colors - Dark Mode */
+  --background: #0a0f0a;
+  --foreground: var(--color-cream);
+  
+  --card: #111611;
+  --card-foreground: var(--color-cream);
+  
+  --popover: #111611;
+  --popover-foreground: var(--color-cream);
+  
+  --primary: var(--color-sage-medium);
+  --primary-foreground: #0a0f0a;
+  
+  --secondary: var(--color-sage-dark);
+  --secondary-foreground: var(--color-cream);
+  
+  --muted: #1a201a;
+  --muted-foreground: #a1a1a1;
+  
+  --accent: var(--color-sage-dark);
+  --accent-foreground: var(--color-cream);
+  
+  --destructive: #7f1d1d;
+  --destructive-foreground: #ffffff;
+
+  --border: #2a302a;
+  --input: #2a302a;
+  --ring: var(--color-sage-medium);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
