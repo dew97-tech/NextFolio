@@ -38,6 +38,9 @@ export const metadata: Metadata = {
     description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js and AI-driven solutions.",
     creator: "@dew97_tech", // Placeholder handle
   },
+  verification: {
+    google: "2QUjqhsr5Z3NvS5hXLmwr0YerqaCjauu7xVMHJUYAMw",
+  },
 };
 
 export default function RootLayout({
