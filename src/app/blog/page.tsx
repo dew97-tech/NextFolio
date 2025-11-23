@@ -7,6 +7,8 @@ export const metadata: Metadata = {
 };
 
 
+import { blogPosts } from "@/data/blog-posts";
+
 export default function BlogPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
