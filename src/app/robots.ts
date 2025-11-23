@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://portfolio-gilt-beta-15.vercel.app/sitemap.xml",
+    sitemap: "https://david-dew-mallick.vercel.app/sitemap.xml",
   };
 }

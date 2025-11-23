@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://portfolio-gilt-beta-15.vercel.app"),
+  metadataBase: new URL("https://david-dew-mallick.vercel.app"),
   title: {
     default: "David Dew Mallick | Software Engineer",
     template: "%s | David Dew Mallick",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://portfolio-gilt-beta-15.vercel.app", // Placeholder URL
+    url: "https://david-dew-mallick.vercel.app", // Placeholder URL
     title: "David Dew Mallick | Software Engineer",
     description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js and AI-driven solutions.",
     siteName: "David Dew Mallick Portfolio",
@@ -53,7 +53,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Person",
     name: "David Dew Mallick",
-    url: "https://portfolio-gilt-beta-15.vercel.app",
+    url: "https://david-dew-mallick.vercel.app",
     jobTitle: "Software Engineer",
     sameAs: [
       "https://github.com/dew97-tech",
