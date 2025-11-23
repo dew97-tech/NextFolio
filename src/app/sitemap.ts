@@ -1,10 +1,15 @@
-import { blogPosts } from "@/data/blog-posts";
+import prisma from "@/app/lib/prisma";
 import { MetadataRoute } from "next";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = blogPosts.map((post) => ({
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = await prisma.post.findMany({
+    where: { published: true },
+    select: { slug: true, date: true },
+  });
+
+  const blogEntries = posts.map((post: any) => ({
     url: `https://david-dew-mallick.vercel.app/blog/${post.slug}`,
-    lastModified: new Date(post.date),
+    lastModified: post.date,
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
@@ -16,6 +21,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 1,
     },
-    ...posts,
+    ...blogEntries,
   ];
 }
