@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://portfolio-gilt-beta-15.vercel.app"),
   title: {
     default: "David Dew Mallick | Software Engineer",
     template: "%s | David Dew Mallick",
