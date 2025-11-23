@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://david-dew-mallick.vercel.app", // Placeholder URL
+    url: "https://portfolio-gilt-beta-15.vercel.app", // Placeholder URL
     title: "David Dew Mallick | Software Engineer",
     description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js and AI-driven solutions.",
     siteName: "David Dew Mallick Portfolio",
@@ -52,7 +52,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Person",
     name: "David Dew Mallick",
-    url: "https://david-dew-mallick.vercel.app",
+    url: "https://portfolio-gilt-beta-15.vercel.app",
     jobTitle: "Software Engineer",
     sameAs: [
       "https://github.com/dew97-tech",
