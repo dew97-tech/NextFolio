@@ -6,23 +6,13 @@ export const metadata: Metadata = {
   description: "Insights and guides on software engineering, SEO, and web development.",
 };
 
-const posts = [
-  {
-    slug: "diy-meo-guide",
-    title: "Complete Guide to DIY MEO (Map Engine Optimization)",
-    description: "Learn how to rank your local business on Google Maps without spending a fortune. A comprehensive guide to Google Business Profile optimization.",
-    date: "2025-11-23",
-    readTime: "10 min read",
-    tags: ["SEO", "MEO", "Google Maps", "Marketing"],
-  },
-];
 
 export default function BlogPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-4xl font-bold mb-8 tracking-tight">Blog</h1>
       <div className="grid gap-8">
-        {posts.map((post) => (
+        {blogPosts.map((post) => (
           <article
             key={post.slug}
             className="group border border-border rounded-lg p-6 hover:bg-accent/50 transition-colors"

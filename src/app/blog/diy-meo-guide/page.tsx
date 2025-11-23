@@ -5,11 +5,36 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Complete Guide to DIY MEO | David Dew Mallick",
   description: "A comprehensive guide on how to achieve top rankings in Google Maps (MEO) by yourself. Learn the specific steps and strategies.",
+  keywords: ["MEO", "Google Maps", "SEO", "Local SEO", "Google Business Profile", "DIY Marketing"],
+  openGraph: {
+    title: "Complete Guide to DIY MEO | David Dew Mallick",
+    description: "Learn how to rank your local business on Google Maps without spending a fortune.",
+    type: "article",
+    publishedTime: "2025-11-23",
+    authors: ["David Dew Mallick"],
+  },
 };
 
 export default function MeoGuidePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "Complete Guide to DIY MEO: How to Achieve Top Rankings and Specific Steps",
+    description: "A comprehensive guide on how to achieve top rankings in Google Maps (MEO) by yourself.",
+    author: {
+      "@type": "Person",
+      name: "David Dew Mallick",
+    },
+    datePublished: "2025-11-23",
+    image: "https://david-dew-mallick.vercel.app/og-image.jpg", // Placeholder or actual OG image
+  };
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link
         href="/blog"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors"
