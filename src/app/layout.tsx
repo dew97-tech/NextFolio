@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     creator: "@dew97_tech", // Placeholder handle
   },
   verification: {
-    google: "2QUjqhsr5Z3NvS5hXLmwr0YerqaCjauu7xVMHJUYAMw",
+    google: "PfnsS0haOH5hKybjZAz_cQoqfEi6BmwL-xj0kyl2rNo",
   },
 };
 
