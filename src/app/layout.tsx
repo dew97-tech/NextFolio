@@ -25,10 +25,25 @@ export const metadata: Metadata = {
   keywords: ["Software Engineer", "Next.js", "React", "AI", "Web Developer", "Portfolio", "David Dew Mallick"],
   authors: [{ name: "David Dew Mallick" }],
   creator: "David Dew Mallick",
+  publisher: "David Dew Mallick",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://david-dew-mallick.vercel.app", // Placeholder URL
+    url: "https://david-dew-mallick.vercel.app",
     title: "David Dew Mallick | Software Engineer",
     description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js and AI-driven solutions.",
     siteName: "David Dew Mallick Portfolio",
@@ -37,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "David Dew Mallick | Software Engineer",
     description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js and AI-driven solutions.",
-    creator: "@dew97_tech", // Placeholder handle
+    creator: "@dew97_tech",
   },
   verification: {
     google: "PfnsS0haOH5hKybjZAz_cQoqfEi6BmwL-xj0kyl2rNo",
