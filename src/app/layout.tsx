@@ -15,6 +15,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "David Dew Mallick",
+  url: "https://david-dew-mallick.vercel.app",
+  jobTitle: "Software Engineer",
+  sameAs: [
+    "https://github.com/dew97-tech",
+    "https://www.linkedin.com/in/david-dew-mallick-618a6223b/",
+  ],
+  worksFor: {
+    "@type": "Organization",
+    name: "JB Connect Ltd.",
+  },
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://david-dew-mallick.vercel.app"),
   title: {
@@ -81,6 +97,9 @@ export const metadata: Metadata = {
       },
     ],
   },
+  other: {
+    "application/ld+json": JSON.stringify(jsonLd),
+  },
 };
 
 export default function RootLayout({
@@ -88,30 +107,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: "David Dew Mallick",
-    url: "https://david-dew-mallick.vercel.app",
-    jobTitle: "Software Engineer",
-    sameAs: [
-      "https://github.com/dew97-tech",
-      "https://www.linkedin.com/in/david-dew-mallick-618a6223b/",
-    ],
-    worksFor: {
-      "@type": "Organization",
-      name: "JB Connect Ltd.",
-    },
-  };
-
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
