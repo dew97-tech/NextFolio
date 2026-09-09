@@ -1,13 +1,15 @@
 import prisma from "@/app/lib/prisma";
 import BlogPagination from "@/app/ui/blog-pagination";
 import BlogSearch from "@/app/ui/blog-search";
+import { ArrowRight, BookOpen, Calendar, Clock } from "lucide-react";
 import { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Blog | David Dew Mallick",
-  description: "Insights and guides on software engineering, SEO, and web development.",
+  title: "Blog & Insights | David Dew Mallick",
+  description: "Guides, deep dives, and tutorials on software architecture, SEO, performance optimization, and modern web applications.",
 };
 
 const POSTS_PER_PAGE = 6;
@@ -24,7 +26,6 @@ export default async function BlogPage({
   const query = params?.query || "";
   const currentPage = Number(params?.page) || 1;
 
-  // Build where clause for search
   const where = {
     published: true,
     ...(query && {
@@ -36,11 +37,9 @@ export default async function BlogPage({
     }),
   };
 
-  // Get total count for pagination
   const totalPosts = await prisma.post.count({ where });
   const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
 
-  // Get posts for current page
   const posts = await prisma.post.findMany({
     where,
     orderBy: { date: "desc" },
@@ -49,67 +48,121 @@ export default async function BlogPage({
   });
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4 tracking-tight">Blog</h1>
-        <Suspense fallback={<div className="h-10 bg-muted animate-pulse rounded-md" />}>
-          <BlogSearch />
-        </Suspense>
-      </div>
-
-      {posts.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            {query ? `No posts found for "${query}"` : "No blog posts yet"}
+    <div className="min-h-screen pt-28 pb-20 px-4 sm:px-6">
+      <div className="container mx-auto max-w-4xl">
+        <div className="mb-12 text-center md:text-left">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-3">
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>Articles & Insights</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground mb-4">
+            Engineering & Strategy
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl font-light">
+            In-depth guides on building high-performance web systems, modern architecture patterns, and search engine optimization.
           </p>
+
+          <div className="mt-8 max-w-xl">
+            <Suspense fallback={<div className="h-11 bg-muted animate-pulse rounded-lg" />}>
+              <BlogSearch />
+            </Suspense>
+          </div>
         </div>
-      ) : (
-        <>
-          <div className="grid gap-8 mb-8">
+
+        {posts.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-card/50">
+            <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground mb-4">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-1">
+              {query ? `No matching articles found` : "No articles published yet"}
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              {query
+                ? `We couldn't find anything matching "${query}". Try searching with different keywords or clearing your query.`
+                : "Check back soon for upcoming guides and architectural deep-dives."}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
             {posts.map((post: any) => (
               <article
                 key={post.slug}
-                className="group border border-border rounded-lg p-6 hover:bg-accent/50 transition-colors"
+                className="group rounded-2xl border border-border bg-card p-6 sm:p-7 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
               >
                 <Link href={`/blog/${post.slug}`} className="block">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                    <h2 className="text-2xl font-semibold group-hover:text-primary transition-colors">
-                      {post.title}
-                    </h2>
-                    <span className="text-sm text-muted-foreground mt-2 md:mt-0">
-                      {new Date(post.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground mb-4 line-clamp-2">
-                    {post.description}
-                  </p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-primary font-medium">{post.readTime}</span>
-                    <div className="flex gap-2">
-                      {post.tags.slice(0, 3).map((tag: string) => (
-                        <span
-                          key={tag}
-                          className="bg-secondary/20 px-2 py-1 rounded-md text-xs text-secondary-foreground"
-                        >
-                          {tag}
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <time dateTime={post.date.toISOString()}>
+                            {new Date(post.date).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </time>
                         </span>
-                      ))}
+                        <span>•</span>
+                        <span className="inline-flex items-center gap-1 font-medium text-primary">
+                          <Clock className="h-3.5 w-3.5" />
+                          {post.readTime}
+                        </span>
+                      </div>
+
+                      <h2 className="text-xl sm:text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-200 tracking-tight mb-2.5">
+                        {post.title}
+                      </h2>
+
+                      <p className="text-muted-foreground text-sm sm:text-base leading-relaxed line-clamp-2 mb-4">
+                        {post.description}
+                      </p>
+
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                        {post.tags.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {post.tags.slice(0, 3).map((tag: string) => (
+                              <span key={tag} className="blog-tag">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        ) : <div />}
+
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:translate-x-1 transition-transform">
+                          <span>Read article</span>
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </span>
+                      </div>
                     </div>
+
+                    {post.thumbnail && (
+                      <div className="relative w-full md:w-48 h-36 rounded-xl overflow-hidden bg-muted shrink-0 border border-border">
+                        <Image
+                          src={post.thumbnail}
+                          alt={post.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, 192px"
+                        />
+                      </div>
+                    )}
                   </div>
                 </Link>
               </article>
             ))}
           </div>
+        )}
 
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-center">
-              <Suspense fallback={<div className="h-10 w-64 bg-muted animate-pulse rounded-md" />}>
-                <BlogPagination totalPages={totalPages} />
-              </Suspense>
-            </div>
-          )}
-        </>
-      )}
+        {totalPages > 1 && (
+          <div className="mt-12 flex justify-center">
+            <Suspense fallback={<div className="h-10 w-64 bg-muted animate-pulse rounded-md" />}>
+              <BlogPagination totalPages={totalPages} />
+            </Suspense>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

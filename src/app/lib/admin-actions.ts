@@ -12,9 +12,12 @@ const PostSchema = z.object({
   description: z.string().min(1),
   content: z.string().min(1),
   readTime: z.string().min(1),
-  tags: z.string(), // Comma separated
+  tags: z.string(),
   thumbnail: z.string().optional(),
-  published: z.coerce.boolean(),
+  published: z.preprocess(
+    (val) => val === true || val === "true" || val === "on" || val === 1 || val === "1",
+    z.boolean(),
+  ),
 });
 
 export async function createPost(prevState: any, formData: FormData) {
@@ -127,7 +130,6 @@ export async function updatePost(
 export async function deletePost(id: string) {
   const session = await auth();
   if (!session?.user) {
-    // return { message: "Unauthorized" };
     return;
   }
 
@@ -138,7 +140,6 @@ export async function deletePost(id: string) {
     revalidatePath("/blog");
     revalidatePath("/admin");
   } catch (error) {
-    // return { message: "Database Error: Failed to Delete Post." };
     console.error("Failed to delete post:", error);
   }
 }

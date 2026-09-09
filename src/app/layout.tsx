@@ -1,7 +1,10 @@
+import { CursorTrail } from "@/components/cursor-trail";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
+import { PerformanceMonitor } from "@/components/performance-monitor";
 import { ThemeProvider } from "@/components/theme-provider";
-import type { Metadata } from "next";
+import { PhysicsProvider } from "@/lib/motion/physics-context";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -75,31 +78,26 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon.png', sizes: 'any' },
+      { url: '/icon.svg?v=3', type: 'image/svg+xml' },
+      { url: '/favicon.svg?v=3', type: 'image/svg+xml' },
     ],
     apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
-    other: [
-      {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '192x192',
-        url: '/android-chrome-192x192.png',
-      },
-      {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '512x512',
-        url: '/android-chrome-512x512.png',
-      },
+      { url: '/icon.svg?v=3' },
     ],
   },
   other: {
     "application/ld+json": JSON.stringify(jsonLd),
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0e17" },
+  ],
 };
 
 export default function RootLayout({
@@ -109,8 +107,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=3" />
+        <link rel="alternate icon" href="/icon.svg?v=3" />
+        <link rel="apple-touch-icon" href="/icon.svg?v=3" />
+        <link rel="preconnect" href="https://github.com" />
+        <link rel="preconnect" href="https://linkedin.com" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"
@@ -118,11 +125,18 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main className="flex-grow pt-16 md:pt-20">
-            {children}
-          </main>
-          <Footer />
+          <PhysicsProvider>
+            <PerformanceMonitor />
+            <CursorTrail />
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md">
+              Skip to main content
+            </a>
+            <Navbar />
+            <main id="main-content" className="flex-grow pt-16 md:pt-20" tabIndex={-1}>
+              {children}
+            </main>
+            <Footer />
+          </PhysicsProvider>
         </ThemeProvider>
       </body>
     </html>

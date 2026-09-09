@@ -10,10 +10,10 @@ export const authConfig = {
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");
       if (isOnAdmin) {
         if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+        return false;
       }
       return true;
     },
   },
-  providers: [], // Add providers with an empty array for now
+  providers: [],
 } satisfies NextAuthConfig;

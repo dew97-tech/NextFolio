@@ -11,7 +11,7 @@ export default function BlogSearch() {
 
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", "1"); // Reset to first page on new search
+    params.set("page", "1");
     
     if (term) {
       params.set("query", term);

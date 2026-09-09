@@ -13,7 +13,6 @@ export default function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-6">
-      {/* Email Field */}
       <div className="space-y-2">
         <label
           htmlFor="email"
@@ -34,7 +33,6 @@ export default function LoginForm() {
         </div>
       </div>
 
-      {/* Password Field */}
       <div className="space-y-2">
         <label
           htmlFor="password"
@@ -56,7 +54,6 @@ export default function LoginForm() {
         </div>
       </div>
 
-      {/* Error Message */}
       {errorMessage && (
         <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
           <AlertCircle className="h-4 w-4" />
@@ -64,7 +61,6 @@ export default function LoginForm() {
         </div>
       )}
 
-      {/* Submit Button */}
       <LoginButton />
     </form>
   );

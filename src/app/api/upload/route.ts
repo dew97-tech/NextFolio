@@ -18,7 +18,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         return {
           allowedContentTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
           tokenPayload: JSON.stringify({
-            userId: session.user.email, // Use email as ID for now
+            userId: session.user.email,
           }),
         };
       },
