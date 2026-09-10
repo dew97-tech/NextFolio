@@ -1,6 +1,7 @@
 "use client";
 
 import DeletePostButton from "@/app/ui/delete-post-button";
+import IndexPostButton from "@/app/ui/index-post-button";
 import {
   CheckCircle2,
   Clock,
@@ -28,6 +29,12 @@ interface PostItem {
   readTime: string;
   tags: string[];
   thumbnail?: string | null;
+  source?: string;
+  aiModel?: string | null;
+  topic?: string | null;
+  keywords?: string[];
+  indexedAt?: string | null;
+  indexStatus?: string | null;
 }
 
 export default function AdminPostsManager({
@@ -260,6 +267,22 @@ export default function AdminPostsManager({
                             <span className="text-[11px] font-mono text-muted-foreground/80">
                               /{post.slug}
                             </span>
+                            {post.source === "ai" && (
+                              <span
+                                className="inline-flex items-center rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-600 dark:text-violet-400"
+                                title={`AI draft${post.aiModel ? ` · ${post.aiModel}` : ""}${post.topic ? ` · ${post.topic}` : ""}`}
+                              >
+                                AI{post.aiModel ? ` · ${post.aiModel}` : ""}
+                              </span>
+                            )}
+                            {post.keywords && post.keywords.length > 0 && (
+                              <span
+                                className="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-600 dark:text-sky-400"
+                                title={`Primary keyword: ${post.keywords[0]}`}
+                              >
+                                KW: {post.keywords[0]}
+                              </span>
+                            )}
                             {post.tags.slice(0, 3).map((tag) => (
                               <span
                                 key={tag}
@@ -321,6 +344,14 @@ export default function AdminPostsManager({
                           <Pencil className="h-3.5 w-3.5" />
                           <span>Edit</span>
                         </Link>
+
+                        {post.published && (
+                          <IndexPostButton
+                            postId={post.id}
+                            indexedAt={post.indexedAt}
+                            indexStatus={post.indexStatus}
+                          />
+                        )}
 
                         <DeletePostButton postId={post.id} />
                       </div>

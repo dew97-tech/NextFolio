@@ -11,7 +11,7 @@ export default async function AdminPage() {
   return (
     <div className="w-full">
       <AdminPostsManager
-        initialPosts={posts.map((p: any) => ({
+        initialPosts={posts.map((p) => ({
           id: p.id,
           slug: p.slug,
           title: p.title,
@@ -21,6 +21,12 @@ export default async function AdminPage() {
           readTime: p.readTime,
           tags: p.tags,
           thumbnail: p.thumbnail,
+          source: p.source,
+          aiModel: p.aiModel,
+          topic: p.topic,
+          keywords: p.keywords,
+          indexedAt: p.indexedAt ? p.indexedAt.toISOString() : null,
+          indexStatus: p.indexStatus,
         }))}
       />
     </div>

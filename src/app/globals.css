@@ -628,6 +628,78 @@ button:focus-visible,
   margin: 2.5rem 0;
 }
 
+.article-content .highlight-box {
+  background-color: var(--muted);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1.5rem 1.75rem;
+  margin: 2.5rem 0;
+}
+
+.article-content .highlight-box strong:first-child {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.article-content .highlight-box > p:last-child {
+  margin-bottom: 0;
+}
+
+.article-content .pro-tip {
+  position: relative;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.9rem 1.75rem 1.5rem;
+  margin: 3rem 0 2rem;
+  box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.25);
+}
+
+.article-content .pro-tip::before {
+  content: "PRO TIP";
+  position: absolute;
+  top: -0.7rem;
+  left: 1.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.2rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.article-content .pro-tip > p:last-child {
+  margin-bottom: 0;
+}
+
+.article-content .table-wrapper {
+  overflow-x: auto;
+  margin: 2.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.article-content .table-wrapper > table {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.article-content .comparison-table th {
+  white-space: nowrap;
+}
+
+.article-content pre.code-snippet {
+  border-radius: var(--radius);
+}
+
 .ProseMirror {
   outline: none;
   min-height: 320px;

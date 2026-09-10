@@ -60,16 +60,39 @@ model VerificationToken {
 }
 
 model Post {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   title       String
   description String
-  content     String   @db.Text
-  published   Boolean  @default(false)
-  date        DateTime @default(now())
+  content     String    @db.Text
+  published   Boolean   @default(false)
+  date        DateTime  @default(now())
   readTime    String
   tags        String[]
   thumbnail   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  source      String    @default("manual")
+  topic       String?
+  keywords    String[]  @default([])
+  aiModel     String?
+  generatedAt DateTime?
+  indexedAt   DateTime?
+  indexStatus String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model GenerationRun {
+  id           String    @id @default(cuid())
+  startedAt    DateTime  @default(now())
+  finishedAt   DateTime?
+  status       String
+  model        String?
+  topic        String?
+  postId       String?
+  error        String?   @db.Text
+  cost         Float?
+  inputTokens  Int?
+  outputTokens Int?
+
+  @@index([startedAt])
 }
