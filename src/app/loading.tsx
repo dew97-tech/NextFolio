@@ -1,18 +1,11 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { PageLoading } from "@/components/ui/skeletons";
-
 export default function Loading() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-    >
-      <PageLoading />
-    </motion.div>
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div
+        role="status"
+        aria-label="Loading"
+        className="h-5 w-5 animate-spin rounded-full border border-rule border-t-ink"
+      />
+    </div>
   );
 }

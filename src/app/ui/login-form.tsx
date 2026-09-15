@@ -1,64 +1,51 @@
 "use client";
 
 import { authenticate } from "@/app/lib/actions";
-import { AlertCircle, Lock, Mail } from "lucide-react";
+import { CircleNotch } from "@phosphor-icons/react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 export default function LoginForm() {
-  const [errorMessage, formAction, isPending] = useActionState(
-    authenticate,
-    undefined,
-  );
+  const [errorMessage, formAction] = useActionState(authenticate, undefined);
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-5">
       <div className="space-y-2">
-        <label
-          htmlFor="email"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
+        <label htmlFor="email" className="block text-sm font-medium text-foreground">
           Email
         </label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            placeholder="admin@example.com"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-10 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        </div>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          spellCheck={false}
+          placeholder="you@example.com"
+          className="h-10 w-full rounded border border-input bg-surface px-3 text-sm text-foreground placeholder:text-ink-faint"
+        />
       </div>
 
       <div className="space-y-2">
-        <label
-          htmlFor="password"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
+        <label htmlFor="password" className="block text-sm font-medium text-foreground">
           Password
         </label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={6}
-            placeholder="••••••••"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-10 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        </div>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          minLength={6}
+          autoComplete="current-password"
+          placeholder="At least 6 characters"
+          className="h-10 w-full rounded border border-input bg-surface px-3 text-sm text-foreground placeholder:text-ink-faint"
+        />
       </div>
 
       {errorMessage && (
-        <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          <AlertCircle className="h-4 w-4" />
-          <p>{errorMessage}</p>
-        </div>
+        <p role="alert" className="text-sm text-danger">
+          {errorMessage}
+        </p>
       )}
 
       <LoginButton />
@@ -73,9 +60,10 @@ function LoginButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-foreground/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
     >
-      {pending ? "Signing in..." : "Sign In"}
+      {pending && <CircleNotch size={16} className="animate-spin" aria-hidden="true" />}
+      <span>{pending ? "Signing in\u2026" : "Sign in"}</span>
     </button>
   );
 }

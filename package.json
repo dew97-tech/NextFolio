@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:dashes": "node scripts/check-dashes.mjs",
+    "strip:dashes": "node scripts/strip-long-dashes.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@heroicons/react": "^2.2.0",
+    "@phosphor-icons/react": "^2.1.10",
     "@prisma/client": "^5.22.0",
     "@tiptap/extension-code-block-lowlight": "^3.19.0",
     "@tiptap/extension-highlight": "^3.31.3",
@@ -29,10 +31,8 @@
     "@vercel/blob": "^2.0.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.23.24",
     "googleapis": "^178.1.1",
     "lowlight": "^3.3.0",
-    "lucide-react": "^0.554.0",
     "next": "16.0.10",
     "next-auth": "^5.0.0-beta.30",
     "next-themes": "^0.4.6",
@@ -44,7 +44,6 @@
     "remark-gfm": "^4.0.1",
     "sanitize-html": "^2.17.7",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.6",
     "zod": "^4.1.12"
   },

@@ -3,21 +3,31 @@
 import { createPost, updatePost } from "@/app/lib/admin-actions";
 import { upload } from "@vercel/blob/client";
 import {
-  Image as ImageIcon,
-  Upload,
-  Clock,
+  ArrowSquareOut,
+  CheckCircle,
+  CircleNotch,
+  ImageSquare,
   Tag,
-  CheckCircle2,
-  FileText,
-  Trash2,
-  ExternalLink,
-  Sparkles,
-} from "lucide-react";
+  UploadSimple,
+  X,
+} from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import TiptapEditor from "./tiptap-editor";
 
-export default function PostForm({ post }: { post?: any }) {
+interface EditablePost {
+  id: string;
+  title?: string | null;
+  slug?: string | null;
+  description?: string | null;
+  thumbnail?: string | null;
+  content?: string | null;
+  published?: boolean | null;
+  readTime?: string | null;
+  tags?: string[] | null;
+}
+
+export default function PostForm({ post }: { post?: EditablePost }) {
   const [title, setTitle] = useState(post?.title || "");
   const [slug, setSlug] = useState(post?.slug || "");
   const [description, setDescription] = useState(post?.description || "");
@@ -25,9 +35,12 @@ export default function PostForm({ post }: { post?: any }) {
   const [content, setContent] = useState(post?.content || "");
   const [isPublished, setIsPublished] = useState(post?.published ?? false);
   const [readTime, setReadTime] = useState(post?.readTime || "5 min read");
-  const [tags, setTags] = useState<string[]>(post?.tags || ["Engineering", "Web Development"]);
+  const [tags, setTags] = useState<string[]>(
+    post?.tags || ["Engineering", "Web Development"],
+  );
   const [tagInput, setTagInput] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const inputFileRef = useRef<HTMLInputElement>(null);
 
   const generateSlug = (text: string) => {
@@ -67,11 +80,14 @@ export default function PostForm({ post }: { post?: any }) {
     setTags(tags.filter((t) => t !== tagToRemove));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     if (!event.target.files || event.target.files.length === 0) return;
 
     const file = event.target.files[0];
     setIsUploading(true);
+    setUploadError("");
 
     try {
       const newBlob = await upload(file.name, file, {
@@ -79,9 +95,8 @@ export default function PostForm({ post }: { post?: any }) {
         handleUploadUrl: "/api/upload",
       });
       setThumbnailUrl(newBlob.url);
-    } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Upload failed. You can also paste an image URL directly.");
+    } catch {
+      setUploadError("Upload failed. Paste an image URL instead.");
     } finally {
       setIsUploading(false);
     }
@@ -104,17 +119,24 @@ export default function PostForm({ post }: { post?: any }) {
     }
   };
 
+  const fieldLabel = "block text-sm font-medium text-foreground";
+
   return (
     <form action={handleSubmit} className="space-y-8">
+      <h1 className="font-serif text-2xl tracking-[-0.01em] text-foreground">
+        {post ? "Edit post" : "New post"}
+      </h1>
+
       <input type="hidden" name="published" value={isPublished ? "true" : "false"} />
       <input type="hidden" name="thumbnail" value={thumbnailUrl} />
       <input type="hidden" name="readTime" value={readTime} />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 space-y-6">
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-5">
-            <div>
-              <label htmlFor="title" className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                Article Title
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="space-y-8 lg:col-span-8">
+          <div className="space-y-5 rounded-lg border border-border bg-card p-6">
+            <div className="space-y-2">
+              <label htmlFor="title" className={fieldLabel}>
+                Title
               </label>
               <input
                 type="text"
@@ -123,18 +145,20 @@ export default function PostForm({ post }: { post?: any }) {
                 value={title}
                 onChange={handleTitleChange}
                 required
-                placeholder="Enter an engaging, descriptive title..."
-                className="w-full text-2xl md:text-3xl font-bold bg-transparent border-0 border-b border-border/80 focus:border-primary pb-2.5 outline-none text-foreground placeholder:text-muted-foreground/50 transition-colors"
+                placeholder="What the post is about"
+                className="w-full border-b border-input bg-transparent pb-2 font-serif text-2xl text-foreground outline-none placeholder:text-ink-faint md:text-3xl"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="slug" className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                  URL Slug
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="slug" className={fieldLabel}>
+                  URL
                 </label>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground bg-muted/40 border border-input rounded-md px-3 py-2">
-                  <span className="text-xs opacity-70">/blog/</span>
+                <div className="flex items-center gap-1 rounded border border-input bg-surface px-3 py-2 text-sm">
+                  <span className="font-mono text-[13px] text-ink-faint">
+                    /blog/
+                  </span>
                   <input
                     type="text"
                     id="slug"
@@ -142,32 +166,30 @@ export default function PostForm({ post }: { post?: any }) {
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     required
-                    className="bg-transparent border-none outline-none text-foreground flex-1 font-mono text-xs"
+                    spellCheck={false}
+                    className="flex-1 border-none bg-transparent font-mono text-[13px] text-foreground outline-none"
                   />
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="readTime" className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                  Read Time
+              <div className="space-y-2">
+                <label htmlFor="readTime" className={fieldLabel}>
+                  Read time
                 </label>
-                <div className="flex items-center gap-2 bg-muted/40 border border-input rounded-md px-3 py-2">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    id="readTime"
-                    name="readTime"
-                    value={readTime}
-                    onChange={(e) => setReadTime(e.target.value)}
-                    className="bg-transparent border-none outline-none text-foreground flex-1 text-xs"
-                  />
-                </div>
+                <input
+                  type="text"
+                  id="readTime"
+                  name="readTime"
+                  value={readTime}
+                  onChange={(e) => setReadTime(e.target.value)}
+                  className="h-[38px] w-full rounded border border-input bg-surface px-3 text-sm text-foreground"
+                />
               </div>
             </div>
 
-            <div>
-              <label htmlFor="description" className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                Excerpt / Subtitle
+            <div className="space-y-2">
+              <label htmlFor="description" className={fieldLabel}>
+                Excerpt
               </label>
               <textarea
                 id="description"
@@ -176,118 +198,133 @@ export default function PostForm({ post }: { post?: any }) {
                 onChange={(e) => setDescription(e.target.value)}
                 required
                 rows={2}
-                placeholder="A concise summary of your article for social previews and SEO..."
-                className="w-full rounded-md border border-input bg-background/80 px-3 py-2 text-sm placeholder:text-muted-foreground/60 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
+                placeholder="One or two sentences for previews and search results"
+                className="w-full resize-none rounded border border-input bg-surface px-3 py-2 text-sm text-foreground placeholder:text-ink-faint"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-primary" />
-                Article Content
-              </label>
-              <span className="text-xs text-muted-foreground">
-                TipTap Rich Text Editor (Supports HTML paste & tables)
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <label className={fieldLabel}>Content</label>
+              <span className="text-[13px] text-ink-faint">
+                Toolbar shortcuts and HTML paste both work
               </span>
             </div>
             <TiptapEditor content={content} onChange={handleContentChange} />
           </div>
         </div>
 
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              Publishing Settings
-            </h3>
+        <div className="space-y-6 lg:col-span-4">
+          <div className="space-y-4 rounded-lg border border-border bg-card p-5">
+            <h2 className="text-sm font-medium text-foreground">Publishing</h2>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
-              <div>
-                <p className="text-sm font-semibold text-foreground">Status</p>
-                <p className="text-xs text-muted-foreground">
-                  {isPublished ? "Visible to public" : "Saved as private draft"}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsPublished(!isPublished)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  isPublished ? "bg-emerald-500" : "bg-muted-foreground/30"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    isPublished ? "translate-x-6" : "translate-x-1"
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[13px] text-ink-muted">
+                {isPublished ? "Visible on the public blog." : "Only visible here."}
+              </p>
+              <div className="flex rounded border border-border" role="group" aria-label="Publish status">
+                <button
+                  type="button"
+                  onClick={() => setIsPublished(false)}
+                  aria-pressed={!isPublished}
+                  className={`px-2.5 py-1 text-[13px] transition-colors ${
+                    !isPublished
+                      ? "rounded-l bg-accent text-foreground"
+                      : "rounded-l text-ink-muted hover:text-foreground"
                   }`}
-                />
-              </button>
+                >
+                  Draft
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPublished(true)}
+                  aria-pressed={isPublished}
+                  className={`px-2.5 py-1 text-[13px] transition-colors ${
+                    isPublished
+                      ? "rounded-r bg-accent text-foreground"
+                      : "rounded-r text-ink-muted hover:text-foreground"
+                  }`}
+                >
+                  Publish
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-2 pt-2 border-t border-border">
+            <div className="space-y-2 border-t border-border pt-4">
               <SubmitButton isPublished={isPublished} />
               {post?.slug && (
                 <a
                   href={`/blog/${post.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full flex items-center justify-center gap-1.5 py-2 px-4 rounded-md border border-border hover:bg-accent text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex w-full items-center justify-center gap-1.5 rounded border border-border px-4 py-2 text-sm text-ink-muted transition-colors hover:text-foreground"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  View Live Article
+                  <ArrowSquareOut size={14} aria-hidden="true" />
+                  <span>View live post</span>
                 </a>
               )}
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-primary" />
-              Featured Cover Image
-            </h3>
+          <div className="space-y-4 rounded-lg border border-border bg-card p-5">
+            <h2 className="text-sm font-medium text-foreground">Cover image</h2>
 
             {thumbnailUrl ? (
               <div className="space-y-3">
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border group">
-                  <img src={thumbnailUrl} alt="Cover preview" className="h-full w-full object-cover" />
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={thumbnailUrl}
+                    alt="Cover preview"
+                    className="h-full w-full object-cover"
+                  />
                   <button
                     type="button"
                     onClick={() => setThumbnailUrl("")}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-background/90 text-destructive hover:bg-destructive hover:text-white transition-colors shadow-md"
-                    title="Remove image"
+                    aria-label="Remove image"
+                    className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded border border-border bg-background text-ink-muted transition-colors hover:border-destructive/40 hover:text-destructive"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <X size={13} aria-hidden="true" />
                   </button>
                 </div>
+                <label htmlFor="cover-url" className="sr-only">
+                  Cover image URL
+                </label>
                 <input
+                  id="cover-url"
                   type="text"
                   value={thumbnailUrl}
                   onChange={(e) => setThumbnailUrl(e.target.value)}
-                  placeholder="Or paste image URL directly..."
-                  className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-muted-foreground outline-none focus:border-primary"
+                  placeholder="Image URL"
+                  spellCheck={false}
+                  className="w-full rounded border border-input bg-surface px-3 py-1.5 font-mono text-[13px] text-ink-muted"
                 />
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-6 text-center transition-colors">
-                  <ImageIcon className="w-8 h-8 mx-auto text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Upload an image or paste a URL
+                <div className="rounded border border-dashed border-border p-6 text-center">
+                  <ImageSquare
+                    size={22}
+                    aria-hidden="true"
+                    className="mx-auto text-ink-faint"
+                  />
+                  <p className="mt-2 text-[13px] text-ink-muted">
+                    Upload a file or paste a URL
                   </p>
                   <label
                     htmlFor="thumbnail-upload"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors"
+                    className="mt-3 inline-flex h-8 cursor-pointer items-center gap-1.5 rounded border border-border px-3 text-[13px] text-ink-muted transition-colors hover:text-foreground"
                   >
                     {isUploading ? (
                       <>
-                        <Upload className="w-3.5 h-3.5 animate-spin" />
-                        <span>Uploading...</span>
+                        <CircleNotch size={14} className="animate-spin" aria-hidden="true" />
+                        <span>Uploading\u2026</span>
                       </>
                     ) : (
                       <>
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Upload Image</span>
+                        <UploadSimple size={14} aria-hidden="true" />
+                        <span>Upload image</span>
                       </>
                     )}
                   </label>
@@ -297,44 +334,58 @@ export default function PostForm({ post }: { post?: any }) {
                     ref={inputFileRef}
                     onChange={handleImageUpload}
                     accept="image/*"
-                    className="hidden"
+                    className="sr-only"
                   />
                 </div>
+                <label htmlFor="cover-url-new" className="sr-only">
+                  Cover image URL
+                </label>
                 <input
+                  id="cover-url-new"
                   type="text"
                   value={thumbnailUrl}
                   onChange={(e) => setThumbnailUrl(e.target.value)}
-                  placeholder="Or paste image URL directly..."
-                  className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-muted-foreground outline-none focus:border-primary"
+                  placeholder="Image URL"
+                  spellCheck={false}
+                  className="w-full rounded border border-input bg-surface px-3 py-1.5 font-mono text-[13px] text-ink-muted"
                 />
+                {uploadError && (
+                  <p role="alert" className="text-[13px] text-danger">
+                    {uploadError}
+                  </p>
+                )}
               </div>
             )}
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-              <Tag className="w-4 h-4 text-primary" />
-              Tags & Categories
-            </h3>
+          <div className="space-y-4 rounded-lg border border-border bg-card p-5">
+            <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Tag size={14} aria-hidden="true" />
+              Tags
+            </h2>
 
             <div className="flex flex-wrap gap-1.5">
               {tags.map((tag) => (
-                <span key={tag} className="blog-tag gap-1 text-xs">
+                <span key={tag} className="blog-tag gap-1">
                   <span>{tag}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveTag(tag)}
-                    className="hover:text-destructive transition-colors ml-0.5"
-                    title="Remove tag"
+                    aria-label={`Remove tag ${tag}`}
+                    className="text-ink-faint transition-colors hover:text-destructive"
                   >
-                    &times;
+                    <X size={11} aria-hidden="true" />
                   </button>
                 </span>
               ))}
             </div>
 
             <div className="flex gap-2">
+              <label htmlFor="tag-input" className="sr-only">
+                Add a tag
+              </label>
               <input
+                id="tag-input"
                 type="text"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
@@ -344,13 +395,13 @@ export default function PostForm({ post }: { post?: any }) {
                     handleAddTag();
                   }
                 }}
-                placeholder="Add a tag..."
-                className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
+                placeholder="Add a tag"
+                className="flex-1 rounded border border-input bg-surface px-3 py-1.5 text-[13px] text-foreground placeholder:text-ink-faint"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-foreground text-xs font-semibold rounded-md transition-colors"
+                className="inline-flex h-[30px] items-center rounded border border-border px-3 text-[13px] text-ink-muted transition-colors hover:text-foreground"
               >
                 Add
               </button>
@@ -369,14 +420,17 @@ function SubmitButton({ isPublished }: { isPublished: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary py-2.5 px-4 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-foreground/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
     >
       {pending ? (
-        <span>Saving...</span>
+        <>
+          <CircleNotch size={15} className="animate-spin" aria-hidden="true" />
+          <span>Saving\u2026</span>
+        </>
       ) : (
         <>
-          <CheckCircle2 className="w-4 h-4" />
-          <span>{isPublished ? "Publish Article" : "Save as Draft"}</span>
+          <CheckCircle size={15} aria-hidden="true" />
+          <span>{isPublished ? "Publish" : "Save draft"}</span>
         </>
       )}
     </button>

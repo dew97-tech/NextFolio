@@ -20,7 +20,15 @@ const PostSchema = z.object({
   ),
 });
 
-export async function createPost(prevState: any, formData: FormData) {
+type PostFormState =
+  | {
+      message?: string;
+      errors?: Record<string, string[] | undefined>;
+    }
+  | null
+  | undefined;
+
+export async function createPost(prevState: PostFormState, formData: FormData) {
   const session = await auth();
   if (!session?.user) {
     return { message: "Unauthorized" };
@@ -62,7 +70,7 @@ export async function createPost(prevState: any, formData: FormData) {
         published,
       },
     });
-  } catch (error) {
+  } catch {
     return { message: "Database Error: Failed to Create Post." };
   }
 
@@ -73,7 +81,7 @@ export async function createPost(prevState: any, formData: FormData) {
 
 export async function updatePost(
   id: string,
-  prevState: any,
+  prevState: PostFormState,
   formData: FormData,
 ) {
   const session = await auth();
@@ -118,7 +126,7 @@ export async function updatePost(
         published,
       },
     });
-  } catch (error) {
+  } catch {
     return { message: "Database Error: Failed to Update Post." };
   }
 

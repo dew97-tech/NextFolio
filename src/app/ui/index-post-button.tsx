@@ -4,7 +4,7 @@ import {
   requestIndexing,
   type IndexingActionState,
 } from "@/app/lib/google/indexing-actions";
-import { Loader2, Search } from "lucide-react";
+import { CircleNotch, MagnifyingGlass } from "@phosphor-icons/react";
 import { useActionState } from "react";
 
 export default function IndexPostButton({
@@ -31,28 +31,26 @@ export default function IndexPostButton({
             ? `Last index request: ${new Date(indexedAt).toLocaleString()}`
             : "Request indexing in Google Search Console"
         }
-        className="inline-flex items-center justify-center gap-1 px-3 h-8 rounded-lg border border-border bg-card text-xs font-medium text-foreground hover:bg-accent hover:text-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex h-8 items-center gap-1.5 rounded border border-border px-2.5 text-sm text-ink-muted transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <CircleNotch size={14} className="animate-spin" aria-hidden="true" />
         ) : (
-          <Search className="h-3.5 w-3.5" />
+          <MagnifyingGlass size={14} aria-hidden="true" />
         )}
         <span>{indexedAt ? "Re-index" : "Index"}</span>
       </button>
 
       {state?.message ? (
-        <span className="text-[10px] leading-tight text-amber-600 dark:text-amber-400 max-w-[150px] text-right">
+        <span className="max-w-[160px] text-right text-[11px] leading-tight text-warn">
           {state.message}
         </span>
       ) : indexedAt ? (
-        <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+        <span className="text-[11px] text-ok">
           Indexed {new Date(indexedAt).toLocaleDateString()}
         </span>
       ) : indexStatus === "error" ? (
-        <span className="text-[10px] text-amber-600 dark:text-amber-400">
-          Last attempt failed
-        </span>
+        <span className="text-[11px] text-warn">Last attempt failed</span>
       ) : null}
     </form>
   );

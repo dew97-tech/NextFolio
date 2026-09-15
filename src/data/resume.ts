@@ -8,25 +8,26 @@ export const resumeData = {
     github: "https://github.com/dew97-tech",
     linkedin: "https://www.linkedin.com/in/david-dew-mallick-618a6223b/",
     location: "Dhaka, Bangladesh",
-    tagline: "Software Engineer specializing in full-stack architecture, Next.js, PHP/Laravel, and AI-driven automation systems.",
+    tagline:
+      "Software engineer building full-stack web applications with Next.js and Laravel, with hands-on work in AI-assisted automation.",
   },
   education: [
     {
       institution: "BRAC University",
       location: "Dhaka, Bangladesh",
-      degree: "Bachelor of Science in Computer Science & Engineering",
+      degree: "Bachelor of Science in Computer Science and Engineering",
       date: "Aug 2018 - Dec 2022",
       gpa: "3.55/4.00",
     },
     {
-      institution: "St. Gregory's High School & College",
+      institution: "St. Gregory's High School and College",
       location: "Dhaka, Bangladesh",
       degree: "Higher Secondary Certificate",
       date: "2016 - 2018",
       gpa: "4.00",
     },
     {
-      institution: "St. Gregory's High School & College",
+      institution: "St. Gregory's High School and College",
       location: "Dhaka, Bangladesh",
       degree: "Secondary School Certificate",
       date: "2006 - 2016",
@@ -39,19 +40,21 @@ export const resumeData = {
       location: "Banani, Dhaka, Bangladesh",
       role: "Software Engineer",
       date: "Oct 2024 - Present",
+      promotions: [],
       projects: [
         {
-          name: "BridgeBooks System - SEO",
-          description: "A platform for AI-driven SEO enhancement, including article generation, backlink acquisition, and contact form automation",
+          name: "BridgeBooks System",
+          description:
+            "AI-driven SEO platform for article generation, backlinks, and contact automation.",
           achievements: [
-            "Engineered an AI article generation module from inception over eight weeks with other two members of same team.",
-            "Transitioned article generation from AWS Lambda to containerized deployment, reducing failure rates to 5% within three weeks",
-            "Optimized API interactions with AI models, achieving 95% cost savings",
-            "Enhanced query performance via SQL tuning, improving page load times by 70%",
-            "Developed a keyword acquisition system delivering real-time SEO-friendly keywords through multi-layered filtering to facilitate article generation and enhance website visibility",
-            "Implemented a credit-based billing system associating services with credits, with dynamic consumption tracking based on platform utilization",
-            "Optimized download and upload CSV queue jobs with file-based storage and automatic unlinking after finalization to minimize server memory usage.",
-            "Built a backlink acquisition system integrating third-party services for link gathering, email reply monitoring for status updates, and AWS Route 53 configuration for inbound response handling",
+            "Built the AI article generation module from scratch with two teammates over eight weeks.",
+            "Moved generation from AWS Lambda to containers, cutting failure rates to 5% in three weeks.",
+            "Reworked model API usage to cut generation costs by 95%.",
+            "Tuned SQL queries to reduce page load times by 70%.",
+            "Built a keyword system that supplies real-time SEO keywords through layered filtering.",
+            "Implemented credit-based billing with usage tracking across platform services.",
+            "Rebuilt CSV import and export queue jobs on file storage with automatic cleanup to reduce server memory use.",
+            "Built a backlink system that gathers links from third-party services, monitors email replies, and handles inbound responses with AWS Route 53.",
           ],
         },
       ],
@@ -61,14 +64,16 @@ export const resumeData = {
       location: "Adelaide, South Australia",
       role: "Full Stack Web Developer",
       date: "Sep 2024 - Mar 2025",
+      promotions: [],
       projects: [
         {
-          name: "eduKET - LMS",
-          description: "A comprehensive platform for educational administration and resource management",
+          name: "eduKET LMS",
+          description:
+            "Platform for course administration and learning material management.",
           achievements: [
-            "Developed modules for assigning courses to students and classes, incorporating validation to confirm instructor availability",
-            "Implemented functionality for instructors to upload course materials, ensuring accessibility and usability for students",
-            "Modified database tables to support seamless integration of legacy and new features",
+            "Built course and class assignment modules with instructor availability validation.",
+            "Added instructor material upload with student-facing access.",
+            "Changed database tables to support legacy and new features without breaking either.",
           ],
         },
       ],
@@ -87,28 +92,30 @@ export const resumeData = {
       projects: [
         {
           name: "Maison Ensemble",
-          description: "A French language learning platform providing interactive tools for multilingual education",
+          description:
+            "French language learning platform with interactive study tools.",
           achievements: [
-            "Designed 12 interactive exercises and games to foster memory and language acquisition from Dutch to French",
-            "Integrated video-based learning modules with embedded quizzes for enhanced comprehension",
-            "Built achievement systems to track and reward user progress through exercises",
+            "Built 12 interactive exercises and games for Dutch to French vocabulary and memory practice.",
+            "Integrated video lessons with embedded quizzes.",
+            "Built a progress and achievement system for exercises.",
           ],
         },
         {
           name: "Augmenta Education",
-          description: "An educational management platform for student administration, scheduling, and financial tracking",
+          description:
+            "School management platform for student records, scheduling, and payments.",
           achievements: [
-            "Designed student ID cards with integrated unique barcode generation for enhanced security and identification",
-            "Implemented schedule-based class assignment system to align student enrollments with instructor availability",
-            "Developed payment slip issuance module linked to student IDs, incorporating automated credit deduction upon generation",
-            "Enhanced class routine module with PDF generation and download features for streamlined distribution",
+            "Designed student ID cards with generated barcodes for identification.",
+            "Built schedule-based class assignment aligned with instructor availability.",
+            "Added payment slip issuance tied to student IDs with automatic credit deduction.",
+            "Extended the class routine module with PDF generation and download.",
           ],
         },
         {
           name: "KIMS",
-          description: "An inventory management system handling products, categories, brands, units, suppliers, purchases, orders, customers, and sales",
+          description: "Inventory management system for retail operations.",
           achievements: [
-            "Delivered end-to-end coverage of inventory operations for efficient business oversight",
+            "Built core inventory flows for products, categories, brands, units, suppliers, purchases, orders, customers, and sales.",
           ],
         },
       ],
@@ -116,13 +123,15 @@ export const resumeData = {
   ],
   publications: [
     {
-      title: "SweetCoat-2D: Two-Dimensional Bangla Spelling Correction and Suggestion Using Levenshtein Edit Distance and String Matching Algorithm",
+      title:
+        "SweetCoat-2D: Two-Dimensional Bangla Spelling Correction and Suggestion Using Levenshtein Edit Distance and String Matching Algorithm",
       publisher: "IEEE",
       date: "Aug 2023",
       link: "https://ieeexplore.ieee.org/abstract/document/10191392",
     },
     {
-      title: "An Efficient Text Preprocessing and Classification Technique for Multilingual and Transliterated Data",
+      title:
+        "An Efficient Text Preprocessing and Classification Technique for Multilingual and Transliterated Data",
       publisher: "IEEE",
       date: "Mar 2023",
       link: "https://ieeexplore.ieee.org/abstract/document/10054834",
@@ -130,20 +139,21 @@ export const resumeData = {
   ],
   awards: [
     {
-      title: "Deans List Achievements",
-      description: "Recognized for consistent academic excellence, achieving Deans List status in multiple semesters during Bachelor's Program.",
+      title: "Dean's List",
+      description: "Named to the Dean's List in multiple semesters at BRAC University.",
     },
     {
       title: "Presentation Award",
-      description: "Successfully completed 'English Presentation Skills' course as part of extra curricular activities during Bachelor's Program, earning a certificate that underscores improved communication and presentation abilities.",
+      description:
+        "Completed the English Presentation Skills course and received the certificate.",
     },
     {
       title: "Runner Up Trophy",
-      description: "Secured Runner Up position in the Inter School Science Fair and Cultural Festival, demonstrating leadership skills and innovative thinking.",
+      description: "Runner up at the Inter School Science Fair and Cultural Festival.",
     },
     {
       title: "Attendance Record",
-      description: "Maintained a perfect attendance record throughout high school education.",
+      description: "Perfect attendance through high school.",
     },
   ],
   skills: {

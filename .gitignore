@@ -44,3 +44,6 @@ next-env.d.ts
 .vercel
 
 /src/generated/prisma
+
+# agent skills (restore locally with: npx skills experimental_install)
+/.agents/

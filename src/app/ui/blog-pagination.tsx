@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
@@ -18,40 +18,28 @@ export default function BlogPagination({ totalPages }: { totalPages: number }) {
   const allPages = generatePagination(currentPage, totalPages);
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <nav className="flex items-center gap-1.5" aria-label="Pagination">
       <PaginationArrow
         direction="left"
         href={createPageURL(currentPage - 1)}
         isDisabled={currentPage <= 1}
       />
 
-      <div className="flex gap-1">
-        {allPages.map((page, index) => {
-          let position: "first" | "last" | "single" | "middle" | undefined;
-
-          if (index === 0) position = "first";
-          if (index === allPages.length - 1) position = "last";
-          if (allPages.length === 1) position = "single";
-          if (page === "...") position = "middle";
-
-          return (
-            <PaginationNumber
-              key={`${page}-${index}`}
-              href={createPageURL(page)}
-              page={page}
-              position={position}
-              isActive={currentPage === page}
-            />
-          );
-        })}
-      </div>
+      {allPages.map((page, index) => (
+        <PaginationNumber
+          key={`${page}-${index}`}
+          href={createPageURL(page)}
+          page={page}
+          isActive={currentPage === page}
+        />
+      ))}
 
       <PaginationArrow
         direction="right"
         href={createPageURL(currentPage + 1)}
         isDisabled={currentPage >= totalPages}
       />
-    </div>
+    </nav>
   );
 }
 
@@ -59,22 +47,26 @@ function PaginationNumber({
   page,
   href,
   isActive,
-  position,
 }: {
   page: number | string;
   href: string;
-  position?: "first" | "last" | "middle" | "single";
   isActive: boolean;
 }) {
-  const className = `flex h-10 w-10 items-center justify-center text-sm border rounded-md transition-colors ${
+  const className = `flex h-9 min-w-9 items-center justify-center px-2 font-mono text-[13px] tabular-nums transition-colors ${
     isActive
-      ? "border-primary bg-primary text-primary-foreground"
-      : "border-border hover:bg-accent hover:text-accent-foreground"
-  } ${position === "middle" ? "pointer-events-none" : ""}`;
+      ? "rounded bg-primary text-primary-foreground"
+      : "rounded text-ink-muted hover:bg-accent hover:text-foreground"
+  }`;
 
-  return isActive || position === "middle" ? (
-    <div className={className}>{page}</div>
-  ) : (
+  if (isActive || page === "...") {
+    return (
+      <span className={className} aria-current={isActive ? "page" : undefined}>
+        {page}
+      </span>
+    );
+  }
+
+  return (
     <Link href={href} className={className}>
       {page}
     </Link>
@@ -90,23 +82,27 @@ function PaginationArrow({
   direction: "left" | "right";
   isDisabled?: boolean;
 }) {
-  const className = `flex h-10 w-10 items-center justify-center rounded-md border transition-colors ${
+  const className = `flex h-9 w-9 items-center justify-center rounded border border-border transition-colors ${
     isDisabled
-      ? "pointer-events-none border-border text-muted-foreground opacity-50"
-      : "border-border hover:bg-accent hover:text-accent-foreground"
+      ? "pointer-events-none text-ink-faint opacity-50"
+      : "text-ink-muted hover:bg-accent hover:text-foreground"
   }`;
 
+  const label = direction === "left" ? "Previous page" : "Next page";
   const icon =
-    direction === "left" ? (
-      <ChevronLeftIcon className="w-4" />
-    ) : (
-      <ChevronRightIcon className="w-4" />
-    );
+    direction === "left" ? <CaretLeft size={14} aria-hidden="true" /> : <CaretRight size={14} aria-hidden="true" />;
 
-  return isDisabled ? (
-    <div className={className}>{icon}</div>
-  ) : (
-    <Link className={className} href={href}>
+  if (isDisabled) {
+    return (
+      <span className={className} aria-disabled="true">
+        <span className="sr-only">{label}</span>
+        {icon}
+      </span>
+    );
+  }
+
+  return (
+    <Link href={href} className={className} aria-label={label}>
       {icon}
     </Link>
   );

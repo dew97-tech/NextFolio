@@ -1,11 +1,6 @@
-import { CursorTrail } from "@/components/cursor-trail";
-import { Footer } from "@/components/footer";
-import { Navbar } from "@/components/navbar";
-import { PerformanceMonitor } from "@/components/performance-monitor";
 import { ThemeProvider } from "@/components/theme-provider";
-import { PhysicsProvider } from "@/lib/motion/physics-context";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,6 +11,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const jsonLd = {
@@ -40,8 +41,18 @@ export const metadata: Metadata = {
     default: "David Dew Mallick | Software Engineer",
     template: "%s | David Dew Mallick",
   },
-  description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js, AI-driven solutions, and full-stack development.",
-  keywords: ["Software Engineer", "Next.js", "React", "AI", "Web Developer", "Portfolio", "David Dew Mallick"],
+  description:
+    "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
+  keywords: [
+    "Software Engineer",
+    "Next.js",
+    "React",
+    "PHP",
+    "Laravel",
+    "Full Stack Developer",
+    "Portfolio",
+    "David Dew Mallick",
+  ],
   authors: [{ name: "David Dew Mallick" }],
   creator: "David Dew Mallick",
   publisher: "David Dew Mallick",
@@ -64,13 +75,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://david-dew-mallick.vercel.app",
     title: "David Dew Mallick | Software Engineer",
-    description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js and AI-driven solutions.",
-    siteName: "David Dew Mallick Portfolio",
+    description:
+      "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
+    siteName: "David Dew Mallick",
   },
   twitter: {
     card: "summary_large_image",
     title: "David Dew Mallick | Software Engineer",
-    description: "Portfolio of David Dew Mallick, a Software Engineer specializing in Next.js and AI-driven solutions.",
+    description:
+      "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
     creator: "@dew97_tech",
   },
   verification: {
@@ -78,12 +91,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/icon.svg?v=3', type: 'image/svg+xml' },
-      { url: '/favicon.svg?v=3', type: 'image/svg+xml' },
+      { url: "/icon.svg?v=3", type: "image/svg+xml" },
+      { url: "/favicon.svg?v=3", type: "image/svg+xml" },
     ],
-    apple: [
-      { url: '/icon.svg?v=3' },
-    ],
+    apple: [{ url: "/icon.svg?v=3" }],
   },
   other: {
     "application/ld+json": JSON.stringify(jsonLd),
@@ -95,8 +106,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0e17" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f4f1" },
+    { media: "(prefers-color-scheme: dark)", color: "#141512" },
   ],
 };
 
@@ -117,7 +128,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"
@@ -125,18 +136,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <PhysicsProvider>
-            <PerformanceMonitor />
-            <CursorTrail />
-            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md">
-              Skip to main content
-            </a>
-            <Navbar />
-            <main id="main-content" className="flex-grow pt-16 md:pt-20" tabIndex={-1}>
-              {children}
-            </main>
-            <Footer />
-          </PhysicsProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          {children}
         </ThemeProvider>
       </body>
     </html>

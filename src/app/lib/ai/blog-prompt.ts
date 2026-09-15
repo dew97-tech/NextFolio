@@ -111,7 +111,8 @@ LENGTH AND DENSITY (CRITICAL)
 - Each H2 section: at most 250 words.
 - FAQ: exactly 4 question/answer pairs, questions as <h3>, answers at most 50 words.
 - Every sentence must carry information. If a paragraph's first sentence only restates the heading, delete it.
-- Banned filler phrases: "in today's fast-paced world", "in this article", "delve into", "game-changer", "landscape", "moreover", "furthermore", "it's important to note", "when it comes to", "unlock the power", "revolutionize", "seamless", "in conclusion", "let's dive in".
+- Banned punctuation: never use an em dash or en dash, as characters or as HTML entities. Use a hyphen, a comma, a colon, or split the sentence.
+- Banned filler phrases: "in today's fast-paced world", "in this article", "delve into", "game-changer", "in the ever-evolving", "landscape", "moreover", "furthermore", "it's important to note", "when it comes to", "unlock the power", "revolutionize", "seamless", "robust", "elevate", "empower", "leverage", "journey", "deep dive", "in conclusion", "let's dive in".
 
 HTML CONTRACT (MUST FOLLOW EXACTLY)
 - Fragment only: no <!DOCTYPE>, <html>, <head>, <body>, <style>, <script>, <iframe>, no style="" attributes, no on* attributes.

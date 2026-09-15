@@ -158,8 +158,19 @@ function extractH2Text(html: string): string[] {
   return matches.map((block) => block.replace(/<[^>]+>/g, " "));
 }
 
+const EM_DASH = String.fromCharCode(0x2014);
+const EN_DASH = String.fromCharCode(0x2013);
+
+function normalizeDashes(text: string): string {
+  return text
+    .replaceAll(` ${EM_DASH} `, ", ")
+    .replaceAll(` ${EN_DASH} `, ", ")
+    .replaceAll(EM_DASH, "-")
+    .replaceAll(EN_DASH, "-");
+}
+
 function sanitizeGeneratedHtml(html: string): string {
-  return sanitizeHtml(html, {
+  const clean = sanitizeHtml(html, {
     allowedTags: [
       "h2",
       "h3",
@@ -205,6 +216,8 @@ function sanitizeGeneratedHtml(html: string): string {
     allowedSchemes: ["http", "https", "mailto"],
     disallowedTagsMode: "discard",
   });
+
+  return normalizeDashes(clean);
 }
 
 function validateDraft(

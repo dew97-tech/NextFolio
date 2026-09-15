@@ -12,34 +12,66 @@ import { TaskList } from "@tiptap/extension-task-list";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { createLowlight, common } from "lowlight";
 import {
-  Bold,
-  Italic,
-  Strikethrough,
-  Heading1,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  ListCheck,
-  Quote,
+  ArrowUUpLeft,
+  ArrowUUpRight,
   Code,
-  Highlighter,
-  Link as LinkIcon,
-  Table as TableIcon,
-  Undo,
-  Redo,
-  Minus,
-  Pilcrow,
-  Eye,
-  Edit3,
-  Trash2,
-  Plus,
   Columns,
+  Eye,
+  HighlighterCircle,
+  LinkSimple,
+  ListBullets,
+  ListChecks,
+  ListNumbers,
+  Minus,
+  Paragraph,
+  PencilSimple,
+  Plus,
+  Quotes,
   Rows,
-} from "lucide-react";
+  Table as TableIcon,
+  TextB,
+  TextHOne,
+  TextHThree,
+  TextHTwo,
+  TextItalic,
+  TextStrikethrough,
+  Trash,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 
 const lowlight = createLowlight(common);
+
+function ToolbarButton({
+  onClick,
+  isActive = false,
+  disabled = false,
+  title,
+  children,
+}: {
+  onClick: () => void;
+  isActive?: boolean;
+  disabled?: boolean;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      aria-label={title}
+      className={`flex h-8 w-8 min-w-8 shrink-0 items-center justify-center rounded transition-colors disabled:pointer-events-none disabled:opacity-30 ${
+        isActive
+          ? "bg-primary text-primary-foreground"
+          : "text-ink-muted hover:bg-accent hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
 
 interface TiptapEditorProps {
   content: string;
@@ -57,7 +89,7 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
         codeBlock: false,
       }),
       Placeholder.configure({
-        placeholder: "Tell your story, draft your engineering guide, or paste your HTML article...",
+        placeholder: "Write the post, or paste HTML",
       }),
       Typography,
       Highlight.configure({
@@ -76,7 +108,7 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
       TipTapLink.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-primary underline hover:text-primary/80",
+          class: "underline underline-offset-4",
         },
       }),
       CodeBlockLowlight.configure({
@@ -100,7 +132,7 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
 
   const addLink = () => {
     const previousUrl = editor.getAttributes("link").href;
-    const url = window.prompt("Enter URL:", previousUrl || "");
+    const url = window.prompt("Link URL", previousUrl || "");
 
     if (url === null) {
       return;
@@ -119,197 +151,170 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
     setShowTableMenu(false);
   };
 
-  const ToolbarButton = ({
-    onClick,
-    isActive = false,
-    disabled = false,
-    title,
-    children,
-  }: {
-    onClick: () => void;
-    isActive?: boolean;
-    disabled?: boolean;
-    title: string;
-    children: React.ReactNode;
-  }) => (
-    <button
-      type="button"
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      aria-label={title}
-      className={`h-8 w-8 min-w-8 rounded-lg transition-all text-xs font-semibold flex items-center justify-center shrink-0 disabled:opacity-30 disabled:pointer-events-none ${
-        isActive
-          ? "bg-primary text-primary-foreground shadow-xs font-bold"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-      }`}
-    >
-      {children}
-    </button>
-  );
+  const menuItem =
+    "flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-[13px] text-foreground transition-colors hover:bg-accent";
 
   return (
-    <div className="border border-border rounded-xl bg-card overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2">
-        <div className="flex items-center gap-1">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => setActiveTab("write")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 text-[13px] transition-colors ${
               activeTab === "write"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "text-foreground underline decoration-1 underline-offset-4"
+                : "text-ink-muted hover:text-foreground"
             }`}
           >
-            <Edit3 className="w-3.5 h-3.5" />
+            <PencilSimple size={13} aria-hidden="true" />
             Write
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("preview")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 text-[13px] transition-colors ${
               activeTab === "preview"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "text-foreground underline decoration-1 underline-offset-4"
+                : "text-ink-muted hover:text-foreground"
             }`}
           >
-            <Eye className="w-3.5 h-3.5" />
-            Live Preview
+            <Eye size={13} aria-hidden="true" />
+            Preview
           </button>
         </div>
 
-        <div className="text-xs text-muted-foreground font-mono">
+        <div className="font-mono text-[11px] text-ink-faint">
           {editor.getText().trim().split(/\s+/).filter(Boolean).length} words
         </div>
       </div>
 
       {activeTab === "write" ? (
         <>
-          <div className="sticky top-0 z-20 flex flex-wrap items-center gap-1 p-2 border-b border-border bg-card/95 backdrop-blur">
-            <div className="flex items-center gap-0.5 pr-1 border-r border-border/50">
+          <div className="sticky top-14 z-20 flex flex-wrap items-center gap-1 border-b border-border bg-background p-2">
+            <div className="flex items-center gap-0.5 border-r border-border pr-1">
               <ToolbarButton
                 onClick={() => editor.chain().focus().setParagraph().run()}
                 isActive={editor.isActive("paragraph")}
                 title="Paragraph"
               >
-                <Pilcrow className="w-4 h-4" />
+                <Paragraph size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                 isActive={editor.isActive("heading", { level: 1 })}
                 title="Heading 1"
               >
-                <Heading1 className="w-4 h-4" />
+                <TextHOne size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                 isActive={editor.isActive("heading", { level: 2 })}
                 title="Heading 2"
               >
-                <Heading2 className="w-4 h-4" />
+                <TextHTwo size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
                 isActive={editor.isActive("heading", { level: 3 })}
                 title="Heading 3"
               >
-                <Heading3 className="w-4 h-4" />
+                <TextHThree size={16} aria-hidden="true" />
               </ToolbarButton>
             </div>
 
-            <div className="flex items-center gap-0.5 px-1 border-r border-border/50">
+            <div className="flex items-center gap-0.5 border-r border-border px-1">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 isActive={editor.isActive("bold")}
                 title="Bold (Ctrl+B)"
               >
-                <Bold className="w-4 h-4" />
+                <TextB size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 isActive={editor.isActive("italic")}
                 title="Italic (Ctrl+I)"
               >
-                <Italic className="w-4 h-4" />
+                <TextItalic size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleStrike().run()}
                 isActive={editor.isActive("strike")}
                 title="Strikethrough"
               >
-                <Strikethrough className="w-4 h-4" />
+                <TextStrikethrough size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleHighlight().run()}
                 isActive={editor.isActive("highlight")}
                 title="Highlight"
               >
-                <Highlighter className="w-4 h-4 text-amber-500" />
+                <HighlighterCircle size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleCode().run()}
                 isActive={editor.isActive("code")}
-                title="Inline Code"
+                title="Inline code"
               >
-                <Code className="w-4 h-4" />
+                <Code size={16} aria-hidden="true" />
               </ToolbarButton>
             </div>
 
-            <div className="flex items-center gap-0.5 px-1 border-r border-border/50">
+            <div className="flex items-center gap-0.5 border-r border-border px-1">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 isActive={editor.isActive("bulletList")}
-                title="Bullet List"
+                title="Bullet list"
               >
-                <List className="w-4 h-4" />
+                <ListBullets size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
                 isActive={editor.isActive("orderedList")}
-                title="Numbered List"
+                title="Numbered list"
               >
-                <ListOrdered className="w-4 h-4" />
+                <ListNumbers size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleTaskList().run()}
                 isActive={editor.isActive("taskList")}
-                title="Task Checklist"
+                title="Checklist"
               >
-                <ListCheck className="w-4 h-4" />
+                <ListChecks size={16} aria-hidden="true" />
               </ToolbarButton>
             </div>
 
-            <div className="flex items-center gap-0.5 px-1 border-r border-border/50">
+            <div className="flex items-center gap-0.5 border-r border-border px-1">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBlockquote().run()}
                 isActive={editor.isActive("blockquote")}
-                title="Blockquote"
+                title="Quote"
               >
-                <Quote className="w-4 h-4" />
+                <Quotes size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleCodeBlock().run()}
                 isActive={editor.isActive("codeBlock")}
-                title="Code Block"
+                title="Code block"
               >
-                <Code className="w-4 h-4" />
+                <Code size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().setHorizontalRule().run()}
-                title="Horizontal Divider"
+                title="Divider"
               >
-                <Minus className="w-4 h-4" />
+                <Minus size={16} aria-hidden="true" />
               </ToolbarButton>
             </div>
 
-            <div className="relative flex items-center px-1 border-r border-border/50">
+            <div className="relative flex items-center border-r border-border px-1">
               <ToolbarButton
                 onClick={() => setShowTableMenu((prev) => !prev)}
                 isActive={editor.isActive("table") || showTableMenu}
-                title="Table Tools"
+                title="Table tools"
               >
-                <TableIcon className="w-4 h-4" />
+                <TableIcon size={16} />
               </ToolbarButton>
 
               {showTableMenu && (
@@ -318,27 +323,27 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
                     className="fixed inset-0 z-40"
                     onClick={() => setShowTableMenu(false)}
                   />
-                  <div className="absolute top-full left-0 mt-2 z-50 w-56 bg-white dark:bg-[#0b1329] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-xl p-2.5 space-y-1.5 ring-1 ring-black/10 dark:ring-white/10">
+                  <div className="absolute left-0 top-full z-50 mt-2 w-56 rounded-lg border border-border bg-popover p-2">
                     {!editor.isActive("table") ? (
-                      <div className="p-1 space-y-2">
+                      <div className="space-y-2 p-1">
                         <button
                           type="button"
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={insertTable}
-                          className="w-full text-left px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-semibold flex items-center gap-2.5 transition-colors text-xs"
+                          className={menuItem}
                         >
-                          <Plus className="w-4 h-4" />
-                          <span>Insert 3x3 Table</span>
+                          <Plus size={14} aria-hidden="true" />
+                          <span>Insert 3x3 table</span>
                         </button>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 px-1 leading-relaxed">
-                          Creates a responsive data table with a styled header row.
+                        <p className="px-1 text-[11px] leading-relaxed text-ink-faint">
+                          Adds a table with a header row.
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-1 text-xs">
-                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                          Table Editing
-                        </div>
+                      <div className="space-y-1">
+                        <p className="px-2 py-1 text-[11px] text-ink-faint">
+                          Table
+                        </p>
                         <button
                           type="button"
                           onMouseDown={(e) => e.preventDefault()}
@@ -346,10 +351,10 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
                             editor.chain().focus().addColumnAfter().run();
                             setShowTableMenu(false);
                           }}
-                          className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium transition-colors"
+                          className={menuItem}
                         >
-                          <Columns className="w-3.5 h-3.5 text-primary" />
-                          <span>Add Column</span>
+                          <Columns size={14} aria-hidden="true" />
+                          <span>Add column</span>
                         </button>
                         <button
                           type="button"
@@ -358,10 +363,10 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
                             editor.chain().focus().addRowAfter().run();
                             setShowTableMenu(false);
                           }}
-                          className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium transition-colors"
+                          className={menuItem}
                         >
-                          <Rows className="w-3.5 h-3.5 text-primary" />
-                          <span>Add Row</span>
+                          <Rows size={14} aria-hidden="true" />
+                          <span>Add row</span>
                         </button>
                         <button
                           type="button"
@@ -370,10 +375,10 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
                             editor.chain().focus().deleteColumn().run();
                             setShowTableMenu(false);
                           }}
-                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 font-medium transition-colors"
+                          className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-[13px] text-danger transition-colors hover:bg-danger/10"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>Delete Column</span>
+                          <Trash size={14} aria-hidden="true" />
+                          <span>Delete column</span>
                         </button>
                         <button
                           type="button"
@@ -382,12 +387,12 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
                             editor.chain().focus().deleteRow().run();
                             setShowTableMenu(false);
                           }}
-                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 font-medium transition-colors"
+                          className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-[13px] text-danger transition-colors hover:bg-danger/10"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>Delete Row</span>
+                          <Trash size={14} aria-hidden="true" />
+                          <span>Delete row</span>
                         </button>
-                        <div className="border-t border-slate-200 dark:border-slate-800 pt-1 mt-1">
+                        <div className="mt-1 border-t border-border pt-1">
                           <button
                             type="button"
                             onMouseDown={(e) => e.preventDefault()}
@@ -395,10 +400,10 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
                               editor.chain().focus().deleteTable().run();
                               setShowTableMenu(false);
                             }}
-                            className="w-full text-left px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 flex items-center gap-2 font-semibold transition-colors"
+                            className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-[13px] text-danger transition-colors hover:bg-danger/10"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Delete Entire Table</span>
+                            <Trash size={14} aria-hidden="true" />
+                            <span>Delete table</span>
                           </button>
                         </div>
                       </div>
@@ -408,26 +413,26 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
               )}
             </div>
 
-            <div className="flex items-center gap-0.5 px-1 border-r border-border/50">
+            <div className="flex items-center gap-0.5 border-r border-border px-1">
               <ToolbarButton onClick={addLink} isActive={editor.isActive("link")} title="Link">
-                <LinkIcon className="w-4 h-4" />
+                <LinkSimple size={16} aria-hidden="true" />
               </ToolbarButton>
             </div>
 
-            <div className="flex items-center gap-0.5 pl-1 ml-auto">
+            <div className="ml-auto flex items-center gap-0.5 pl-1">
               <ToolbarButton
                 onClick={() => editor.chain().focus().undo().run()}
                 disabled={!editor.can().undo()}
                 title="Undo (Ctrl+Z)"
               >
-                <Undo className="w-4 h-4" />
+                <ArrowUUpLeft size={16} aria-hidden="true" />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().redo().run()}
                 disabled={!editor.can().redo()}
                 title="Redo (Ctrl+Y)"
               >
-                <Redo className="w-4 h-4" />
+                <ArrowUUpRight size={16} aria-hidden="true" />
               </ToolbarButton>
             </div>
           </div>
@@ -435,11 +440,15 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
           <EditorContent editor={editor} />
         </>
       ) : (
-        <div className="p-6 md:p-10 max-w-3xl mx-auto">
-          <div
-            className="article-content"
-            dangerouslySetInnerHTML={{ __html: editor.getHTML() || "<p className='text-muted-foreground italic'>Nothing written yet...</p>" }}
-          />
+        <div className="mx-auto max-w-3xl p-6 md:p-10">
+          {editor.getHTML() ? (
+            <div
+              className="article-content"
+              dangerouslySetInnerHTML={{ __html: editor.getHTML() }}
+            />
+          ) : (
+            <p className="text-ink-faint">Nothing written yet.</p>
+          )}
         </div>
       )}
     </div>
