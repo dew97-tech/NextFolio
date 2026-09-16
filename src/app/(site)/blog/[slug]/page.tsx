@@ -31,7 +31,9 @@ export async function generateMetadata({
       type: "article",
       publishedTime: post.date.toISOString(),
       authors: ["David Dew Mallick"],
-      images: post.thumbnail ? [{ url: post.thumbnail }] : [],
+      images: post.thumbnail
+        ? [{ url: post.thumbnail }]
+        : [{ url: "/og.png", width: 1200, height: 630 }],
     },
   };
 }
@@ -78,7 +80,7 @@ export default async function BlogPostPage({
     },
     datePublished: post.date.toISOString(),
     image:
-      post.thumbnail || "https://david-dew-mallick.vercel.app/og-image.jpg",
+      post.thumbnail || "https://david-dew-mallick.vercel.app/og.png",
   };
 
   const { personal } = resumeData;
@@ -93,7 +95,7 @@ export default async function BlogPostPage({
       <div className="mx-auto w-full max-w-[720px] px-5 md:px-8">
         <Link
           href="/blog"
-          className="font-mono text-[13px] text-ink-muted transition-colors hover:text-foreground"
+          className="link-draw font-mono text-[13px] text-ink-muted hover:text-foreground"
         >
           Back to blog
         </Link>
@@ -171,7 +173,7 @@ export default async function BlogPostPage({
                   href={personal.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-ink-muted underline decoration-1 decoration-rule-strong underline-offset-4 transition-colors hover:text-foreground"
+                  className="text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground"
                 >
                   GitHub
                 </a>
@@ -179,13 +181,13 @@ export default async function BlogPostPage({
                   href={personal.linkedin}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-ink-muted underline decoration-1 decoration-rule-strong underline-offset-4 transition-colors hover:text-foreground"
+                  className="text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground"
                 >
                   LinkedIn
                 </a>
                 <a
                   href={`mailto:${personal.email}`}
-                  className="text-ink-muted underline decoration-1 decoration-rule-strong underline-offset-4 transition-colors hover:text-foreground"
+                  className="text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground"
                 >
                   Email
                 </a>

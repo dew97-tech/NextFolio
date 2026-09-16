@@ -19,7 +19,7 @@ export function Footer() {
             <li>
               <a
                 href={`mailto:${personal.email}`}
-                className="inline-block py-1 text-ink-muted underline decoration-1 decoration-rule-strong underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                className="inline-block py-1 text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
               >
                 {personal.email}
               </a>
@@ -29,7 +29,7 @@ export function Footer() {
                 href={personal.github}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-block py-1 text-ink-muted underline decoration-1 decoration-rule-strong underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                className="inline-block py-1 text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
               >
                 GitHub
               </a>
@@ -39,7 +39,7 @@ export function Footer() {
                 href={personal.linkedin}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-block py-1 text-ink-muted underline decoration-1 decoration-rule-strong underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                className="inline-block py-1 text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
               >
                 LinkedIn
               </a>

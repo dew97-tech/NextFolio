@@ -157,7 +157,26 @@ export const resumeData = {
     },
   ],
   skills: {
-    languagesAndFrameworks: ["JavaScript", "React", "Next.js", "PHP", "Laravel"],
-    methodologies: ["Agile"],
+    languagesAndFrameworks: [
+      "JavaScript",
+      "React",
+      "Next.js",
+      "PHP",
+      "Laravel",
+      "Python",
+    ],
+    cloudAndPlatforms: [
+      "AWS Lambda",
+      "Route 53",
+      "S3",
+      "ECS / Fargate",
+      "EC2",
+      "CloudFront",
+      "SES",
+      "SQS",
+      "Vercel",
+      "Docker",
+    ],
+    methodologies: ["Agile", "Scrum"],
   },
 };

@@ -1,4 +1,5 @@
 import { Reveal } from "@/components/reveal";
+import { TypeLine } from "@/components/type-line";
 import { resumeData } from "@/data/resume";
 
 const projects = resumeData.experience.flatMap((job) =>
@@ -13,10 +14,10 @@ const projects = resumeData.experience.flatMap((job) =>
 
 export function Projects() {
   return (
-    <section id="projects" className="border-t border-border">
+    <section id="projects" className="section-rule border-t border-border">
       <div className="mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
         <h2 className="font-serif text-[clamp(1.75rem,3vw,2.25rem)] leading-tight tracking-[-0.02em]">
-          Selected work
+          <TypeLine text="Selected work" trigger="view" caret={false} speedMs={28} />
         </h2>
 
         <div className="mt-12 space-y-16 md:mt-16 md:space-y-20">
@@ -36,14 +37,10 @@ export function Projects() {
 
                 <div className="md:col-span-8">
                   <p className="text-ink-muted">{project.description}</p>
-                  <ul className="mt-5 space-y-2.5 text-[15px]">
+                  <ul className="mt-5 list-disc space-y-2.5 pl-5 text-[15px] marker:text-ink-faint">
                     {project.achievements.map((achievement) => (
-                      <li key={achievement} className="flex gap-3">
-                        <span
-                          aria-hidden="true"
-                          className="mt-[0.7em] h-px w-3 shrink-0 bg-rule-strong"
-                        />
-                        <span className="text-ink-muted">{achievement}</span>
+                      <li key={achievement} className="text-ink-muted">
+                        {achievement}
                       </li>
                     ))}
                   </ul>

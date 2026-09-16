@@ -1,0 +1,7 @@
+export function ReadingProgress() {
+  return (
+    <div className="reading-progress" aria-hidden="true">
+      <span />
+    </div>
+  );
+}

@@ -1,3 +1,4 @@
+import { TypeLine } from "@/components/type-line";
 import { resumeData } from "@/data/resume";
 import Link from "next/link";
 
@@ -6,21 +7,30 @@ export function Hero() {
 
   return (
     <section aria-label="Introduction" className="border-b border-border">
-      <div className="mx-auto w-full max-w-[1180px] px-5 pb-16 pt-16 md:px-8 md:pb-24 md:pt-24">
-        <h1 className="font-serif text-[clamp(2.5rem,6vw,4.25rem)] leading-[1.05] tracking-[-0.02em] text-foreground">
+      <div className="hero-seq mx-auto w-full max-w-[1180px] px-5 pb-16 pt-16 md:px-8 md:pb-24 md:pt-24">
+        <h1
+          data-seq="1"
+          className="font-serif text-[clamp(2.75rem,6.5vw,5.25rem)] leading-[1.02] tracking-[-0.025em] text-foreground"
+        >
           {personal.name}
         </h1>
 
-        <p className="mt-5 text-base text-ink-muted md:text-lg">
-          {personal.role} at {personal.company}
+        <p data-seq="2" className="mt-5 text-base text-ink-muted md:text-lg">
+          <TypeLine text={`${personal.role} at ${personal.company}`} />
         </p>
 
-        <p className="mt-6 max-w-[54ch] text-ink-muted">
-          I build full-stack web applications with Next.js and Laravel, plus
-          AI-assisted automation for content and SEO systems.
+        <p data-seq="3" className="mt-6 max-w-[54ch] text-ink-muted">
+          I build full-stack web applications with{" "}
+          <span className="highlight-marker hero-marker">
+            Next.js and Laravel
+          </span>
+          , plus AI-assisted automation for content and SEO systems.
         </p>
 
-        <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
+        <div
+          data-seq="4"
+          className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4"
+        >
           <Link
             href="/#projects"
             className="inline-flex items-center rounded bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-foreground/90 active:scale-[0.98]"

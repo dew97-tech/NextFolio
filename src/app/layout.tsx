@@ -58,6 +58,9 @@ export const metadata: Metadata = {
   publisher: "David Dew Mallick",
   alternates: {
     canonical: "/",
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
   },
   robots: {
     index: true,
@@ -78,6 +81,14 @@ export const metadata: Metadata = {
     description:
       "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
     siteName: "David Dew Mallick",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "David Dew Mallick, Software Engineer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -85,6 +96,7 @@ export const metadata: Metadata = {
     description:
       "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
     creator: "@dew97_tech",
+    images: ["/og.png"],
   },
   verification: {
     google: "PfnsS0haOH5hKybjZAz_cQoqfEi6BmwL-xj0kyl2rNo",

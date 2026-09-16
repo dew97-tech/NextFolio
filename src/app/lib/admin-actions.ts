@@ -20,6 +20,17 @@ const PostSchema = z.object({
   ),
 });
 
+const EM_DASH = String.fromCharCode(0x2014);
+const EN_DASH = String.fromCharCode(0x2013);
+
+function normalizeDashes(text: string) {
+  return text
+    .replaceAll(` ${EM_DASH} `, ", ")
+    .replaceAll(` ${EN_DASH} `, ", ")
+    .replaceAll(EM_DASH, "-")
+    .replaceAll(EN_DASH, "-");
+}
+
 type PostFormState =
   | {
       message?: string;
@@ -55,15 +66,18 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
   const { title, slug, description, content, readTime, tags, thumbnail, published } =
     validatedFields.data;
 
-  const tagsArray = tags.split(",").map((tag) => tag.trim());
+  const tagsArray = tags
+    .split(",")
+    .map((tag) => normalizeDashes(tag.trim()))
+    .filter(Boolean);
 
   try {
     await prisma.post.create({
       data: {
-        title,
+        title: normalizeDashes(title),
         slug,
-        description,
-        content,
+        description: normalizeDashes(description),
+        content: normalizeDashes(content),
         readTime,
         tags: tagsArray,
         thumbnail,
@@ -110,16 +124,19 @@ export async function updatePost(
   const { title, slug, description, content, readTime, tags, thumbnail, published } =
     validatedFields.data;
 
-  const tagsArray = tags.split(",").map((tag) => tag.trim());
+  const tagsArray = tags
+    .split(",")
+    .map((tag) => normalizeDashes(tag.trim()))
+    .filter(Boolean);
 
   try {
     await prisma.post.update({
       where: { id },
       data: {
-        title,
+        title: normalizeDashes(title),
         slug,
-        description,
-        content,
+        description: normalizeDashes(description),
+        content: normalizeDashes(content),
         readTime,
         tags: tagsArray,
         thumbnail,

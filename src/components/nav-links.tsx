@@ -20,8 +20,8 @@ export function NavLinks() {
             href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "py-1.5 text-sm text-ink-muted transition-colors hover:text-foreground",
-              isActive && "text-foreground underline decoration-1 underline-offset-4",
+              "link-draw py-1.5 text-sm text-ink-muted hover:text-foreground",
+              isActive && "text-foreground",
             )}
           >
             {item.name}

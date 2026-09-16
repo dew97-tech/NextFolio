@@ -19,8 +19,8 @@ Light:
 | `--paper` | `#F4F4F1` | page background |
 | `--surface` | `#FCFCFA` | raised surfaces, inputs |
 | `--ink` | `#1A1B18` | text, actions |
-| `--ink-muted` | `#5B5D56` | secondary text |
-| `--ink-faint` | `#6B6D66` | metadata, captions |
+| `--ink-muted` | `#4F514A` | secondary text |
+| `--ink-faint` | `#63655E` | metadata, captions |
 | `--rule` | `#E2E2DC` | hairlines, input borders |
 | `--rule-strong` | `#CFCFC7` | emphasised dividers |
 | `--focus` | `#1A1B18` | focus ring |
@@ -37,7 +37,7 @@ Dark:
 | `--surface` | `#1B1C18` |
 | `--ink` | `#EBECE5` |
 | `--ink-muted` | `#A2A49A` |
-| `--ink-faint` | `#7E8076` |
+| `--ink-faint` | `#94968A` |
 | `--rule` | `#2B2C27` |
 | `--rule-strong` | `#3C3D36` |
 | `--focus` | `#EBECE5` |
@@ -51,6 +51,7 @@ Rules:
 - Do not mix warm and cool grays. This palette is neutral with a faint green cast on both themes.
 - One palette per page. Admin may use `--ok`, `--warn`, `--danger`; the public site may not.
 - Contrast: body text at least 4.5:1 in both themes.
+- The only decorative color on the public site is the Codecademy yellow used for text selection (`rgba(255, 211, 0, 0.30)` light, `0.10` dark) and the highlighter marker (`0.5` light, `0.16` dark). It is never used for text, borders, or surfaces. Every text token still passes AA while selected or highlighted.
 
 ## Type
 
@@ -61,7 +62,7 @@ Rules:
 | Metadata, dates, tags, code | Geist Mono | 400, 500 | 13px, letter-spacing 0.01em, tabular-nums |
 
 Scale:
-- Name: `clamp(2.5rem, 6vw, 4.25rem)`.
+- Name: `clamp(2.75rem, 6.5vw, 5.25rem)`.
 - Section title: `clamp(1.75rem, 3vw, 2.25rem)`.
 - Entry title: 1.25rem, Geist 600.
 - Body: 1.0625rem (17px), max measure 65ch.
@@ -101,13 +102,20 @@ No pills for buttons, tags, or badges. No 16px-plus radii on cards. Hairline bor
 
 ## Motion
 
-- Scroll reveals: one pattern only. Opacity 0 to 1 plus translateY(8px) to 0, 500ms, `cubic-bezier(0.23, 1, 0.32, 1)`, once per element, IntersectionObserver. Nothing else animates on scroll.
+- Hero load sequence: one orchestrated moment. Name, role line, intro, and actions rise 8px and fade over 420ms with 70ms stagger. Runs once on load, gated behind `scripting: enabled` and `prefers-reduced-motion: no-preference`.
+- Typed line: three places only, never loops and never deletes. The hero role line types on mount with a caret. The `Selected work`, `Experience`, `Skills`, and `Awards` headings type once when 60 percent in view at 28ms per character, with no caret. The Experience total follows its heading by 450ms and keeps the caret. Screen readers get the static text, reduced motion and no-JS get it instantly, and the reserved grid slot prevents any shift.
+- Highlighter marker: a rotated, uneven-edged stroke behind key words only. Placements are the hero phrase "Next.js and Laravel", `4+ years` in the Experience metric, and `mark` elements inside articles. The stroke sweeps left to right over 380ms when revealed, and sits static under reduced motion.
+- Scroll reveals: one pattern only. Opacity 0 to 1 plus translateY(8px) to 0, 500ms, `cubic-bezier(0.23, 1, 0.32, 1)`, once per element, IntersectionObserver. Grids may stagger children by 60ms with `.reveal-stagger`. Skill chips assemble in sequence at 30ms intervals once their section reveals. Nothing else animates on scroll.
+- Section rules: the 1px rule above each home section draws left to right on entry with a scroll-driven animation, falling back to the static rule where unsupported.
+- Reading progress: a 2px ink bar driven by a scroll timeline on every public page.
+- Underline draw: single-line links (`.link-draw`) draw a 1px underline over 180ms on hover and keyboard focus. Body-copy links keep a static underline.
 - Interaction: `transition: color, background-color, border-color, opacity, transform` at 150ms to 200ms. Explicit properties, never `transition: all`.
 - Press feedback: `scale(0.98)` on `:active` for buttons and links with a surface.
 - Hover effects only inside `@media (hover: hover) and (pointer: fine)`.
-- No infinite animations, no loop decorations, no cursor effects, no parallax, no tilt, no magnetic movement, no page transitions.
+- No other infinite animations, no loop decorations, no cursor effects, no parallax, no tilt, no magnetic movement, no page transitions. The caret blink while typing is the only allowed loop and it stops when typing ends.
 - `prefers-reduced-motion: reduce` removes all transforms and leaves instant state changes.
 - Only `transform` and `opacity` animate. No layout properties.
+- Texture: one fixed, pointer-events-none grain layer on `body::after` at 0.02 opacity (0.03 in dark mode), disabled for print.
 
 ## Components
 
@@ -116,14 +124,17 @@ No pills for buttons, tags, or badges. No 16px-plus radii on cards. Hairline bor
 - Inputs: surface background, 1px rule border, 4px radius, label above, error text below, focus ring 2px ink offset 2px.
 - Cards: only when elevation communicates hierarchy. Prefer grouping with space and one rule.
 - Tags: mono, 13px, 4px radius, rule border, transparent background. No color except admin status.
+- Theme toggle: two states only, Light and Dark. The first visit follows the operating system, and the first click pins the choice.
+- Skill chips: sans 13px, 4px radius, rule border, transparent background, no hover state because they are not interactive. Grouped under a label in a 3/9 grid.
 - Skeletons: match final layout shape, paper-to-surface pulse at low contrast.
 - Empty and error states: plain functional sentence, an action if one exists.
+- Experience metric: the total is a union of role intervals, never a sum, because roles overlap (technoPLUS overlaps JB Connect). Counting is inclusive of both endpoint months. The heading shows the floor ("4+ years") and each company row shows its exact duration.
 
 ## Copy
 
 - Plain, specific, active voice. Sentence case everywhere, including buttons and headings.
 - Banned words: elevate, seamless, unleash, next-gen, game-changer, robust, delve, journey, dive, deep dive, passion, craft (as filler), cutting-edge, empower, leverage, landscape, supercharge.
-- No em dash, no en dash separator, no ellipsis in headings or body copy. The single character ellipsis is allowed in input placeholders and pending labels ("Saving…").
+- No em dash, no en dash separator, no ellipsis in headings or body copy. The single character ellipsis is allowed in input placeholders and pending labels ("Saving…"). Long dashes are normalized on write in admin actions and in the AI generator; the strip script cleans existing posts. Spaced long dashes become commas, unspaced ones become hyphens.
 - No invented numbers, no fake precision, no mock metrics.
 - Dates: `Oct 2024 - Present` with a spaced hyphen. Ranges: `2018 - 2022`.
 - Errors state what happened and what to do. No apologies, no "Oops".

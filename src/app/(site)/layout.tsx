@@ -1,5 +1,6 @@
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
+import { ReadingProgress } from "@/components/reading-progress";
 
 export default function SiteLayout({
   children,
@@ -8,6 +9,7 @@ export default function SiteLayout({
 }) {
   return (
     <>
+      <ReadingProgress />
       <Navbar />
       <main id="main-content" className="flex-grow">
         {children}

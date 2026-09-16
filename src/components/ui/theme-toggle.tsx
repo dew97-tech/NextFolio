@@ -3,14 +3,6 @@
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 
-const labels = {
-  system: "Auto",
-  light: "Light",
-  dark: "Dark",
-} as const;
-
-const order = ["system", "light", "dark"] as const;
-
 const subscribe = () => () => {};
 
 function useMounted() {
@@ -22,19 +14,17 @@ function useMounted() {
 }
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
 
-  const current = mounted && theme && theme in labels ? theme : "system";
-  const currentLabel = labels[current as keyof typeof labels];
-  const next =
-    order[(order.indexOf(current as (typeof order)[number]) + 1) % order.length];
-  const nextLabel = labels[next];
+  const isDark = mounted && resolvedTheme === "dark";
+  const currentLabel = mounted ? (isDark ? "Dark" : "Light") : "Theme";
+  const nextLabel = isDark ? "Light" : "Dark";
 
   return (
     <button
       type="button"
-      onClick={() => setTheme(next)}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={`Theme: ${currentLabel}. Switch to ${nextLabel}.`}
       title={`Theme: ${currentLabel}`}
       className="text-sm text-ink-muted transition-colors hover:text-foreground"

@@ -9,6 +9,7 @@
     "lint": "eslint",
     "check:dashes": "node scripts/check-dashes.mjs",
     "strip:dashes": "node scripts/strip-long-dashes.mjs",
+    "og": "node scripts/generate-og.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {

@@ -226,6 +226,9 @@ function validateDraft(
   usedKeywords: Set<string>,
 ): ValidatedDraft {
   const parsed = DraftSchema.parse(raw);
+  const normalizedTitle = normalizeDashes(parsed.title);
+  const normalizedDescription = normalizeDashes(parsed.description);
+  const normalizedTopic = normalizeDashes(parsed.topic);
   const html = sanitizeGeneratedHtml(parsed.html);
   const wordCount = countWords(html);
 
@@ -237,7 +240,7 @@ function validateDraft(
     throw new Error(`Generated article exceeds the concise limit (${wordCount} words)`);
   }
 
-  const bannedText = `${parsed.title} ${parsed.description} ${
+  const bannedText = `${normalizedTitle} ${normalizedDescription} ${
     parsed.tags?.join(" ") ?? ""
   } ${parsed.primaryKeyword}`;
   if (isBannedTopic(bannedText)) {
@@ -250,11 +253,11 @@ function validateDraft(
     throw new Error("Generated primary keyword is not usable");
   }
 
-  if (!slugify(parsed.title).includes(primarySlug)) {
+  if (!slugify(normalizedTitle).includes(primarySlug)) {
     throw new Error(`Primary keyword "${primaryKeyword}" is missing from the title`);
   }
 
-  if (!slugify(parsed.description).includes(primarySlug)) {
+  if (!slugify(normalizedDescription).includes(primarySlug)) {
     throw new Error(
       `Primary keyword "${primaryKeyword}" is missing from the meta description`,
     );
@@ -303,7 +306,7 @@ function validateDraft(
   }
 
   const similarTitle = existingTitles.find(
-    (title) => titleSimilarity(title, parsed.title) > MAX_TITLE_SIMILARITY,
+    (existing) => titleSimilarity(existing, normalizedTitle) > MAX_TITLE_SIMILARITY,
   );
   if (similarTitle) {
     throw new Error(`Title is too similar to an existing post: "${similarTitle}"`);
@@ -313,16 +316,16 @@ function validateDraft(
     throw new Error(`Primary keyword "${primaryKeyword}" was already used recently`);
   }
 
-  const slug = slugify(parsed.slug || primaryKeyword || parsed.title);
+  const slug = slugify(parsed.slug || primaryKeyword || normalizedTitle);
   if (!slug) {
     throw new Error("Could not derive a valid slug from the generated article");
   }
 
   return {
-    title: parsed.title.trim(),
+    title: normalizedTitle.trim(),
     slug,
-    description: parsed.description.trim().slice(0, 160),
-    topic: parsed.topic.trim(),
+    description: normalizedDescription.trim().slice(0, 160),
+    topic: normalizedTopic.trim(),
     primaryKeyword,
     secondaryKeywords,
     tags: secondaryKeywords,

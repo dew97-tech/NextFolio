@@ -32,40 +32,34 @@ export default function BlogReadingProgress({ title }: { title: string }) {
   };
 
   return (
-    <>
-      <div className="reading-progress" aria-hidden="true">
-        <span />
-      </div>
+    <div className="flex items-center gap-5">
+      <button
+        onClick={handleCopyLink}
+        type="button"
+        aria-live="polite"
+        className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted transition-colors hover:text-foreground"
+      >
+        {copied ? (
+          <>
+            <Check size={14} aria-hidden="true" className="text-ok" />
+            <span className="text-ok">Copied</span>
+          </>
+        ) : (
+          <>
+            <Copy size={14} aria-hidden="true" />
+            <span>Copy link</span>
+          </>
+        )}
+      </button>
 
-      <div className="flex items-center gap-5">
-        <button
-          onClick={handleCopyLink}
-          type="button"
-          aria-live="polite"
-          className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted transition-colors hover:text-foreground"
-        >
-          {copied ? (
-            <>
-              <Check size={14} className="text-ok" aria-hidden="true" />
-              <span className="text-ok">Copied</span>
-            </>
-          ) : (
-            <>
-              <Copy size={14} aria-hidden="true" />
-              <span>Copy link</span>
-            </>
-          )}
-        </button>
-
-        <button
-          onClick={handleShare}
-          type="button"
-          className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted transition-colors hover:text-foreground"
-        >
-          <ShareNetwork size={14} aria-hidden="true" />
-          <span>Share</span>
-        </button>
-      </div>
-    </>
+      <button
+        onClick={handleShare}
+        type="button"
+        className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted transition-colors hover:text-foreground"
+      >
+        <ShareNetwork size={14} aria-hidden="true" />
+        <span>Share</span>
+      </button>
+    </div>
   );
 }
