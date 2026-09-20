@@ -18,20 +18,26 @@ export async function generateMetadata({
 
   if (!post || !post.published) {
     return {
-      title: "Post Not Found | David Dew Mallick",
+      title: "Post not found",
     };
   }
 
   return {
-    title: `${post.title} | David Dew Mallick`,
+    title: post.title,
     description: post.description,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.description,
       type: "article",
+      url: `/blog/${slug}`,
       publishedTime: post.date.toISOString(),
       authors: ["David Dew Mallick"],
-      images: post.thumbnail ? [{ url: post.thumbnail }] : [],
+      images: post.thumbnail
+        ? [{ url: post.thumbnail }]
+        : [{ url: "/og.png", width: 1200, height: 630 }],
     },
   };
 }

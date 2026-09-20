@@ -1,6 +1,7 @@
 "use client";
 
 import { createPost, updatePost } from "@/app/lib/admin-actions";
+import { discardUploadedBlob } from "@/app/lib/blob-actions";
 import { upload } from "@vercel/blob/client";
 import {
   Image as ImageIcon,
@@ -71,6 +72,7 @@ export default function PostForm({ post }: { post?: any }) {
     if (!event.target.files || event.target.files.length === 0) return;
 
     const file = event.target.files[0];
+    const previousUrl = thumbnailUrl;
     setIsUploading(true);
 
     try {
@@ -79,11 +81,24 @@ export default function PostForm({ post }: { post?: any }) {
         handleUploadUrl: "/api/upload",
       });
       setThumbnailUrl(newBlob.url);
+      if (previousUrl && previousUrl !== newBlob.url) {
+        discardUploadedBlob(previousUrl).catch(() => undefined);
+      }
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Upload failed. You can also paste an image URL directly.");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      alert(`Upload failed: ${message}\nYou can also paste an image URL directly.`);
     } finally {
       setIsUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleRemoveThumbnail = () => {
+    const removedUrl = thumbnailUrl;
+    setThumbnailUrl("");
+    if (removedUrl) {
+      discardUploadedBlob(removedUrl).catch(() => undefined);
     }
   };
 
@@ -253,7 +268,7 @@ export default function PostForm({ post }: { post?: any }) {
                   <img src={thumbnailUrl} alt="Cover preview" className="h-full w-full object-cover" />
                   <button
                     type="button"
-                    onClick={() => setThumbnailUrl("")}
+                    onClick={handleRemoveThumbnail}
                     className="absolute top-2 right-2 p-1.5 rounded-full bg-background/90 text-destructive hover:bg-destructive hover:text-white transition-colors shadow-md"
                     title="Remove image"
                   >
@@ -296,7 +311,7 @@ export default function PostForm({ post }: { post?: any }) {
                     type="file"
                     ref={inputFileRef}
                     onChange={handleImageUpload}
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
                     className="hidden"
                   />
                 </div>

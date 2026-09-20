@@ -8,8 +8,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Blog & Insights | David Dew Mallick",
+  title: "Blog & Insights",
   description: "Guides, deep dives, and tutorials on software architecture, SEO, performance optimization, and modern web applications.",
+  alternates: {
+    canonical: "/blog",
+  },
 };
 
 const POSTS_PER_PAGE = 6;
