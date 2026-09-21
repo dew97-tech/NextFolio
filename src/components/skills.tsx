@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/reveal";
-import { TypeLine } from "@/components/type-line";
+import { SectionFolio, SectionHeading } from "@/components/section-heading";
 import { resumeData } from "@/data/resume";
 
 export function Skills() {
@@ -12,11 +12,13 @@ export function Skills() {
   ];
 
   return (
-    <section id="skills" className="section-rule border-t border-border">
-      <div className="mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
-        <h2 className="font-serif text-[clamp(1.75rem,3vw,2.25rem)] leading-tight tracking-[-0.02em]">
-          <TypeLine text="Skills" trigger="view" caret={false} speedMs={28} />
-        </h2>
+    <section
+      id="skills"
+      className="band-paper section-rule border-t border-border"
+    >
+      <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
+        <SectionFolio index={3} />
+        <SectionHeading text="Skills" sectionId="skills" />
 
         <Reveal className="mt-12 space-y-9">
           {groups.map((group) => (

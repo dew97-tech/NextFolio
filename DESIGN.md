@@ -51,7 +51,7 @@ Rules:
 - Do not mix warm and cool grays. This palette is neutral with a faint green cast on both themes.
 - One palette per page. Admin may use `--ok`, `--warn`, `--danger`; the public site may not.
 - Contrast: body text at least 4.5:1 in both themes.
-- The only decorative color on the public site is the Codecademy yellow used for text selection (`rgba(255, 211, 0, 0.30)` light, `0.10` dark) and the highlighter marker (`0.5` light, `0.16` dark). It is never used for text, borders, or surfaces. Every text token still passes AA while selected or highlighted.
+- The only decorative color on the public site is the Codecademy yellow used for text selection (`rgba(255, 211, 0, 0.30)` in both themes) and the highlighter marker. Light marker: `0.5` fill. Dark marker: a `0.14` to `0.30` fill gradient plus a `0.55` bottom bar. Highlighted words switch to `--ink` because muted text on the dark fill fails AA. It is never used for text, borders, or surfaces. Every text token still passes AA while selected or highlighted.
 
 ## Type
 
@@ -97,18 +97,24 @@ No pills for buttons, tags, or badges. No 16px-plus radii on cards. Hairline bor
 - Projects: editorial rows, asymmetric (title and meta left, detail right at lg). Alternate offset. No three equal cards.
 - Experience: company blocks separated by a rule and space, not a per-bullet timeline.
 - Long lists over five items: group into clusters with headings, or split columns.
+- Paper bands: sections alternate `paper` and `surface` (`band-paper` / `band-surface`). Projects and Skills sit on paper, Experience and Awards on surface. The band is the only thing that changes between sections; type, rules, and spacing stay identical.
+- Folios: each home section carries a mono folio (`01 / 04` through `04 / 04`) on its top rule, right-aligned to the container, sitting in a chip of the band color so it interrupts the hairline. `aria-hidden`. Project rows carry mono row numbers (`01` onward) above the title.
+- Project rows are a ledger: one hairline above each row, row number, then title. No per-row bottom border.
 - Hero: max four text elements (name, role line, intro under 20 words, actions). Top padding max `pt-24`. No scroll cue, no badge, no availability dot, no facts strip.
 - Navigation: one line at desktop, height 64px, hairline bottom border, page background.
 
 ## Motion
 
 - Hero load sequence: one orchestrated moment. Name, role line, intro, and actions rise 8px and fade over 420ms with 70ms stagger. Runs once on load, gated behind `scripting: enabled` and `prefers-reduced-motion: no-preference`.
-- Typed line: three places only, never loops and never deletes. The hero role line types on mount with a caret. The `Selected work`, `Experience`, `Skills`, and `Awards` headings type once when 60 percent in view at 28ms per character, with no caret. The Experience total follows its heading by 450ms and keeps the caret. Screen readers get the static text, reduced motion and no-JS get it instantly, and the reserved grid slot prevents any shift.
-- Highlighter marker: a rotated, uneven-edged stroke behind key words only. Placements are the hero phrase "Next.js and Laravel", `4+ years` in the Experience metric, and `mark` elements inside articles. The stroke sweeps left to right over 380ms when revealed, and sits static under reduced motion.
-- Scroll reveals: one pattern only. Opacity 0 to 1 plus translateY(8px) to 0, 500ms, `cubic-bezier(0.23, 1, 0.32, 1)`, once per element, IntersectionObserver. Grids may stagger children by 60ms with `.reveal-stagger`. Skill chips assemble in sequence at 30ms intervals once their section reveals. Nothing else animates on scroll.
+- Typed line: three places only, never loops and never deletes. The hero role line types on mount with a caret. The `Selected work`, `Experience`, `Skills`, and `Awards` headings type when 60 percent in view at 28ms per character, with no caret. A heading resets to pending once it has fully left the viewport, so it types again on re-entry. Clicking a section nav link restarts the visible heading after a 200ms beat; jumps to off-screen sections let the scroll entry trigger the type. The Experience total follows its heading by 450ms and keeps the caret. Screen readers get the static text, reduced motion and no-JS get it instantly, and the reserved grid slot prevents any shift.
+- Highlighter marker: a rotated, uneven-edged stroke behind key words only. Placements are the hero phrases "Next.js and Laravel" and "AI-assisted automation", `4+ years` in the Experience metric, one real outcome per project row (the `highlight` field in the resume data), and `mark` elements inside articles. The stroke sweeps left to right over 380ms when typed, revealed with a row, or loaded in the hero; the hero pair staggers by 200ms. It sits static under reduced motion and without JS.
+- Scroll reveals: one pattern only. Opacity 0 to 1 plus translateY(8px) to 0, 500ms, `cubic-bezier(0.23, 1, 0.32, 1)`, once per element, IntersectionObserver. Grids may stagger children by 60ms with `.reveal-stagger`. Skill chips assemble in sequence at 30ms intervals once their section reveals. Project and Experience bullets rise 4px and fade at 30ms intervals with `.row-seq` once their row reveals. Nothing else animates on scroll.
+- Navigation state: the nav link for the section crossing the upper third of the viewport gets the `.link-draw` underline and `aria-current="location"`. The running head follows the same state.
+- Running head: the active section name in mono, ink-faint, centered in the header on `lg` and up, `aria-hidden` because the nav already carries the information. Fades over 150ms, empty above the first section.
 - Section rules: the 1px rule above each home section draws left to right on entry with a scroll-driven animation, falling back to the static rule where unsupported.
 - Reading progress: a 2px ink bar driven by a scroll timeline on every public page.
 - Underline draw: single-line links (`.link-draw`) draw a 1px underline over 180ms on hover and keyboard focus. Body-copy links keep a static underline.
+- Back to top: text link with the underline draw; its arrow lifts 2px over 150ms on hover and keyboard focus.
 - Interaction: `transition: color, background-color, border-color, opacity, transform` at 150ms to 200ms. Explicit properties, never `transition: all`.
 - Press feedback: `scale(0.98)` on `:active` for buttons and links with a surface.
 - Hover effects only inside `@media (hover: hover) and (pointer: fine)`.
@@ -128,6 +134,8 @@ No pills for buttons, tags, or badges. No 16px-plus radii on cards. Hairline bor
 - Skill chips: sans 13px, 4px radius, rule border, transparent background, no hover state because they are not interactive. Grouped under a label in a 3/9 grid.
 - Skeletons: match final layout shape, paper-to-surface pulse at low contrast.
 - Empty and error states: plain functional sentence, an action if one exists.
+- Colophon: one rule row above the footer. Left, mono size small: `End of record`. Right: the back to top link. No type credits, no invented credits, no version strings.
+- Highlights: one per project row at most, and only phrases that carry a real outcome or differentiator. Never highlight technology names just because they are listed elsewhere.
 - Experience metric: the total is a union of role intervals, never a sum, because roles overlap (technoPLUS overlaps JB Connect). Counting is inclusive of both endpoint months. The heading shows the floor ("4+ years") and each company row shows its exact duration.
 
 ## Copy

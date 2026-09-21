@@ -1,11 +1,13 @@
+import { Highlight } from "@/components/highlight";
 import { Reveal } from "@/components/reveal";
-import { TypeLine } from "@/components/type-line";
+import { SectionFolio, SectionHeading } from "@/components/section-heading";
 import { resumeData } from "@/data/resume";
 
 const projects = resumeData.experience.flatMap((job) =>
   job.projects.map((project) => ({
     name: project.name,
     description: project.description,
+    highlight: project.highlight,
     achievements: project.achievements.slice(0, 4),
     company: job.company,
     date: job.date,
@@ -14,18 +16,23 @@ const projects = resumeData.experience.flatMap((job) =>
 
 export function Projects() {
   return (
-    <section id="projects" className="section-rule border-t border-border">
-      <div className="mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
-        <h2 className="font-serif text-[clamp(1.75rem,3vw,2.25rem)] leading-tight tracking-[-0.02em]">
-          <TypeLine text="Selected work" trigger="view" caret={false} speedMs={28} />
-        </h2>
+    <section
+      id="projects"
+      className="band-paper section-rule border-t border-border"
+    >
+      <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
+        <SectionFolio index={1} />
+        <SectionHeading text="Selected work" sectionId="projects" />
 
-        <div className="mt-12 space-y-16 md:mt-16 md:space-y-20">
-          {projects.map((project) => (
+        <div className="mt-12 md:mt-16">
+          {projects.map((project, index) => (
             <Reveal key={`${project.company}-${project.name}`}>
-              <article className="grid gap-5 md:grid-cols-12 md:gap-8">
+              <article className="row-seq grid gap-5 border-t border-border py-10 md:grid-cols-12 md:gap-8 md:py-12">
                 <div className="md:col-span-4">
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <p className="font-mono text-[12px] tabular-nums text-ink-faint">
+                    {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-foreground">
                     {project.name}
                   </h3>
                   <p className="mt-2 font-mono text-[13px] leading-relaxed text-ink-faint">
@@ -36,11 +43,13 @@ export function Projects() {
                 </div>
 
                 <div className="md:col-span-8">
-                  <p className="text-ink-muted">{project.description}</p>
+                  <p className="text-ink-muted">
+                    <Highlight text={project.description} phrase={project.highlight} />
+                  </p>
                   <ul className="mt-5 list-disc space-y-2.5 pl-5 text-[15px] marker:text-ink-faint">
                     {project.achievements.map((achievement) => (
                       <li key={achievement} className="text-ink-muted">
-                        {achievement}
+                        <Highlight text={achievement} phrase={project.highlight} />
                       </li>
                     ))}
                   </ul>

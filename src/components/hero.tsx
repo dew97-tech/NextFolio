@@ -24,7 +24,11 @@ export function Hero() {
           <span className="highlight-marker hero-marker">
             Next.js and Laravel
           </span>
-          , plus AI-assisted automation for content and SEO systems.
+          , plus{" "}
+          <span className="highlight-marker hero-marker-late">
+            AI-assisted automation
+          </span>{" "}
+          for content and SEO systems.
         </p>
 
         <div

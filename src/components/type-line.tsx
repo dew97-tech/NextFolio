@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_TYPE_INTERVAL_MS = 42;
+const FORCE_COOLDOWN_MS = 400;
+const FORCE_DELAY_MS = 200;
 
 export function TypeLine({
   text,
@@ -13,6 +15,8 @@ export function TypeLine({
   caret = true,
   highlight,
   speedMs = DEFAULT_TYPE_INTERVAL_MS,
+  sectionId,
+  retrigger = false,
 }: {
   text: string;
   className?: string;
@@ -21,6 +25,8 @@ export function TypeLine({
   caret?: boolean;
   highlight?: string;
   speedMs?: number;
+  sectionId?: string;
+  retrigger?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [count, setCount] = useState(0);
@@ -38,61 +44,107 @@ export function TypeLine({
       return;
     }
 
-    let timer: number | undefined;
+    let interval: number | undefined;
     let startTimeout: number | undefined;
+    let startedAt = 0;
+
+    const clearTimers = () => {
+      if (interval) window.clearInterval(interval);
+      if (startTimeout) window.clearTimeout(startTimeout);
+      interval = undefined;
+      startTimeout = undefined;
+    };
 
     const start = () => {
+      clearTimers();
+      startedAt = Date.now();
       element.setAttribute("data-typing", "active");
 
       let typed = 0;
-      timer = window.setInterval(() => {
+      setCount(typed);
+
+      interval = window.setInterval(() => {
         typed += 1;
         setCount(typed);
 
         if (typed >= text.length) {
-          window.clearInterval(timer);
+          window.clearInterval(interval);
+          interval = undefined;
           element.setAttribute("data-typing", "done");
         }
       }, speedMs);
     };
 
-    const schedule = () => {
-      if (delayMs > 0) {
-        startTimeout = window.setTimeout(start, delayMs);
+    const schedule = (wait: number) => {
+      clearTimers();
+      if (wait > 0) {
+        startTimeout = window.setTimeout(start, wait);
       } else {
         start();
       }
     };
 
-    if (trigger === "view" && typeof IntersectionObserver !== "undefined") {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              observer.disconnect();
-              schedule();
-            }
-          }
-        },
-        { threshold: 0.6 },
-      );
+    const reset = () => {
+      clearTimers();
+      setCount(0);
+      element.setAttribute("data-typing", "pending");
+    };
 
-      observer.observe(element);
+    const isVisible = () => {
+      const rect = element.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < window.innerHeight;
+    };
 
-      return () => {
-        observer.disconnect();
-        if (timer) window.clearInterval(timer);
-        if (startTimeout) window.clearTimeout(startTimeout);
-      };
+    const onForce = (event: Event) => {
+      if (!sectionId) return;
+      if ((event as CustomEvent<string>).detail !== sectionId) return;
+      if (element.getAttribute("data-typing") === "active") return;
+      if (Date.now() - startedAt < FORCE_COOLDOWN_MS) return;
+      if (!isVisible()) return;
+
+      setCount(0);
+      element.setAttribute("data-typing", "pending");
+      schedule(Math.max(delayMs, FORCE_DELAY_MS));
+    };
+
+    if (sectionId) {
+      window.addEventListener("typed-section", onForce);
     }
 
-    schedule();
+    if (trigger === "view" || retrigger) {
+      if (typeof IntersectionObserver !== "undefined") {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                if (element.getAttribute("data-typing") !== "active") {
+                  schedule(delayMs);
+                }
+              } else if (retrigger && entry.intersectionRatio === 0) {
+                reset();
+              }
+            }
+          },
+          { threshold: [0, 0.6] },
+        );
+
+        observer.observe(element);
+
+        return () => {
+          observer.disconnect();
+          clearTimers();
+          if (sectionId) window.removeEventListener("typed-section", onForce);
+        };
+      }
+    }
+
+    schedule(delayMs);
 
     return () => {
-      if (timer) window.clearInterval(timer);
-      if (startTimeout) window.clearTimeout(startTimeout);
+      clearTimers();
+      if (sectionId) window.removeEventListener("typed-section", onForce);
     };
-  }, [text, trigger, delayMs, speedMs]);
+  }, [text, trigger, delayMs, speedMs, sectionId, retrigger]);
 
   const fullText = highlight
     ? (() => {

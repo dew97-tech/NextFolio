@@ -138,7 +138,7 @@ body {
 }
 
 .dark ::selection {
-  background: rgba(255, 211, 0, 0.1);
+  background: rgba(255, 211, 0, 0.3);
 }
 
 html {
@@ -308,6 +308,59 @@ p {
 }
 
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .row-seq li {
+    opacity: 0;
+  }
+
+  [data-reveal="visible"] .row-seq li {
+    animation: row-in 300ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  .row-seq li:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .row-seq li:nth-child(2) {
+    animation-delay: 30ms;
+  }
+
+  .row-seq li:nth-child(3) {
+    animation-delay: 60ms;
+  }
+
+  .row-seq li:nth-child(4) {
+    animation-delay: 90ms;
+  }
+
+  .row-seq li:nth-child(5) {
+    animation-delay: 120ms;
+  }
+
+  .row-seq li:nth-child(6) {
+    animation-delay: 150ms;
+  }
+
+  .row-seq li:nth-child(7) {
+    animation-delay: 180ms;
+  }
+
+  .row-seq li:nth-child(8) {
+    animation-delay: 210ms;
+  }
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
   .hero-seq [data-seq] {
     opacity: 0;
     animation: hero-rise 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
@@ -404,14 +457,33 @@ p {
 }
 
 .link-draw:focus-visible,
-.link-draw[aria-current="page"] {
+.link-draw[aria-current="page"],
+.link-draw[aria-current="location"] {
   background-size: 100% 1px;
+}
+
+.back-to-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.back-to-top-arrow {
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .back-to-top:hover .back-to-top-arrow,
+  .back-to-top:focus-visible .back-to-top-arrow {
+    transform: translateY(-2px);
+  }
 }
 
 .highlight-marker {
   position: relative;
   isolation: isolate;
   display: inline-block;
+  color: var(--ink);
 }
 
 .highlight-marker::before {
@@ -419,24 +491,42 @@ p {
   position: absolute;
   inset: 0.1em -0.14em 0.04em -0.14em;
   z-index: -1;
-  background: rgba(255, 211, 0, 0.5);
+  background-color: rgba(255, 211, 0, 0.5);
   border-radius: 0.4em 0.55em 0.35em 0.6em;
   transform: rotate(-0.7deg);
 }
 
 .dark .highlight-marker::before {
-  background: rgba(255, 211, 0, 0.16);
+  background-color: transparent;
+  background-image:
+    linear-gradient(
+      100deg,
+      rgba(255, 211, 0, 0.14) 0%,
+      rgba(255, 211, 0, 0.3) 5%,
+      rgba(255, 211, 0, 0.22) 50%,
+      rgba(255, 211, 0, 0.28) 92%,
+      rgba(255, 211, 0, 0.12) 100%
+    ),
+    linear-gradient(rgba(255, 211, 0, 0.55), rgba(255, 211, 0, 0.55));
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% 0.16em;
+  background-position: 0 0, 0 100%;
 }
 
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
   .hero-marker::before,
-  [data-typing="done"] .highlight-marker::before {
+  [data-typing="done"] .highlight-marker::before,
+  [data-reveal="visible"] .highlight-marker::before {
     clip-path: inset(0 100% 0 0);
     animation: marker-sweep 380ms cubic-bezier(0.23, 1, 0.32, 1) both;
   }
 
   .hero-marker::before {
     animation-delay: 900ms;
+  }
+
+  .hero-marker-late::before {
+    animation-delay: 1100ms;
   }
 }
 
@@ -475,6 +565,33 @@ p {
   to {
     background-size: 100% 1px;
   }
+}
+
+.band-paper {
+  background-color: var(--paper);
+  --band: var(--paper);
+}
+
+.band-surface {
+  background-color: var(--surface);
+  --band: var(--surface);
+}
+
+.section-folio {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  transform: translateY(-50%);
+  padding: 0 0.4rem;
+  background-color: var(--band, var(--background));
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  user-select: none;
 }
 
 body::after {
@@ -797,10 +914,11 @@ body::after {
 .dark .article-content mark {
   background-image: linear-gradient(
     100deg,
-    rgba(255, 211, 0, 0.08) 0%,
-    rgba(255, 211, 0, 0.2) 6%,
-    rgba(255, 211, 0, 0.14) 92%,
-    rgba(255, 211, 0, 0.06) 100%
+    rgba(255, 211, 0, 0.18) 0%,
+    rgba(255, 211, 0, 0.4) 6%,
+    rgba(255, 211, 0, 0.3) 50%,
+    rgba(255, 211, 0, 0.36) 92%,
+    rgba(255, 211, 0, 0.16) 100%
   );
 }
 
@@ -1044,9 +1162,10 @@ body::after {
 .dark .ProseMirror mark {
   background-image: linear-gradient(
     100deg,
-    rgba(255, 211, 0, 0.08) 0%,
-    rgba(255, 211, 0, 0.2) 6%,
-    rgba(255, 211, 0, 0.14) 92%,
-    rgba(255, 211, 0, 0.06) 100%
+    rgba(255, 211, 0, 0.18) 0%,
+    rgba(255, 211, 0, 0.4) 6%,
+    rgba(255, 211, 0, 0.3) 50%,
+    rgba(255, 211, 0, 0.36) 92%,
+    rgba(255, 211, 0, 0.16) 100%
   );
 }

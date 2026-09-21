@@ -45,7 +45,16 @@ export function MobileMenu() {
               <Link
                 key={item.name}
                 href={item.href}
-                onClick={() => setOpenPath(null)}
+                onClick={() => {
+                  setOpenPath(null);
+                  if (item.href.startsWith("/#")) {
+                    window.dispatchEvent(
+                      new CustomEvent("typed-section", {
+                        detail: item.href.slice(2),
+                      }),
+                    );
+                  }
+                }}
                 className="rounded px-2 py-2.5 text-base text-foreground transition-colors hover:bg-accent"
               >
                 {item.name}

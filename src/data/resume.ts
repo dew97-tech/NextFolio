@@ -46,6 +46,7 @@ export const resumeData = {
           name: "BridgeBooks System",
           description:
             "AI-driven SEO platform for article generation, backlinks, and contact automation.",
+          highlight: "cut generation costs by 95%",
           achievements: [
             "Built the AI article generation module from scratch with two teammates over eight weeks.",
             "Moved generation from AWS Lambda to containers, cutting failure rates to 5% in three weeks.",
@@ -70,6 +71,7 @@ export const resumeData = {
           name: "eduKET LMS",
           description:
             "Platform for course administration and learning material management.",
+          highlight: "without breaking either",
           achievements: [
             "Built course and class assignment modules with instructor availability validation.",
             "Added instructor material upload with student-facing access.",
@@ -94,6 +96,7 @@ export const resumeData = {
           name: "Maison Ensemble",
           description:
             "French language learning platform with interactive study tools.",
+          highlight: "12 interactive exercises",
           achievements: [
             "Built 12 interactive exercises and games for Dutch to French vocabulary and memory practice.",
             "Integrated video lessons with embedded quizzes.",
@@ -104,6 +107,7 @@ export const resumeData = {
           name: "Augmenta Education",
           description:
             "School management platform for student records, scheduling, and payments.",
+          highlight: "automatic credit deduction",
           achievements: [
             "Designed student ID cards with generated barcodes for identification.",
             "Built schedule-based class assignment aligned with instructor availability.",
@@ -114,6 +118,7 @@ export const resumeData = {
         {
           name: "KIMS",
           description: "Inventory management system for retail operations.",
+          highlight: "core inventory flows",
           achievements: [
             "Built core inventory flows for products, categories, brands, units, suppliers, purchases, orders, customers, and sales.",
           ],

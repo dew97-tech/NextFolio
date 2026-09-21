@@ -5,6 +5,23 @@ export function Footer() {
 
   return (
     <footer id="contact" className="border-t border-border">
+      <div className="mx-auto w-full max-w-[1180px] px-5 md:px-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-border py-5">
+          <p className="font-mono text-[12px] text-ink-faint">
+            End of record
+          </p>
+          <a
+            href="#main-content"
+            className="link-draw back-to-top text-sm text-ink-muted hover:text-foreground"
+          >
+            Back to top
+            <span className="back-to-top-arrow" aria-hidden="true">
+              ↑
+            </span>
+          </a>
+        </div>
+      </div>
+
       <div className="mx-auto grid w-full max-w-[1180px] gap-10 px-5 py-14 md:grid-cols-12 md:gap-8 md:px-8 md:py-16">
         <div className="md:col-span-5">
           <p className="font-serif text-lg tracking-tight text-foreground">
