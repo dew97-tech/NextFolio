@@ -18,7 +18,9 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
 
-  turbopack: {},
+  turbopack: {
+    root: __dirname,
+  },
 
   async headers() {
     return [

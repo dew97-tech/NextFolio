@@ -21,7 +21,7 @@ export function Projects() {
   return (
     <section
       id="projects"
-      className="py-20 relative"
+      className="py-20 relative scroll-mt-20 md:scroll-mt-24"
       ref={containerRef}
       aria-labelledby="projects-heading"
     >

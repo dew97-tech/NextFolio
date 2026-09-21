@@ -21,7 +21,7 @@ export function Skills() {
   return (
     <section
       id="skills"
-      className="py-20 bg-accent/5 relative overflow-hidden"
+      className="py-20 bg-accent/5 relative overflow-hidden scroll-mt-20 md:scroll-mt-24"
       aria-labelledby="skills-heading"
     >
       <motion.div

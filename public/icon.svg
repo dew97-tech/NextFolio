@@ -1,25 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Background Gradient -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0c1220"/>
       <stop offset="100%" stop-color="#070a12"/>
     </linearGradient>
 
-    <!-- Border Glow Gradient -->
     <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#3b82f6"/>
       <stop offset="50%" stop-color="#06b6d4"/>
       <stop offset="100%" stop-color="#3b82f6"/>
     </linearGradient>
 
-    <!-- Lettermark "D" Gradient -->
     <linearGradient id="letterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
       <stop offset="100%" stop-color="#e2e8f0"/>
     </linearGradient>
 
-    <!-- Glowing Cyan Dot Gradient -->
     <radialGradient id="dotGrad" cx="40%" cy="40%" r="60%">
       <stop offset="0%" stop-color="#ffffff"/>
       <stop offset="30%" stop-color="#67e8f9"/>
@@ -27,7 +23,6 @@
       <stop offset="100%" stop-color="#0891b2"/>
     </radialGradient>
 
-    <!-- Cyan Glow Filter -->
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur1"/>
       <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur2"/>
@@ -39,15 +34,11 @@
     </filter>
   </defs>
 
-  <!-- Squircle Base with Glowing Border -->
   <rect x="18" y="18" width="476" height="476" rx="112" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="7"/>
 
-  <!-- Inner Soft Inset Highlight -->
   <rect x="25" y="25" width="462" height="462" rx="105" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
 
-  <!-- Geometric "D" Monogram -->
   <g id="lettermark">
-    <!-- Outer D shape with cutout inner counter -->
     <path d="M 152 126 
              L 262 126 
              C 342 126, 396 178, 396 256 
@@ -62,14 +53,10 @@
              Z" 
           fill="url(#letterGrad)"/>
 
-    <!-- Tech Precision Chamfer Cut on top-left of stem -->
     <path d="M 152 126 L 194 126 L 152 168 Z" fill="#0c1220"/>
     <path d="M 152 168 L 194 126" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
   </g>
 
-  <!-- Glowing Cyan Dot "." matching the "David Dew." logo -->
-  <!-- Ambient outer glow -->
   <circle cx="396" cy="386" r="30" fill="rgba(6, 182, 212, 0.35)" filter="url(#glow)"/>
-  <!-- Vibrant core dot -->
   <circle cx="396" cy="386" r="22" fill="url(#dotGrad)"/>
 </svg>

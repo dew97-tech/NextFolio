@@ -25,9 +25,18 @@ export function Navbar() {
   const [activeSection, setActiveSection] = React.useState("");
   const { reducedMotion } = usePhysics();
 
-  if (pathname && (pathname.startsWith("/admin") || pathname.startsWith("/auth"))) {
-    return null;
-  }
+  const resolveHref = (href: string) =>
+    href.startsWith("#") && pathname !== "/" ? `/${href}` : href;
+
+  const isItemActive = (href: string) => {
+    if (href.startsWith("#")) {
+      return activeSection === href.substring(1);
+    }
+    if (href === "/blog") {
+      return pathname.startsWith("/blog");
+    }
+    return pathname === href;
+  };
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -78,6 +87,10 @@ export function Navbar() {
     return () => window.removeEventListener('resize', handleResize);
   }, [isOpen]);
 
+  if (pathname && (pathname.startsWith("/admin") || pathname.startsWith("/auth"))) {
+    return null;
+  }
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -115,17 +128,17 @@ export function Navbar() {
             {navItems.map((item) => (
               <div key={item.name} className="relative">
                 <MagneticLink
-                  href={item.href}
+                  href={resolveHref(item.href)}
                   strength={0.3}
                   className={cn(
                     "relative px-4 py-2 text-sm font-medium transition-colors duration-300 block",
-                    activeSection === item.href.substring(1) || (item.href === "/blog" && activeSection === "")
+                    isItemActive(item.href)
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   )}
-                  aria-current={activeSection === item.href.substring(1) ? 'page' : undefined}
+                  aria-current={isItemActive(item.href) ? 'page' : undefined}
                 >
-                  {activeSection === item.href.substring(1) && (
+                  {isItemActive(item.href) && (
                     <motion.div
                       layoutId="activeNav"
                       className="absolute inset-0 bg-primary/10 rounded-full"
@@ -215,7 +228,7 @@ export function Navbar() {
                   }}
                 >
                   <Link
-                    href={item.href}
+                    href={resolveHref(item.href)}
                     onClick={() => setIsOpen(false)}
                     className="text-2xl font-medium text-foreground hover:text-primary transition-colors py-3 block focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-md"
                   >

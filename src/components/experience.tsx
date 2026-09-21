@@ -23,7 +23,7 @@ export function Experience() {
   return (
     <section
       id="experience"
-      className="py-20 bg-accent/5 relative overflow-hidden"
+      className="py-20 bg-accent/5 relative overflow-hidden scroll-mt-20 md:scroll-mt-24"
       ref={containerRef}
       aria-labelledby="experience-heading"
     >

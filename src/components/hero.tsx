@@ -146,7 +146,7 @@ export function Hero() {
           <MagneticButton
             className="inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all duration-300 group shadow-lg shadow-primary/25 hover:shadow-primary/40 relative overflow-hidden"
           >
-            <Link href="#projects" className="flex items-center relative z-10">
+            <Link href="/#projects" className="flex items-center relative z-10">
               View Work
               <motion.span
                 className="ml-2"

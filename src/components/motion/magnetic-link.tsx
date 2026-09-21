@@ -1,11 +1,15 @@
 "use client";
 
-import { ReactNode, useRef } from "react";
+import { ReactNode } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { usePhysics } from "@/lib/motion/physics-context";
 import Link from "next/link";
 
-interface MagneticLinkProps {
+interface MagneticLinkProps
+  extends Omit<
+    React.AnchorHTMLAttributes<HTMLAnchorElement>,
+    "href" | "className" | "onClick" | "children"
+  > {
   children: ReactNode;
   href: string;
   className?: string;
@@ -19,6 +23,7 @@ export function MagneticLink({
   className = "",
   strength = 0.3,
   onClick,
+  ...rest
 }: MagneticLinkProps) {
   const { reducedMotion, isMobile } = usePhysics();
 
@@ -46,7 +51,7 @@ export function MagneticLink({
   };
 
   return (
-    <Link href={href} passHref legacyBehavior={false}>
+    <Link href={href} passHref legacyBehavior={false} {...rest}>
       <motion.div
         onClick={onClick}
         onMouseMove={handleMouseMove}
