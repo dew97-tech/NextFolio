@@ -37,7 +37,7 @@ export default function BlogReadingProgress({ title }: { title: string }) {
         onClick={handleCopyLink}
         type="button"
         aria-live="polite"
-        className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-clay-text"
       >
         {copied ? (
           <>
@@ -55,7 +55,7 @@ export default function BlogReadingProgress({ title }: { title: string }) {
       <button
         onClick={handleShare}
         type="button"
-        className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-clay-text"
       >
         <ShareNetwork size={14} aria-hidden="true" />
         <span>Share</span>

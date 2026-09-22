@@ -95,7 +95,7 @@ export default async function BlogPostPage({
       <div className="mx-auto w-full max-w-[720px] px-5 md:px-8">
         <Link
           href="/blog"
-          className="link-draw font-mono text-[13px] text-ink-muted hover:text-foreground"
+          className="link-draw font-mono text-sm text-clay-text hover:text-ink-brown"
         >
           Back to blog
         </Link>
@@ -111,7 +111,7 @@ export default async function BlogPostPage({
             </div>
           )}
 
-          <h1 className="mt-5 font-serif text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.12] tracking-[-0.02em] text-foreground">
+          <h1 className="mt-5 font-serif text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.12] tracking-[-0.02em] text-ink-brown">
             {post.title}
           </h1>
 
@@ -122,7 +122,7 @@ export default async function BlogPostPage({
           )}
 
           <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
-            <p className="font-mono text-[13px] tabular-nums text-ink-faint">
+            <p className="font-mono text-sm tabular-nums text-ink-faint">
               <time dateTime={post.date.toISOString()}>
                 {new Date(post.date).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -162,9 +162,9 @@ export default async function BlogPostPage({
               DD
             </div>
             <div className="min-w-0">
-              <h2 className="font-medium text-foreground">{personal.name}</h2>
+              <h2 className="font-medium text-ink-brown">{personal.name}</h2>
               <p className="mt-0.5 text-sm text-ink-muted">{personal.role}</p>
-              <p className="mt-3 max-w-[62ch] text-[15px] leading-relaxed text-ink-muted">
+              <p className="mt-3 max-w-[62ch] text-base leading-relaxed text-ink-muted">
                 I build web applications with Next.js, Laravel, and Postgres,
                 and write about the parts that took the longest to figure out.
               </p>
@@ -173,7 +173,7 @@ export default async function BlogPostPage({
                   href={personal.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground"
+                  className="text-clay-text underline decoration-1 decoration-clay underline-offset-4 transition-colors hover:text-ink-brown"
                 >
                   GitHub
                 </a>
@@ -181,13 +181,13 @@ export default async function BlogPostPage({
                   href={personal.linkedin}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground"
+                  className="text-clay-text underline decoration-1 decoration-clay underline-offset-4 transition-colors hover:text-ink-brown"
                 >
                   LinkedIn
                 </a>
                 <a
                   href={`mailto:${personal.email}`}
-                  className="text-ink-muted underline decoration-1 decoration-ink-faint underline-offset-4 transition-colors hover:text-foreground"
+                  className="text-clay-text underline decoration-1 decoration-clay underline-offset-4 transition-colors hover:text-ink-brown"
                 >
                   Email
                 </a>
@@ -198,7 +198,7 @@ export default async function BlogPostPage({
 
         {morePosts.length > 0 && (
           <div className="mt-16 border-t border-border pt-10">
-            <h2 className="text-lg font-semibold text-foreground">More posts</h2>
+            <h2 className="text-xl font-semibold text-ink-brown">More posts</h2>
             <ul className="mt-6 divide-y divide-border">
               {morePosts.map((related) => (
                 <li key={related.slug}>
@@ -206,7 +206,7 @@ export default async function BlogPostPage({
                     href={`/blog/${related.slug}`}
                     className="group block py-5"
                   >
-                    <p className="font-mono text-[13px] tabular-nums text-ink-faint">
+                    <p className="font-mono text-sm tabular-nums text-ink-faint">
                       {new Date(related.date).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
@@ -215,7 +215,7 @@ export default async function BlogPostPage({
                       <span aria-hidden="true"> · </span>
                       {related.readTime}
                     </p>
-                    <p className="mt-1.5 font-medium text-foreground underline-offset-4 group-hover:underline">
+                    <p className="mt-1.5 font-medium text-ink-brown underline-offset-4 group-hover:underline">
                       {related.title}
                     </p>
                     <p className="mt-1 line-clamp-2 text-sm text-ink-muted">

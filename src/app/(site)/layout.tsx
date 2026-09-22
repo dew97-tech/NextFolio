@@ -11,7 +11,7 @@ export default function SiteLayout({
     <>
       <ReadingProgress />
       <Navbar />
-      <main id="main-content" className="flex-grow">
+      <main id="main-content" className="paper-canvas flex-grow">
         {children}
       </main>
       <Footer />

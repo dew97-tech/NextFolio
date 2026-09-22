@@ -27,7 +27,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={`Theme: ${currentLabel}. Switch to ${nextLabel}.`}
       title={`Theme: ${currentLabel}`}
-      className="text-sm text-ink-muted transition-colors hover:text-foreground"
+      className="text-sm text-ink-brown transition-colors hover:text-clay-text"
     >
       {currentLabel}
     </button>

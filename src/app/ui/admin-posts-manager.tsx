@@ -79,7 +79,7 @@ export default function AdminPostsManager({
 
         <Link
           href="/admin/new"
-          className="inline-flex h-9 items-center gap-1.5 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-foreground/90 active:scale-[0.98]"
+          className="inline-flex h-11 items-center gap-1.5 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-[var(--clay-deep-hover)] active:scale-[0.98]"
         >
           <Plus size={14} aria-hidden="true" />
           <span>New post</span>
@@ -118,7 +118,7 @@ export default function AdminPostsManager({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search title, tag, or topic…"
-              className="h-9 w-full rounded border border-input bg-surface pl-9 pr-3 text-sm text-foreground placeholder:text-ink-faint"
+              className="h-11 w-full rounded border border-input bg-surface pl-9 pr-3 text-base text-ink placeholder:text-ink-faint"
             />
             <MagnifyingGlass
               size={14}

@@ -20,10 +20,10 @@ export default async function LoginPage() {
       className="flex min-h-screen items-center justify-center px-5 py-16"
     >
       <div className="w-full max-w-sm">
-        <h1 className="font-serif text-2xl tracking-[-0.01em] text-foreground">
+        <h1 className="font-serif text-2xl tracking-[-0.01em] text-ink-brown">
           Admin
         </h1>
-        <p className="mt-2 text-sm text-ink-muted">
+        <p className="mt-2 text-base text-ink-muted">
           Sign in to manage posts.
         </p>
 
@@ -31,9 +31,7 @@ export default async function LoginPage() {
           <LoginForm />
         </div>
 
-        <p className="mt-6 text-xs text-ink-faint">
-          Authorized access only.
-        </p>
+        <p className="mt-6 text-sm text-ink-faint">Authorized access only.</p>
       </div>
     </main>
   );

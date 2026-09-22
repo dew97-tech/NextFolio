@@ -420,7 +420,7 @@ function SubmitButton({ isPublished }: { isPublished: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-foreground/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
+      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-[var(--clay-deep-hover)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
     >
       {pending ? (
         <>

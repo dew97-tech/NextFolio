@@ -1,5 +1,9 @@
 import { Reveal } from "@/components/reveal";
-import { SectionFolio, SectionHeading } from "@/components/section-heading";
+import {
+  RuleCross,
+  SectionFolio,
+  SectionHeading,
+} from "@/components/section-heading";
 import { TypeLine } from "@/components/type-line";
 import { resumeData } from "@/data/resume";
 import { roleDuration, totalExperience } from "@/lib/experience";
@@ -10,13 +14,14 @@ export function Experience() {
   return (
     <section
       id="experience"
-      className="band-surface section-rule border-t border-border"
+      className="band-surface section-rule"
     >
       <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
         <SectionFolio index={2} />
+        <RuleCross />
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
           <SectionHeading text="Experience" sectionId="experience" />
-          <p className="font-mono text-[13px] tabular-nums text-ink-muted">
+          <p className="font-mono text-sm tabular-nums text-ink-muted">
             <TypeLine
               text={`${total.label} since ${total.sinceLabel}`}
               trigger="view"
@@ -36,17 +41,17 @@ export function Experience() {
               <Reveal key={job.company}>
                 <article>
                   <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-1">
-                    <h3 className="font-serif text-xl tracking-[-0.01em] text-foreground">
+                    <h3 className="font-serif text-xl tracking-[-0.01em] text-ink-brown">
                       {job.company}
                     </h3>
-                    <p className="font-mono text-[13px] tabular-nums text-ink-faint">
+                    <p className="font-mono text-sm tabular-nums text-ink-faint">
                       {job.date}
                       {duration ? ` · ${duration}` : ""}
                     </p>
                   </div>
 
                   <div className="max-w-[880px]">
-                    <p className="mt-1.5 text-[15px] text-ink-muted">
+                    <p className="mt-1.5 text-base text-ink-muted">
                       {job.role} · {job.location}
                     </p>
 
@@ -58,7 +63,7 @@ export function Experience() {
 
                     <ul className="row-seq mt-5 space-y-2.5">
                       {job.projects.map((project) => (
-                        <li key={project.name} className="text-[15px] leading-relaxed">
+                        <li key={project.name} className="text-base leading-relaxed">
                           <span className="font-medium text-foreground">
                             {project.name}.
                           </span>{" "}

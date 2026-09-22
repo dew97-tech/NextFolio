@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Newsreader } from "next/font/google";
+import { Geist, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -8,14 +8,16 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
+const sourceSerif = Source_Serif_4({
+  style: ["normal", "italic"],
+  variable: "--font-source-serif",
   subsets: ["latin"],
+  axes: ["opsz"],
   display: "swap",
 });
 
@@ -118,8 +120,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f4f1" },
-    { media: "(prefers-color-scheme: dark)", color: "#141512" },
+    { media: "(prefers-color-scheme: light)", color: "#f3e9d8" },
+    { media: "(prefers-color-scheme: dark)", color: "#1b1512" },
   ],
 };
 
@@ -140,7 +142,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
+        className={`${geistSans.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"

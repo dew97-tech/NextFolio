@@ -13,7 +13,7 @@ export function SectionHeading({
   return (
     <h2
       className={cn(
-        "font-serif text-[clamp(1.75rem,3vw,2.25rem)] leading-tight tracking-[-0.02em]",
+        "font-serif text-[clamp(1.75rem,3vw,2.25rem)] leading-tight tracking-[-0.02em] text-ink-brown",
         className,
       )}
     >
@@ -41,4 +41,8 @@ export function SectionFolio({
       {String(index).padStart(2, "0")} / {String(total).padStart(2, "0")}
     </span>
   );
+}
+
+export function RuleCross() {
+  return <span className="rule-cross" aria-hidden="true" />;
 }

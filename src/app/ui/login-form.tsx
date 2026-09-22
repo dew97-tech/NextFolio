@@ -22,7 +22,7 @@ export default function LoginForm() {
           autoComplete="email"
           spellCheck={false}
           placeholder="you@example.com"
-          className="h-10 w-full rounded border border-input bg-surface px-3 text-sm text-foreground placeholder:text-ink-faint"
+          className="h-11 w-full rounded border border-input bg-surface px-3 text-base text-ink placeholder:text-ink-faint"
         />
       </div>
 
@@ -38,7 +38,7 @@ export default function LoginForm() {
           minLength={6}
           autoComplete="current-password"
           placeholder="At least 6 characters"
-          className="h-10 w-full rounded border border-input bg-surface px-3 text-sm text-foreground placeholder:text-ink-faint"
+          className="h-11 w-full rounded border border-input bg-surface px-3 text-base text-ink placeholder:text-ink-faint"
         />
       </div>
 
@@ -60,7 +60,7 @@ function LoginButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-foreground/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
+      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-[var(--clay-deep-hover)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
     >
       {pending && <CircleNotch size={16} className="animate-spin" aria-hidden="true" />}
       <span>{pending ? "Signing in\u2026" : "Sign in"}</span>

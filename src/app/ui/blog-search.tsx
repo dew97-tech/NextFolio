@@ -33,7 +33,7 @@ export default function BlogSearch() {
         placeholder="Search posts…"
         onChange={(event) => handleSearch(event.target.value)}
         defaultValue={searchParams.get("query")?.toString()}
-        className="h-10 w-full rounded border border-input bg-surface pl-9 pr-4 text-sm text-foreground placeholder:text-ink-faint"
+        className="h-11 w-full rounded border border-input bg-surface pl-9 pr-4 text-base text-ink placeholder:text-ink-faint"
       />
       <MagnifyingGlass
         size={16}

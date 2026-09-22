@@ -47,3 +47,9 @@ next-env.d.ts
 
 # agent skills (restore locally with: npx skills experimental_install)
 /.agents/
+
+# internal docs and agent configuration (local only)
+*.md
+/opencode.json
+/.opencode/
+/skills-lock.json

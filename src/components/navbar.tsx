@@ -6,11 +6,11 @@ import Link from "next/link";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background">
+    <header className="paper-canvas sticky top-0 z-40 border-b border-border bg-background">
       <div className="relative mx-auto flex h-16 w-full max-w-[1180px] items-center justify-between px-5 md:px-8">
         <Link
           href="/"
-          className="font-serif text-lg tracking-tight text-foreground"
+          className="font-serif text-lg tracking-tight text-ink-brown"
         >
           David Dew Mallick
         </Link>

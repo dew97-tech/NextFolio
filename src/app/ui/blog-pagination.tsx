@@ -52,10 +52,10 @@ function PaginationNumber({
   href: string;
   isActive: boolean;
 }) {
-  const className = `flex h-9 min-w-9 items-center justify-center px-2 font-mono text-[13px] tabular-nums transition-colors ${
+  const className = `flex h-11 min-w-11 items-center justify-center px-2 font-mono text-sm tabular-nums transition-colors ${
     isActive
       ? "rounded bg-primary text-primary-foreground"
-      : "rounded text-ink-muted hover:bg-accent hover:text-foreground"
+      : "rounded text-ink-muted hover:bg-accent hover:text-clay-text"
   }`;
 
   if (isActive || page === "...") {
@@ -82,10 +82,10 @@ function PaginationArrow({
   direction: "left" | "right";
   isDisabled?: boolean;
 }) {
-  const className = `flex h-9 w-9 items-center justify-center rounded border border-border transition-colors ${
+  const className = `flex h-11 w-11 items-center justify-center rounded border border-border transition-colors ${
     isDisabled
       ? "pointer-events-none text-ink-faint opacity-50"
-      : "text-ink-muted hover:bg-accent hover:text-foreground"
+      : "text-ink-muted hover:bg-accent hover:text-clay-text"
   }`;
 
   const label = direction === "left" ? "Previous page" : "Next page";

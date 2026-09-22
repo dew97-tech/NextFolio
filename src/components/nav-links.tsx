@@ -37,8 +37,8 @@ export function NavLinks() {
               );
             }}
             className={cn(
-              "link-draw py-1.5 text-sm text-ink-muted hover:text-foreground",
-              isActive && "text-foreground",
+              "link-draw py-1.5 text-sm text-ink-brown hover:text-clay-text",
+              isActive && "text-clay-text",
             )}
           >
             {item.name}
