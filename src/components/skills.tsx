@@ -12,6 +12,7 @@ export function Skills() {
 
   const groups = [
     { label: "Languages and frameworks", items: skills.languagesAndFrameworks },
+    { label: "Databases and storage", items: skills.databasesAndStorage },
     { label: "Cloud and platforms", items: skills.cloudAndPlatforms },
     { label: "Practices", items: skills.methodologies },
   ];

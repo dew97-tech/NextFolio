@@ -9,7 +9,7 @@ export const resumeData = {
     linkedin: "https://www.linkedin.com/in/david-dew-mallick-618a6223b/",
     location: "Dhaka, Bangladesh",
     tagline:
-      "Software engineer building full-stack web applications with Next.js and Laravel, with hands-on work in AI-assisted automation.",
+      "Software engineer building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
   },
   education: [
     {
@@ -62,7 +62,7 @@ export const resumeData = {
     },
     {
       company: "technoPLUS IT",
-      location: "Adelaide, South Australia",
+      location: "Adelaide, South Australia (Remote)",
       role: "Full Stack Web Developer",
       date: "Sep 2024 - Mar 2025",
       promotions: [],
@@ -168,8 +168,10 @@ export const resumeData = {
       "Next.js",
       "PHP",
       "Laravel",
+      "Node.js",
       "Python",
     ],
+    databasesAndStorage: ["SQL", "Redis"],
     cloudAndPlatforms: [
       "AWS Lambda",
       "Route 53",

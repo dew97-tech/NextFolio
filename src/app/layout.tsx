@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     template: "%s | David Dew Mallick",
   },
   description:
-    "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
+    "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
   keywords: [
     "Software Engineer",
     "Next.js",
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
     url: "https://david-dew-mallick.vercel.app",
     title: "David Dew Mallick | Software Engineer",
     description:
-      "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
+      "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
     siteName: "David Dew Mallick",
     images: [
       {
@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "David Dew Mallick | Software Engineer",
     description:
-      "Software engineer in Dhaka, Bangladesh. Builds full-stack web applications with Next.js, Laravel, and AI-assisted automation.",
+      "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
     creator: "@dew97_tech",
     images: ["/og.png"],
   },

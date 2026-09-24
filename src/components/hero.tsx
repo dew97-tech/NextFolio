@@ -23,15 +23,14 @@ export function Hero() {
         </p>
 
         <p data-seq="3" className="mt-6 max-w-[54ch] text-ink-muted">
-          I build full-stack web applications with{" "}
+          I build{" "}
           <span className="highlight-marker hero-marker">
-            Next.js and Laravel
+            AI-driven SaaS
           </span>
-          , plus{" "}
+          {" "}backends and cloud systems with{" "}
           <span className="highlight-marker hero-marker-late">
-            AI-assisted automation
-          </span>{" "}
-          for content and SEO systems.
+            Laravel and AWS
+          </span>.
         </p>
 
         <div

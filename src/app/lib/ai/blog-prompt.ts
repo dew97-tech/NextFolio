@@ -26,7 +26,11 @@ function buildAuthorProfile(): string {
     .slice(0, 3)
     .join("; ");
 
-  const stack = [...skills.languagesAndFrameworks, "PostgreSQL", "Redis"].join(", ");
+  const stack = [
+    ...skills.languagesAndFrameworks,
+    ...skills.databasesAndStorage,
+    ...skills.cloudAndPlatforms,
+  ].join(", ");
 
   const papers = publications
     .map((paper) => `"${paper.title}" (${paper.publisher}, ${paper.date})`)
@@ -95,21 +99,21 @@ Return exactly one JSON object and nothing else. No markdown fences, no commenta
 SEO CONTRACT
 - Pick primaryKeyword and 4 secondaryKeywords from CANDIDATE KEYWORDS (use a close variant only if nothing fits).
 - secondaryKeywords must be specific sub-topics of the primaryKeyword, not generic category terms, and each must read naturally in the body.
-- primaryKeyword must appear: in the title (front-loaded), in the meta description, in the first 100 words, and in at least two H2 headings.
+- primaryKeyword must appear: in the title (front-loaded), in the meta description, in the first 100 words, and in at least one relevant H2 heading.
 - Mention the primary keyword 3-8 times across the whole article. Never keyword-stuff.
-- Each secondary keyword must appear at least twice naturally, or once inside an H2.
+- Use secondary keywords only where they fit naturally. Do not add a phrase just to satisfy a count.
 - Title: 50-60 characters, specific and click-worthy, no clickbait, no year unless the topic is version-specific.
 - Description: 150-160 characters, primary keyword + a concrete benefit.
 - Slug: 3-6 words derived from the primary keyword, lowercase, hyphenated.
 - H2s should be question- or task-based where it reads naturally.
-- Internal links: include at least 2. Link 2-3 RECENT POSTS above as "/blog/<slug>" only if genuinely related; otherwise link "/blog" and "/#projects". Never invent internal URLs.
+- Internal links: include 1-2 only when genuinely useful. Link a related recent post or a relevant portfolio page. Never add unrelated links to meet a count and never invent URLs.
 - External links: maximum 3, official docs only (laravel.com, php.net, postgresql.org, developer.mozilla.org, redis.io, docker.com).
 
 LENGTH AND DENSITY (CRITICAL)
-- Body must be 1,200-1,800 words. Never exceed 1,800.
+- Target 1,000-1,500 words. Go shorter when the subject is narrow; never pad a post to hit a word count.
 - Introduction: at most 100 words. State the concrete payoff immediately.
-- Each H2 section: at most 250 words.
-- FAQ: exactly 4 question/answer pairs, questions as <h3>, answers at most 50 words.
+- Keep sections focused and vary their length to match the material. Avoid repeating the same section pattern in every post.
+- Add an FAQ only when it answers real follow-up questions; use no more than 3 question/answer pairs, or omit it.
 - Every sentence must carry information. If a paragraph's first sentence only restates the heading, delete it.
 - Banned punctuation: never use an em dash or en dash, as characters or as HTML entities. Use a hyphen, a comma, a colon, or split the sentence.
 - Banned filler phrases: "in today's fast-paced world", "in this article", "delve into", "game-changer", "in the ever-evolving", "landscape", "moreover", "furthermore", "it's important to note", "when it comes to", "unlock the power", "revolutionize", "seamless", "robust", "elevate", "empower", "leverage", "journey", "deep dive", "in conclusion", "let's dive in".
@@ -123,14 +127,15 @@ HTML CONTRACT (MUST FOLLOW EXACTLY)
   * Table: <div class="table-wrapper"><table class="comparison-table">...</table></div>
   * Code: <pre class="code-snippet"><code>...</code></pre>
   * Standard: <p>, <h2>, <h3>, <h4>, <ul>, <ol>, <li>, <blockquote>, <strong>, <em>, <a>, <hr>, <code>, <table>.
-- Minimums: 2 tables, 3 code snippets, 2 pro-tips, 1 highlight-box.
+- Use code snippets when code is central to the explanation, and keep them runnable. Add a table or callout only when it makes a comparison or important caveat clearer. Do not insert components to satisfy a quota.
 - Escape angle brackets inside code blocks as &lt; and &gt;. Never place raw markup inside <code>.
 - Every <a> must have a real href.
 
 QUALITY BAR
 - Code must be real, syntactic, and runnable. Prefer stable, well-known APIs over version-sensitive claims. Never invent benchmarks, citations, or company case studies. No fabricated metrics.
+- Explain meaningful tradeoffs, failure modes, assumptions, and how a reader can verify the result. Cite official documentation for version-sensitive behavior.
 - Write to a professional engineer. Direct, technical, concise. No "as an AI", no knowledge-cutoff disclaimers.
-- At most one short first-person credibility cue, grounded strictly in the AUTHOR PROFILE. Never fabricate employers, clients, or numbers.`;
+- Do not imply David personally built, tested, or operated a system unless the AUTHOR PROFILE directly supports that claim. Never fabricate employers, clients, or numbers.`;
 
 export function buildBlogMessages({
   trends,
@@ -161,7 +166,7 @@ REQUIREMENTS
 - Choose a seed topic a working engineer would search for, and return it verbatim in the "topic" field.
 - Rotate categories relative to the most recent posts when a strong alternative signal exists.
 - Forbidden topics include anything AI/ML/LLM related, even if it appears in the signals above.
-- Before returning, verify: primaryKeyword appears in the title, the description, the first 100 words, and at least two H2 headings; primaryKeyword appears 3-8 times total; at least 3 secondaryKeywords appear in the body; at least 2 internal links are present; word count is 1,200-1,800; exactly 4 FAQ pairs; minimums for tables, code snippets, pro-tips, and highlight boxes are met.
+- Before returning, verify: primaryKeyword appears in the title, description, first 100 words, and at least one relevant H2; it appears 3-8 times without stuffing; at least two secondary keywords fit naturally; code and comparisons are accurate; word count is useful rather than padded; links are relevant and real.
 - Return the single JSON object now.`;
 
   return [

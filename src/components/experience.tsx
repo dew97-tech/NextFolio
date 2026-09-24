@@ -7,6 +7,7 @@ import {
 import { TypeLine } from "@/components/type-line";
 import { resumeData } from "@/data/resume";
 import { roleDuration, totalExperience } from "@/lib/experience";
+import Link from "next/link";
 
 export function Experience() {
   const total = totalExperience();
@@ -50,28 +51,24 @@ export function Experience() {
                     </p>
                   </div>
 
-                  <div className="max-w-[880px]">
-                    <p className="mt-1.5 text-base text-ink-muted">
-                      {job.role} · {job.location}
+                  <p className="mt-1.5 text-base text-ink-muted">
+                    {job.role} · {job.location}
+                  </p>
+
+                  {job.promotions.map((promotion) => (
+                    <p key={promotion.role} className="mt-1 text-sm text-ink-faint">
+                      Promoted from {promotion.role} ({promotion.date})
                     </p>
+                  ))}
 
-                    {job.promotions.map((promotion) => (
-                      <p key={promotion.role} className="mt-1 text-sm text-ink-faint">
-                        Promoted from {promotion.role} ({promotion.date})
-                      </p>
-                    ))}
-
-                    <ul className="row-seq mt-5 space-y-2.5">
-                      {job.projects.map((project) => (
-                        <li key={project.name} className="text-base leading-relaxed">
-                          <span className="font-medium text-foreground">
-                            {project.name}.
-                          </span>{" "}
-                          <span className="text-ink-muted">{project.description}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {job.company === "JB Connect Ltd." ? (
+                    <Link
+                      href="/work/bridgebooks"
+                      className="link-draw mt-4 inline-flex items-center gap-2 text-sm text-clay-text hover:text-ink-brown"
+                    >
+                      BridgeBooks case study <span aria-hidden="true">→</span>
+                    </Link>
+                  ) : null}
                 </article>
               </Reveal>
             );
