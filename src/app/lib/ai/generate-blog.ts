@@ -19,14 +19,19 @@ const MAX_TOTAL_GENERATION_MS = 215_000;
 const MIN_WORD_COUNT = 900;
 const MAX_WORD_COUNT = 2_600;
 const MAX_TITLE_SIMILARITY = 0.6;
+const MIN_TITLE_LENGTH = 25;
+const MAX_TITLE_LENGTH = 70;
+const MIN_DESCRIPTION_LENGTH = 70;
+const MAX_DESCRIPTION_LENGTH = 190;
+const REQUIRED_SECONDARY_KEYWORDS = 4;
 
 const DraftSchema = z.object({
-  title: z.string().min(10).max(140),
+  title: z.string().min(5).max(200),
   slug: z.string().min(3).max(160),
-  description: z.string().min(40).max(240),
+  description: z.string().min(30).max(300),
   topic: z.string().min(3).max(240),
   primaryKeyword: z.string().min(2).max(100),
-  secondaryKeywords: z.array(z.string()).min(2).max(6),
+  secondaryKeywords: z.array(z.string()).min(1).max(8),
   readTime: z.string().max(40).optional(),
   tags: z.array(z.string()).min(1).max(8).optional(),
   html: z.string().min(500),
@@ -148,16 +153,6 @@ function titleSimilarity(a: string, b: string): number {
   return intersection / (tokensA.size + tokensB.size - intersection);
 }
 
-function countOccurrences(haystack: string, needle: string): number {
-  if (!needle) return 0;
-  return haystack.split(needle).length - 1;
-}
-
-function extractH2Text(html: string): string[] {
-  const matches = html.match(/<h2[^>]*>([\s\S]*?)<\/h2>/gi) ?? [];
-  return matches.map((block) => block.replace(/<[^>]+>/g, " "));
-}
-
 const EM_DASH = String.fromCharCode(0x2014);
 const EN_DASH = String.fromCharCode(0x2013);
 
@@ -220,10 +215,28 @@ function sanitizeGeneratedHtml(html: string): string {
   return normalizeDashes(clean);
 }
 
+function clampDescription(value: string, max = 158): string {
+  const text = value.trim();
+  if (text.length <= max) return text;
+
+  const cut = text.slice(0, max);
+  const sentenceEnd = Math.max(
+    cut.lastIndexOf(". "),
+    cut.lastIndexOf("! "),
+    cut.lastIndexOf("? "),
+  );
+
+  if (sentenceEnd >= 60) return cut.slice(0, sentenceEnd + 1).trim();
+
+  const wordEnd = cut.lastIndexOf(" ");
+  return (wordEnd > 0 ? cut.slice(0, wordEnd) : cut).trim();
+}
+
 function validateDraft(
   raw: unknown,
   existingTitles: string[],
   usedKeywords: Set<string>,
+  publishedSlugs: Set<string>,
 ): ValidatedDraft {
   const parsed = DraftSchema.parse(raw);
   const normalizedTitle = normalizeDashes(parsed.title);
@@ -238,6 +251,24 @@ function validateDraft(
 
   if (wordCount > MAX_WORD_COUNT) {
     throw new Error(`Generated article exceeds the concise limit (${wordCount} words)`);
+  }
+
+  if (
+    normalizedTitle.length < MIN_TITLE_LENGTH ||
+    normalizedTitle.length > MAX_TITLE_LENGTH
+  ) {
+    throw new Error(
+      `Title is ${normalizedTitle.length} characters; the page appends " | David Dew Mallick", so keep it between ${MIN_TITLE_LENGTH} and ${MAX_TITLE_LENGTH}`,
+    );
+  }
+
+  if (
+    normalizedDescription.length < MIN_DESCRIPTION_LENGTH ||
+    normalizedDescription.length > MAX_DESCRIPTION_LENGTH
+  ) {
+    throw new Error(
+      `Meta description is ${normalizedDescription.length} characters; write one or two complete sentences between 120 and 155`,
+    );
   }
 
   const bannedText = `${normalizedTitle} ${normalizedDescription} ${
@@ -257,26 +288,10 @@ function validateDraft(
     throw new Error(`Primary keyword "${primaryKeyword}" is missing from the title`);
   }
 
-  if (!slugify(normalizedDescription).includes(primarySlug)) {
-    throw new Error(
-      `Primary keyword "${primaryKeyword}" is missing from the meta description`,
-    );
-  }
-
   const bodyText = stripHtml(html).toLowerCase();
-  const primaryOccurrences = countOccurrences(bodyText, primaryKeyword);
-  if (primaryOccurrences < 2) {
+  if (!bodyText.includes(primaryKeyword)) {
     throw new Error(
-      `Primary keyword "${primaryKeyword}" appears only ${primaryOccurrences} time(s); include it 3-8 times`,
-    );
-  }
-
-  const h2Hits = extractH2Text(html).filter((heading) =>
-    slugify(heading).includes(primarySlug),
-  ).length;
-  if (h2Hits < 1) {
-    throw new Error(
-      `Primary keyword "${primaryKeyword}" must appear in at least one H2 heading`,
+      `Primary keyword "${primaryKeyword}" never appears in the article body`,
     );
   }
 
@@ -286,22 +301,38 @@ function validateDraft(
         .map((keyword) => keyword.trim().toLowerCase().replace(/\s+/g, " "))
         .filter(Boolean),
     ),
-  ).slice(0, 4);
+  );
+
+  if (secondaryKeywords.length !== REQUIRED_SECONDARY_KEYWORDS) {
+    throw new Error(
+      `Expected ${REQUIRED_SECONDARY_KEYWORDS} distinct secondary keywords, received ${secondaryKeywords.length}`,
+    );
+  }
 
   const secondaryHits = secondaryKeywords.filter((keyword) =>
     bodyText.includes(keyword),
   ).length;
-  const requiredSecondaryHits = Math.min(2, secondaryKeywords.length);
-  if (secondaryHits < requiredSecondaryHits) {
+  if (secondaryHits < 1) {
     throw new Error(
-      `Only ${secondaryHits} of ${secondaryKeywords.length} secondary keywords appear in the article; use at least ${requiredSecondaryHits}`,
+      "None of the secondary keywords appear in the article; work at least one into the body where it fits",
+    );
+  }
+
+  const linkTargets = Array.from(
+    html.matchAll(/href="\/blog\/([a-z0-9-]+)"/g),
+    (match) => match[1],
+  );
+  const unpublishedLink = linkTargets.find((slug) => !publishedSlugs.has(slug));
+  if (unpublishedLink) {
+    throw new Error(
+      `Internal link "/blog/${unpublishedLink}" does not point to a published post`,
     );
   }
 
   const internalLinkCount = (html.match(/href="\/(?:#|blog)/g) ?? []).length;
   if (internalLinkCount < 1) {
     throw new Error(
-      'Add at least one internal link to "/blog" or "/#projects"',
+      'Add at least one internal link to a published post or "/#projects"',
     );
   }
 
@@ -324,7 +355,7 @@ function validateDraft(
   return {
     title: normalizedTitle.trim(),
     slug,
-    description: normalizedDescription.trim().slice(0, 160),
+    description: clampDescription(normalizedDescription),
     topic: normalizedTopic.trim(),
     primaryKeyword,
     secondaryKeywords,
@@ -359,6 +390,7 @@ async function generateForModel(
   sessionId: string,
   existingTitles: string[],
   usedKeywords: Set<string>,
+  publishedSlugs: Set<string>,
   deadline: number,
 ): Promise<{ draft: ValidatedDraft; result: ChatCompletionResult }> {
   let attemptMessages = messages;
@@ -383,6 +415,7 @@ async function generateForModel(
         extractJsonObject(result.content),
         existingTitles,
         usedKeywords,
+        publishedSlugs,
       );
       return { draft, result };
     } catch (error) {
@@ -453,12 +486,19 @@ export async function runBlogGeneration(
   });
 
   try {
-    const [liveTrends, recentPosts, usedRuns] = await Promise.all([
+    const [liveTrends, recentPosts, usedRuns, publishedPosts] = await Promise.all([
       fetchTrends().catch(() => [] as TrendItem[]),
       prisma.post.findMany({
         orderBy: { date: "desc" },
         take: 50,
-        select: { title: true, slug: true, tags: true, topic: true, keywords: true },
+        select: {
+          title: true,
+          slug: true,
+          tags: true,
+          topic: true,
+          keywords: true,
+          published: true,
+        },
       }),
       prisma.generationRun.findMany({
         where: { status: "success", topic: { not: null } },
@@ -466,7 +506,13 @@ export async function runBlogGeneration(
         take: 30,
         select: { topic: true },
       }),
+      prisma.post.findMany({
+        where: { published: true },
+        select: { slug: true },
+      }),
     ]);
+
+    const publishedSlugs = new Set(publishedPosts.map((post) => post.slug));
 
     const recentTitles = new Set(recentPosts.map((post) => normalizeTitle(post.title)));
     const recentTopics = new Set(
@@ -526,6 +572,7 @@ export async function runBlogGeneration(
           sessionId,
           existingTitles,
           usedKeywords,
+          publishedSlugs,
           startedAt + MAX_TOTAL_GENERATION_MS,
         );
 
