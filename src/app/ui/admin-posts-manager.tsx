@@ -24,7 +24,6 @@ interface PostItem {
   topic?: string | null;
   keywords?: string[];
   indexedAt?: string | null;
-  indexStatus?: string | null;
 }
 
 export default function AdminPostsManager({
@@ -271,7 +270,6 @@ export default function AdminPostsManager({
                           <IndexPostButton
                             postId={post.id}
                             indexedAt={post.indexedAt}
-                            indexStatus={post.indexStatus}
                           />
                         )}
 
