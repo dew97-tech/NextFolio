@@ -1,6 +1,7 @@
 "use client";
 
 import DeletePostButton from "@/app/ui/delete-post-button";
+import GeneratePostButton from "@/app/ui/generate-post-button";
 import IndexPostButton from "@/app/ui/index-post-button";
 import { cn } from "@/lib/utils";
 import { Eye, MagnifyingGlass, PencilSimple, Plus } from "@phosphor-icons/react";
@@ -28,8 +29,10 @@ interface PostItem {
 
 export default function AdminPostsManager({
   initialPosts,
+  maxAutoDrafts,
 }: {
   initialPosts: PostItem[];
+  maxAutoDrafts: number;
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
@@ -39,6 +42,8 @@ export default function AdminPostsManager({
       total: initialPosts.length,
       published: initialPosts.filter((p) => p.published).length,
       drafts: initialPosts.filter((p) => !p.published).length,
+      aiDrafts: initialPosts.filter((p) => !p.published && p.source === "ai")
+        .length,
     };
   }, [initialPosts]);
 
@@ -75,15 +80,24 @@ export default function AdminPostsManager({
             {stats.total} total, {stats.published} published, {stats.drafts}{" "}
             drafts.
           </p>
+          <p className="mt-1 text-[13px] text-ink-faint">
+            {stats.aiDrafts >= maxAutoDrafts
+              ? "Daily generation is paused until an AI draft is published or deleted."
+              : `AI draft slots used: ${stats.aiDrafts} of ${maxAutoDrafts}.`}
+          </p>
         </div>
 
-        <Link
-          href="/admin/new"
-          className="inline-flex h-11 items-center gap-1.5 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-[var(--clay-deep-hover)] active:scale-[0.98]"
-        >
-          <Plus size={14} aria-hidden="true" />
-          <span>New post</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <GeneratePostButton />
+
+          <Link
+            href="/admin/new"
+            className="inline-flex h-11 items-center gap-1.5 rounded bg-primary px-4 text-sm font-medium text-primary-foreground transition-[background-color,transform] hover:bg-[var(--clay-deep-hover)] active:scale-[0.98]"
+          >
+            <Plus size={14} aria-hidden="true" />
+            <span>New post</span>
+          </Link>
+        </div>
       </div>
 
       <div className="border-t border-border">

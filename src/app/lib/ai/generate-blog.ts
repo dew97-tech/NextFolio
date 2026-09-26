@@ -13,7 +13,6 @@ import {
 import { CURATED_TOPICS, fetchTrends, isBannedTopic, type TrendItem } from "./trends";
 
 export const MAX_AUTO_DRAFTS = 3;
-export const GENERATION_INTERVAL_HOURS = 140;
 const RUNNING_LOCK_MINUTES = 15;
 
 const MAX_TOTAL_GENERATION_MS = 215_000;
@@ -48,7 +47,7 @@ interface ValidatedDraft {
 export type GenerationResult =
   | {
       status: "skipped";
-      reason: "interval" | "draft_cap" | "already_running";
+      reason: "draft_cap" | "already_running";
       detail: string;
       drafts?: number;
     }
@@ -407,7 +406,9 @@ async function generateForModel(
   throw lastError instanceof Error ? lastError : new Error("Unknown model error");
 }
 
-export async function runBlogGeneration(): Promise<GenerationResult> {
+export async function runBlogGeneration(
+  options: { force?: boolean } = {},
+): Promise<GenerationResult> {
   const startedAt = Date.now();
   const sessionId = `portfolio-blog-${new Date().toISOString()}`;
 
@@ -427,39 +428,11 @@ export async function runBlogGeneration(): Promise<GenerationResult> {
     };
   }
 
-  const lastSuccess = await prisma.generationRun.findFirst({
-    where: { status: "success" },
-    orderBy: { startedAt: "desc" },
-    select: { startedAt: true },
-  });
-
-  if (
-    lastSuccess &&
-    Date.now() - lastSuccess.startedAt.getTime() <
-      GENERATION_INTERVAL_HOURS * 60 * 60 * 1000
-  ) {
-    const hoursAgo = Math.floor(
-      (Date.now() - lastSuccess.startedAt.getTime()) / (60 * 60 * 1000),
-    );
-    await prisma.generationRun.create({
-      data: {
-        status: "skipped_interval",
-        finishedAt: new Date(),
-        error: `Last successful generation was ${hoursAgo}h ago`,
-      },
-    });
-    return {
-      status: "skipped",
-      reason: "interval",
-      detail: `Last successful generation was ${hoursAgo}h ago; runs every ${GENERATION_INTERVAL_HOURS}h`,
-    };
-  }
-
   const draftCount = await prisma.post.count({
     where: { published: false, source: "ai" },
   });
 
-  if (draftCount >= MAX_AUTO_DRAFTS) {
+  if (!options.force && draftCount >= MAX_AUTO_DRAFTS) {
     await prisma.generationRun.create({
       data: {
         status: "skipped_cap",

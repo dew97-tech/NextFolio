@@ -1,7 +1,9 @@
+import { MAX_AUTO_DRAFTS } from "@/app/lib/ai/generate-blog";
 import prisma from "@/app/lib/prisma";
 import AdminPostsManager from "@/app/ui/admin-posts-manager";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 export default async function AdminPage() {
   const posts = await prisma.post.findMany({
@@ -28,6 +30,7 @@ export default async function AdminPage() {
   return (
     <div className="w-full">
       <AdminPostsManager
+        maxAutoDrafts={MAX_AUTO_DRAFTS}
         initialPosts={posts.map((p) => ({
           id: p.id,
           slug: p.slug,

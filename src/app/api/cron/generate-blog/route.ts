@@ -19,16 +19,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const force = request.nextUrl.searchParams.get("force") === "1";
+
   try {
-    const result = await runBlogGeneration();
+    const result = await runBlogGeneration({ force });
 
     if (result.status === "skipped" && result.reason === "already_running") {
       return NextResponse.json(result, { status: 409 });
     }
 
-    return NextResponse.json(result, {
-      status: result.status === "failed" ? 500 : 200,
-    });
+    return NextResponse.json(
+      { ...result, ...(force && { forced: true }) },
+      { status: result.status === "failed" ? 500 : 200 },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown cron error";
     return NextResponse.json({ status: "failed", error: message }, { status: 500 });

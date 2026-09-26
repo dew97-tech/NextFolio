@@ -1,5 +1,6 @@
 "use server";
 
+import { runBlogGeneration } from "@/app/lib/ai/generate-blog";
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/auth";
 import { deleteBlobIfUnused } from "@/app/lib/blob";
@@ -278,4 +279,36 @@ export async function deletePost(id: string) {
   } catch (error) {
     console.error("Failed to delete post:", error);
   }
+}
+
+export interface GenerationActionState {
+  status: "success" | "skipped" | "failed";
+  message: string;
+}
+
+export async function triggerGeneration(
+  _prevState: GenerationActionState | null,
+  _formData: FormData,
+): Promise<GenerationActionState> {
+  const session = await auth();
+  if (!session?.user) {
+    return { status: "failed", message: "Unauthorized" };
+  }
+
+  const result = await runBlogGeneration({ force: true });
+
+  revalidatePostSurfaces();
+
+  if (result.status === "success") {
+    return {
+      status: "success",
+      message: `Draft created: ${result.slug} (${result.wordCount} words)`,
+    };
+  }
+
+  if (result.status === "skipped") {
+    return { status: "skipped", message: result.detail };
+  }
+
+  return { status: "failed", message: result.error.slice(0, 240) };
 }
