@@ -68,6 +68,7 @@ model Post {
   content     String    @db.Text
   published   Boolean   @default(false)
   date        DateTime  @default(now())
+  publishedAt DateTime?
   readTime    String
   tags        String[]
   thumbnail   String?
@@ -81,7 +82,7 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  @@index([published, date(sort: Desc)])
+  @@index([published, publishedAt(sort: Desc)])
 }
 
 model GenerationRun {

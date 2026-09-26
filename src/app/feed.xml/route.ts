@@ -1,4 +1,5 @@
 import prisma from "@/app/lib/prisma";
+import { publishedDate } from "@/app/lib/post-dates";
 import { getSiteUrl } from "@/app/lib/site";
 
 export const revalidate = 3600;
@@ -17,13 +18,14 @@ export async function GET() {
 
   const posts = await prisma.post.findMany({
     where: { published: true },
-    orderBy: { date: "desc" },
+    orderBy: [{ publishedAt: { sort: "desc", nulls: "last" } }, { date: "desc" }],
     take: 20,
     select: {
       title: true,
       slug: true,
       description: true,
       date: true,
+      publishedAt: true,
     },
   });
 
@@ -36,7 +38,7 @@ export async function GET() {
       <link>${url}</link>
       <guid isPermaLink="true">${url}</guid>
       <description>${escapeXml(post.description)}</description>
-      <pubDate>${post.date.toUTCString()}</pubDate>
+      <pubDate>${publishedDate(post).toUTCString()}</pubDate>
     </item>`;
     })
     .join("\n");

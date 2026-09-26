@@ -119,6 +119,7 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
         tags: tagsArray,
         thumbnail,
         published,
+        publishedAt: published ? new Date() : null,
       },
     });
   } catch (error) {
@@ -173,7 +174,7 @@ export async function updatePost(
 
   const previous = await prisma.post.findUnique({
     where: { id },
-    select: { slug: true, thumbnail: true },
+    select: { slug: true, thumbnail: true, publishedAt: true },
   });
 
   if (!previous) {
@@ -192,6 +193,9 @@ export async function updatePost(
         tags: tagsArray,
         thumbnail,
         published,
+        ...(published && !previous.publishedAt
+          ? { publishedAt: new Date() }
+          : {}),
       },
     });
   } catch (error) {

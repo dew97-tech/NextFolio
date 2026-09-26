@@ -1,4 +1,5 @@
 import prisma from "@/app/lib/prisma";
+import { publishedDate } from "@/app/lib/post-dates";
 import BlogPagination from "@/app/ui/blog-pagination";
 import BlogSearch from "@/app/ui/blog-search";
 import { Metadata } from "next";
@@ -6,14 +7,40 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
-export const metadata: Metadata = {
-  title: "Blog",
-  description:
-    "Notes on building web applications: Next.js, Laravel, databases, and the automation around them.",
-  alternates: {
-    canonical: "/blog",
-  },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+  }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const query = params?.query?.trim() ?? "";
+  const page = Math.max(1, Number(params?.page) || 1);
+
+  const title = query
+    ? `Search: ${query}`
+    : page > 1
+      ? `Blog, page ${page}`
+      : "Blog";
+
+  const canonical = query
+    ? `/blog?query=${encodeURIComponent(query)}`
+    : page > 1
+      ? `/blog?page=${page}`
+      : "/blog";
+
+  return {
+    title,
+    description:
+      "Notes on building web applications: Next.js, Laravel, databases, and the automation around them.",
+    alternates: {
+      canonical,
+    },
+    ...(query ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 const POSTS_PER_PAGE = 6;
 
@@ -45,7 +72,7 @@ export default async function BlogPage({
 
   const posts = await prisma.post.findMany({
     where,
-    orderBy: { date: "desc" },
+    orderBy: [{ publishedAt: { sort: "desc", nulls: "last" } }, { date: "desc" }],
     skip: (currentPage - 1) * POSTS_PER_PAGE,
     take: POSTS_PER_PAGE,
     select: {
@@ -54,6 +81,7 @@ export default async function BlogPage({
       title: true,
       description: true,
       date: true,
+      publishedAt: true,
       readTime: true,
       tags: true,
       thumbnail: true,
@@ -115,8 +143,8 @@ export default async function BlogPage({
                 <div className="grid gap-4 md:grid-cols-12 md:gap-8">
                   <div className="md:col-span-3">
                     <p className="font-mono text-sm tabular-nums text-ink-faint">
-                      <time dateTime={post.date.toISOString()}>
-                        {new Date(post.date).toLocaleDateString("en-US", {
+                      <time dateTime={publishedDate(post).toISOString()}>
+                        {publishedDate(post).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "short",
                           day: "numeric",

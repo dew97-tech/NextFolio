@@ -1,4 +1,5 @@
 import prisma from "@/app/lib/prisma";
+import { publishedDate } from "@/app/lib/post-dates";
 import { getSiteUrl } from "@/app/lib/site";
 import BlogReadingProgress from "@/app/ui/blog-reading-progress";
 import { resumeData } from "@/data/resume";
@@ -52,7 +53,7 @@ export async function generateMetadata({
       description: post.description,
       type: "article",
       url: `/blog/${slug}`,
-      publishedTime: post.date.toISOString(),
+      publishedTime: publishedDate(post).toISOString(),
       authors: ["David Dew Mallick"],
       images: post.thumbnail
         ? [{ url: post.thumbnail }]
@@ -86,13 +87,14 @@ export default async function BlogPostPage({
       slug: { not: slug },
     },
     take: 2,
-    orderBy: { date: "desc" },
+    orderBy: [{ publishedAt: { sort: "desc", nulls: "last" } }, { date: "desc" }],
     select: {
       id: true,
       slug: true,
       title: true,
       description: true,
       date: true,
+      publishedAt: true,
       readTime: true,
       thumbnail: true,
       tags: true,
@@ -111,7 +113,7 @@ export default async function BlogPostPage({
       name: "David Dew Mallick",
       url: siteUrl,
     },
-    datePublished: post.date.toISOString(),
+    datePublished: publishedDate(post).toISOString(),
     image: post.thumbnail || `${siteUrl}/og.png`,
   };
 
@@ -155,8 +157,8 @@ export default async function BlogPostPage({
 
           <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
             <p className="font-mono text-sm tabular-nums text-ink-faint">
-              <time dateTime={post.date.toISOString()}>
-                {new Date(post.date).toLocaleDateString("en-US", {
+              <time dateTime={publishedDate(post).toISOString()}>
+                {publishedDate(post).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "short",
                   day: "numeric",
@@ -240,7 +242,7 @@ export default async function BlogPostPage({
                     className="group block py-5"
                   >
                     <p className="font-mono text-sm tabular-nums text-ink-faint">
-                      {new Date(related.date).toLocaleDateString("en-US", {
+                      {publishedDate(related).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
