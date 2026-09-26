@@ -25,6 +25,25 @@ const MIN_DESCRIPTION_LENGTH = 70;
 const MAX_DESCRIPTION_LENGTH = 190;
 const REQUIRED_SECONDARY_KEYWORDS = 4;
 
+const BANNED_PHRASES = [
+  "in today's fast-paced",
+  "in this article",
+  "delve into",
+  "game-changer",
+  "in the ever-evolving",
+  "unlock the power",
+  "revolutionize",
+  "deep dive",
+  "in conclusion",
+  "let's dive in",
+  "it's important to note",
+];
+
+function findBannedPhrase(text: string): string | undefined {
+  const normalized = text.toLowerCase();
+  return BANNED_PHRASES.find((phrase) => normalized.includes(phrase));
+}
+
 const DraftSchema = z.object({
   title: z.string().min(5).max(200),
   slug: z.string().min(3).max(160),
@@ -268,6 +287,13 @@ function validateDraft(
   ) {
     throw new Error(
       `Meta description is ${normalizedDescription.length} characters; write one or two complete sentences between 120 and 155`,
+    );
+  }
+
+  const bannedPhrase = findBannedPhrase(`${normalizedTitle} ${normalizedDescription}`);
+  if (bannedPhrase) {
+    throw new Error(
+      `Title or description uses the banned filler phrase "${bannedPhrase}"; replace it with a specific claim`,
     );
   }
 
