@@ -24,6 +24,14 @@ export function getGscProperty(): string {
   return property;
 }
 
+export function isIndexingConfigured(): boolean {
+  return Boolean(
+    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL &&
+      process.env.GOOGLE_PRIVATE_KEY &&
+      process.env.GSC_PROPERTY,
+  );
+}
+
 export function getPublishedPostUrl(slug: string): string {
   return `${getSiteUrl()}/blog/${slug}`;
 }

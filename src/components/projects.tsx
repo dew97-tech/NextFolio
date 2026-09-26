@@ -26,7 +26,10 @@ const otherProjects = projects.filter(
 
 export function Projects() {
   return (
-    <section id="projects" className="band-paper section-rule">
+    <section
+      id="projects"
+      className="band-paper section-rule scroll-mt-20 md:scroll-mt-24"
+    >
       <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
         <SectionFolio index={1} />
         <RuleCross />

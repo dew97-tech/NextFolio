@@ -2,6 +2,12 @@
 
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/auth";
+import { deleteBlobIfUnused } from "@/app/lib/blob";
+import {
+  getPublishedPostUrl,
+  isIndexingConfigured,
+  publishUrlNotification,
+} from "@/app/lib/google/indexing";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -67,6 +73,21 @@ function revalidatePostSurfaces(...slugs: string[]) {
   }
 }
 
+async function submitPostForIndexing(postId: string, slug: string) {
+  try {
+    await publishUrlNotification(getPublishedPostUrl(slug));
+    await prisma.post.update({
+      where: { id: postId },
+      data: { indexedAt: new Date(), indexStatus: "submitted" },
+    });
+  } catch (error) {
+    console.error("Automatic indexing request failed:", error);
+    await prisma.post
+      .update({ where: { id: postId }, data: { indexStatus: "error" } })
+      .catch(() => undefined);
+  }
+}
+
 export async function createPost(prevState: PostFormState, formData: FormData) {
   const session = await auth();
   if (!session?.user) {
@@ -111,8 +132,10 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
     };
   }
 
+  let createdPost: { id: string; slug: string } | null = null;
+
   try {
-    await prisma.post.create({
+    createdPost = await prisma.post.create({
       data: {
         title: normalizeDashes(title),
         slug,
@@ -123,6 +146,7 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
         thumbnail,
         published,
       },
+      select: { id: true, slug: true },
     });
   } catch (error) {
     if (isUniqueConstraintError(error)) {
@@ -132,6 +156,10 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
       };
     }
     return { message: "Database Error: Failed to Create Post." };
+  }
+
+  if (published && createdPost && isIndexingConfigured()) {
+    await submitPostForIndexing(createdPost.id, createdPost.slug);
   }
 
   revalidatePostSurfaces(slug);
@@ -174,9 +202,16 @@ export async function updatePost(
     .map((tag) => normalizeDashes(tag.trim()))
     .filter(Boolean);
 
+  // One read of the current row supplies the old slug (for revalidation), the
+  // previous thumbnail (blob cleanup) and the prior publish/index state.
   const previous = await prisma.post.findUnique({
     where: { id },
-    select: { slug: true },
+    select: {
+      slug: true,
+      thumbnail: true,
+      published: true,
+      indexStatus: true,
+    },
   });
 
   if (!previous) {
@@ -207,6 +242,22 @@ export async function updatePost(
     return { message: "Database Error: Failed to Update Post." };
   }
 
+  if (
+    typeof thumbnail === "string" &&
+    previous.thumbnail &&
+    previous.thumbnail !== thumbnail
+  ) {
+    await deleteBlobIfUnused(previous.thumbnail);
+  }
+
+  if (
+    published &&
+    isIndexingConfigured() &&
+    (previous.indexStatus !== "submitted" || !previous.published)
+  ) {
+    await submitPostForIndexing(id, slug);
+  }
+
   // Revalidate both the old and the new slug: a renamed post must not leave a
   // stale page behind at its previous URL.
   revalidatePostSurfaces(previous.slug, slug);
@@ -221,7 +272,7 @@ export async function deletePost(id: string) {
 
   const existing = await prisma.post.findUnique({
     where: { id },
-    select: { slug: true },
+    select: { slug: true, thumbnail: true },
   });
 
   if (!existing) {
@@ -232,6 +283,11 @@ export async function deletePost(id: string) {
     await prisma.post.delete({
       where: { id },
     });
+
+    if (existing.thumbnail) {
+      await deleteBlobIfUnused(existing.thumbnail);
+    }
+
     revalidatePostSurfaces(existing.slug);
   } catch (error) {
     console.error("Failed to delete post:", error);

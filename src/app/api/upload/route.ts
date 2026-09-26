@@ -28,6 +28,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         return {
           allowedContentTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+          maximumSizeInBytes: 10 * 1024 * 1024,
+          addRandomSuffix: true,
           tokenPayload: JSON.stringify({
             userId: session.user.email,
           }),

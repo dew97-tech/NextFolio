@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "Blog",
   description:
     "Notes on building web applications: Next.js, Laravel, databases, and the automation around them.",
+  alternates: {
+    canonical: "/blog",
+  },
 };
 
 const POSTS_PER_PAGE = 6;

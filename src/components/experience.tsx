@@ -15,7 +15,7 @@ export function Experience() {
   return (
     <section
       id="experience"
-      className="band-surface section-rule"
+      className="band-surface section-rule scroll-mt-20 md:scroll-mt-24"
     >
       <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
         <SectionFolio index={2} />

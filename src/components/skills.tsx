@@ -20,7 +20,7 @@ export function Skills() {
   return (
     <section
       id="skills"
-      className="band-paper section-rule"
+      className="band-paper section-rule scroll-mt-20 md:scroll-mt-24"
     >
       <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
         <SectionFolio index={3} />

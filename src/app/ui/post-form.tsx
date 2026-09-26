@@ -1,6 +1,7 @@
 "use client";
 
 import { createPost, updatePost } from "@/app/lib/admin-actions";
+import { discardUploadedBlob } from "@/app/lib/blob-actions";
 import { upload } from "@vercel/blob/client";
 import {
   ArrowSquareOut,
@@ -86,6 +87,7 @@ export default function PostForm({ post }: { post?: EditablePost }) {
     if (!event.target.files || event.target.files.length === 0) return;
 
     const file = event.target.files[0];
+    const previousUrl = thumbnailUrl;
     setIsUploading(true);
     setUploadError("");
 
@@ -95,10 +97,24 @@ export default function PostForm({ post }: { post?: EditablePost }) {
         handleUploadUrl: "/api/upload",
       });
       setThumbnailUrl(newBlob.url);
-    } catch {
-      setUploadError("Upload failed. Paste an image URL instead.");
+      if (previousUrl && previousUrl !== newBlob.url) {
+        discardUploadedBlob(previousUrl).catch(() => undefined);
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+      const message = error instanceof Error ? error.message : "Upload failed";
+      setUploadError(`${message}. Paste an image URL instead.`);
     } finally {
       setIsUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleRemoveThumbnail = () => {
+    const removedUrl = thumbnailUrl;
+    setThumbnailUrl("");
+    if (removedUrl) {
+      discardUploadedBlob(removedUrl).catch(() => undefined);
     }
   };
 
@@ -281,7 +297,7 @@ export default function PostForm({ post }: { post?: EditablePost }) {
                   />
                   <button
                     type="button"
-                    onClick={() => setThumbnailUrl("")}
+                    onClick={handleRemoveThumbnail}
                     aria-label="Remove image"
                     className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded border border-border bg-background text-ink-muted transition-colors hover:border-destructive/40 hover:text-destructive"
                   >
@@ -333,7 +349,7 @@ export default function PostForm({ post }: { post?: EditablePost }) {
                     type="file"
                     ref={inputFileRef}
                     onChange={handleImageUpload}
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
                     className="sr-only"
                   />
                 </div>

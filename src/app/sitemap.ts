@@ -6,19 +6,9 @@ export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
-  const posts = await prisma.post.findMany({
-    where: { published: true },
-    select: { slug: true, date: true },
-  });
 
-  const blogEntries = posts.map((post) => ({
-    url: `${siteUrl}/blog/${post.slug}`,
-    lastModified: post.date,
-    changeFrequency: "monthly" as const,
-    priority: 0.8,
-  }));
-
-  return [
+  // Served only when the database is unreachable: static routes, no posts.
+  const staticEntries: MetadataRoute.Sitemap = [
     {
       url: siteUrl,
       lastModified: new Date(),
@@ -26,11 +16,58 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
+      url: `${siteUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
       url: `${siteUrl}/work/bridgebooks`,
       lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 0.9,
     },
-    ...blogEntries,
   ];
+
+  try {
+    const posts = await prisma.post.findMany({
+      where: { published: true },
+      orderBy: { date: "desc" },
+      select: { slug: true, updatedAt: true },
+    });
+
+    const blogEntries = posts.map((post) => ({
+      url: `${siteUrl}/blog/${post.slug}`,
+      lastModified: post.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }));
+
+    const newestUpdate = posts[0]?.updatedAt ?? new Date();
+
+    return [
+      {
+        url: siteUrl,
+        lastModified: newestUpdate,
+        changeFrequency: "monthly",
+        priority: 1,
+      },
+      {
+        url: `${siteUrl}/blog`,
+        lastModified: newestUpdate,
+        changeFrequency: "weekly",
+        priority: 0.9,
+      },
+      {
+        url: `${siteUrl}/work/bridgebooks`,
+        lastModified: newestUpdate,
+        changeFrequency: "yearly",
+        priority: 0.9,
+      },
+      ...blogEntries,
+    ];
+  } catch (error) {
+    console.error("Failed to fetch posts for sitemap, serving static routes only:", error);
+    return staticEntries;
+  }
 }
