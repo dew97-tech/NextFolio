@@ -1,4 +1,4 @@
-import { MAX_AUTO_DRAFTS } from "@/app/lib/ai/generate-blog";
+import { MAX_AUTO_DRAFTS } from "@/app/lib/ai/constants";
 import prisma from "@/app/lib/prisma";
 import AdminPostsManager from "@/app/ui/admin-posts-manager";
 

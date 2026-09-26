@@ -2,6 +2,7 @@ import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 import prisma from "@/app/lib/prisma";
 import { buildBlogMessages } from "./blog-prompt";
+import { MAX_AUTO_DRAFTS } from "./constants";
 import { buildKeywordCandidates } from "./keywords";
 import {
   chatCompletion,
@@ -12,7 +13,6 @@ import {
 } from "./opencode-go";
 import { CURATED_TOPICS, fetchTrends, isBannedTopic, type TrendItem } from "./trends";
 
-export const MAX_AUTO_DRAFTS = 3;
 const RUNNING_LOCK_MINUTES = 15;
 
 const MAX_TOTAL_GENERATION_MS = 215_000;
