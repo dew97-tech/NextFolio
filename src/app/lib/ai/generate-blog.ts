@@ -1,5 +1,6 @@
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
+import { fetchSearchQueries } from "@/app/lib/google/search-console";
 import prisma from "@/app/lib/prisma";
 import { buildBlogMessages } from "./blog-prompt";
 import { MAX_AUTO_DRAFTS } from "./constants";
@@ -512,31 +513,33 @@ export async function runBlogGeneration(
   });
 
   try {
-    const [liveTrends, recentPosts, usedRuns, publishedPosts] = await Promise.all([
-      fetchTrends().catch(() => [] as TrendItem[]),
-      prisma.post.findMany({
-        orderBy: { date: "desc" },
-        take: 50,
-        select: {
-          title: true,
-          slug: true,
-          tags: true,
-          topic: true,
-          keywords: true,
-          published: true,
-        },
-      }),
-      prisma.generationRun.findMany({
-        where: { status: "success", topic: { not: null } },
-        orderBy: { startedAt: "desc" },
-        take: 30,
-        select: { topic: true },
-      }),
-      prisma.post.findMany({
-        where: { published: true },
-        select: { slug: true },
-      }),
-    ]);
+    const [liveTrends, recentPosts, usedRuns, publishedPosts, searchQueries] =
+      await Promise.all([
+        fetchTrends().catch(() => [] as TrendItem[]),
+        prisma.post.findMany({
+          orderBy: { date: "desc" },
+          take: 50,
+          select: {
+            title: true,
+            slug: true,
+            tags: true,
+            topic: true,
+            keywords: true,
+            published: true,
+          },
+        }),
+        prisma.generationRun.findMany({
+          where: { status: "success", topic: { not: null } },
+          orderBy: { startedAt: "desc" },
+          take: 30,
+          select: { topic: true },
+        }),
+        prisma.post.findMany({
+          where: { published: true },
+          select: { slug: true },
+        }),
+        fetchSearchQueries().catch(() => []),
+      ]);
 
     const publishedSlugs = new Set(publishedPosts.map((post) => post.slug));
 
@@ -572,6 +575,7 @@ export async function runBlogGeneration(
       today: new Date(),
       keywordCandidates: keywordCandidates.keywords,
       categories: keywordCandidates.categories,
+      searchQueries,
     });
 
     const existingTitles = recentPosts.map((post) => post.title);

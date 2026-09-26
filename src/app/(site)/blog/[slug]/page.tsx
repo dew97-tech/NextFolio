@@ -81,12 +81,12 @@ export default async function BlogPostPage({
     notFound();
   }
 
-  const morePosts = await prisma.post.findMany({
+  const relatedCandidates = await prisma.post.findMany({
     where: {
       published: true,
       slug: { not: slug },
     },
-    take: 2,
+    take: 12,
     orderBy: [{ publishedAt: { sort: "desc", nulls: "last" } }, { date: "desc" }],
     select: {
       id: true,
@@ -100,6 +100,19 @@ export default async function BlogPostPage({
       tags: true,
     },
   });
+
+  const morePosts = relatedCandidates
+    .map((candidate) => ({
+      candidate,
+      shared: candidate.tags.filter((tag) => post.tags.includes(tag)).length,
+    }))
+    .sort(
+      (a, b) =>
+        b.shared - a.shared ||
+        publishedDate(b.candidate).getTime() - publishedDate(a.candidate).getTime(),
+    )
+    .slice(0, 2)
+    .map((entry) => entry.candidate);
 
   const siteUrl = getSiteUrl();
 

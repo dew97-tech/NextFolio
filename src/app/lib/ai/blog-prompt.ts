@@ -1,3 +1,4 @@
+import type { SearchQuery } from "@/app/lib/google/search-console";
 import { resumeData } from "@/data/resume";
 import type { ChatMessage } from "./opencode-go";
 import type { TrendItem } from "./trends";
@@ -17,6 +18,7 @@ export interface BlogPromptContext {
   today: Date;
   keywordCandidates: string[];
   categories: string[];
+  searchQueries: SearchQuery[];
 }
 
 function buildAuthorProfile(): string {
@@ -92,6 +94,19 @@ function formatKeywords(keywords: string[]): string {
   return keywords.map((keyword) => `- ${keyword}`).join("\n");
 }
 
+function formatSearchQueries(queries: SearchQuery[]): string {
+  if (queries.length === 0) {
+    return "No Search Console data for this site yet. Choose a topic from the signals above.";
+  }
+
+  return queries
+    .map(
+      (row) =>
+        `- ${row.query} (${row.impressions} impressions, ${row.clicks} clicks, average position ${row.position.toFixed(1)})`,
+    )
+    .join("\n");
+}
+
 export const BLOG_SYSTEM_PROMPT = `You are "The Architect", the senior technical writer for David Dew Mallick's engineering blog. You write precise, information-dense technical guides for working software engineers.
 
 TOPIC POLICY (NON-NEGOTIABLE)
@@ -162,6 +177,7 @@ export function buildBlogMessages({
   today,
   keywordCandidates,
   categories,
+  searchQueries,
 }: BlogPromptContext): ChatMessage[] {
   const userPrompt = `Write the next article for the blog.
 
@@ -175,6 +191,9 @@ PRIMARY CATEGORY CONTEXT: ${categories.length > 0 ? categories.join(", ") : "sof
 CANDIDATE KEYWORDS (real search phrases; choose a primaryKeyword and exactly 4 secondaryKeywords from this list):
 ${formatKeywords(keywordCandidates)}
 
+SEARCH CONSOLE QUERIES (real queries where this site already appeared in search; these are observed demand, not guesses):
+${formatSearchQueries(searchQueries)}
+
 EXISTING POSTS (do NOT duplicate these topics; the published ones are the only valid internal link targets):
 ${formatRecentPosts(recentPosts)}
 
@@ -184,6 +203,7 @@ ${buildAuthorProfile()}
 REQUIREMENTS
 - Choose a seed topic a working engineer would search for, and return it verbatim in the "topic" field.
 - Rotate categories relative to the most recent posts when a strong alternative signal exists.
+- Prefer a Search Console query over a generic trend signal when the two are close. Where a query already has a matching published post, go deeper on a specific sub-topic of it rather than restating the same article.
 - Forbidden topics include anything AI/ML/LLM related, even if it appears in the signals above.
 - Before returning, verify: the title is 35 to 50 characters and describes the article accurately; the description is 120 to 155 characters and reads as a summary of this specific page; the primaryKeyword appears in the title and reads naturally in the body with no repetition target; exactly 4 secondaryKeywords are present and the ones you use fit their sentences; at least one internal link points to a published post listed above; code and comparisons are accurate; the word count is useful rather than padded; every link is real.
 - Return the single JSON object now.`;
