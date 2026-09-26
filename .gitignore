@@ -53,6 +53,7 @@ next-env.d.ts
 # except the public repo documentation, which stays version-controlled
 !README.md
 !DEPLOYMENT.md
+!DESIGN.md
 /opencode.json
 /.opencode/
 /skills-lock.json

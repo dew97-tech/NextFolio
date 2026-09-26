@@ -4,16 +4,19 @@ export function Footer() {
   const { personal } = resumeData;
 
   return (
-    <footer id="contact" className="paper-canvas border-t border-border">
+    <footer id="contact" className="paper-canvas band-invert border-t border-border">
       <div className="mx-auto w-full max-w-[1180px] px-5 md:px-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-border py-5">
           <p className="font-mono text-sm text-ink-faint">End of record</p>
           <a
             href="#main-content"
-            className="link-draw back-to-top text-sm text-clay-text hover:text-ink-brown"
+            className="link-draw back-to-top group inline-flex items-center gap-1.5 text-sm text-clay-text hover:text-ink-brown"
           >
             Back to top
-            <span className="back-to-top-arrow" aria-hidden="true">
+            <span
+              aria-hidden="true"
+              className="back-to-top-arrow opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+            >
               ↑
             </span>
           </a>

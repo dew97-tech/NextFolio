@@ -1,20 +1,18 @@
 import { Highlight } from "@/components/highlight";
 import { Reveal } from "@/components/reveal";
-import {
-  RuleCross,
-  SectionFolio,
-  SectionHeading,
-} from "@/components/section-heading";
-import { resumeData } from "@/data/resume";
+import { RuleCross, SectionHeading } from "@/components/section-heading";
+import { jobs } from "@/data/resume";
 import { bridgeBooksCaseStudy } from "@/data/bridgebooks-case-study";
 import Link from "next/link";
 
-const projects = resumeData.experience.flatMap((job) =>
+const projects = jobs.flatMap((job) =>
   job.projects.map((project) => ({
     name: project.name,
     description: project.description,
     highlight: project.highlight,
     achievements: project.achievements,
+    stack: project.stack,
+    outcomes: project.outcomes,
     company: job.company,
     date: job.date,
   })),
@@ -24,6 +22,10 @@ const otherProjects = projects.filter(
   (project) => project.name !== bridgeBooksCaseStudy.title,
 );
 
+const featuredStack =
+  projects.find((project) => project.name === bridgeBooksCaseStudy.title)
+    ?.stack ?? [];
+
 export function Projects() {
   return (
     <section
@@ -31,7 +33,6 @@ export function Projects() {
       className="band-paper section-rule scroll-mt-20 md:scroll-mt-24"
     >
       <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
-        <SectionFolio index={1} />
         <RuleCross />
         <SectionHeading text="Selected work" sectionId="projects" />
 
@@ -39,15 +40,23 @@ export function Projects() {
           <Reveal>
             <article className="grid gap-5 border-t border-border py-10 md:grid-cols-12 md:gap-8 md:py-12">
               <div className="md:col-span-4">
-                <p className="font-mono text-xs tabular-nums text-ink-faint">01</p>
-                <h3 className="mt-2 text-xl font-semibold text-ink">
+                <h3 className="text-xl font-semibold text-ink">
                   {bridgeBooksCaseStudy.title}
                 </h3>
-                <p className="mt-2 font-mono text-sm leading-relaxed text-ink-faint">
+                <p className="eyebrow mt-2 leading-relaxed text-ink-faint">
                   JB Connect Ltd.
                   <br />
                   {bridgeBooksCaseStudy.date}
                 </p>
+                {featuredStack.length > 0 ? (
+                  <ul className="mt-3 flex flex-wrap gap-1.5">
+                    {featuredStack.map((tag) => (
+                      <li key={tag} className="blog-tag">
+                        {tag}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
 
               <div className="md:col-span-8">
@@ -71,9 +80,15 @@ export function Projects() {
 
                 <Link
                   href={bridgeBooksCaseStudy.href}
-                  className="link-draw mt-6 inline-flex items-center gap-2 text-sm text-clay-text hover:text-ink-brown"
+                  className="link-draw group mt-6 inline-flex items-center gap-2 text-sm text-clay-text hover:text-ink-brown"
                 >
-                  Read the BridgeBooks case study <span aria-hidden="true">→</span>
+                  Read the {bridgeBooksCaseStudy.title} case study
+                  <span
+                    aria-hidden="true"
+                    className="-translate-x-1 opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                  >
+                    →
+                  </span>
                 </Link>
               </div>
             </article>
@@ -84,7 +99,7 @@ export function Projects() {
           </h3>
 
           <div className="mt-4">
-            {otherProjects.map((project, index) => {
+            {otherProjects.map((project) => {
               const selectedAchievement =
                 project.achievements.find((achievement) =>
                   achievement
@@ -96,17 +111,23 @@ export function Projects() {
                 <Reveal key={`${project.company}-${project.name}`}>
                   <article className="row-seq grid gap-5 border-t border-border py-10 md:grid-cols-12 md:gap-8 md:py-12">
                     <div className="md:col-span-4">
-                      <p className="font-mono text-xs tabular-nums text-ink-faint">
-                        {String(index + 2).padStart(2, "0")}
-                      </p>
-                      <h3 className="mt-2 text-xl font-semibold text-ink">
+                      <h3 className="text-xl font-semibold text-ink">
                         {project.name}
                       </h3>
-                      <p className="mt-2 font-mono text-sm leading-relaxed text-ink-faint">
+                      <p className="eyebrow mt-2 leading-relaxed text-ink-faint">
                         {project.company}
                         <br />
                         {project.date}
                       </p>
+                      {project.stack.length > 0 ? (
+                        <ul className="mt-3 flex flex-wrap gap-1.5">
+                          {project.stack.map((tag) => (
+                            <li key={tag} className="blog-tag">
+                              {tag}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
 
                     <div className="md:col-span-8">
@@ -123,6 +144,23 @@ export function Projects() {
                             phrase={project.highlight}
                           />
                         </p>
+                      ) : null}
+                      {project.outcomes?.length ? (
+                        <dl className="mt-5 border-y border-border py-4">
+                          {project.outcomes.map((outcome) => (
+                            <div key={outcome.label}>
+                              <dt className="font-mono text-sm leading-relaxed text-ink-muted">
+                                {outcome.label}
+                              </dt>
+                              <dd className="mt-1 font-serif text-3xl tracking-[-0.02em] text-ink-brown">
+                                {outcome.value}
+                              </dd>
+                              <p className="mt-1 text-sm leading-relaxed text-ink-muted">
+                                {outcome.detail}
+                              </p>
+                            </div>
+                          ))}
+                        </dl>
                       ) : null}
                     </div>
                   </article>

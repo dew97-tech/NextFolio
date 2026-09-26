@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export function Navbar() {
   return (
-    <header className="paper-canvas sticky top-0 z-40 border-b border-border bg-background">
+    <header className="paper-canvas band-invert sticky top-0 z-40 border-b border-border bg-background">
       <div className="relative mx-auto flex h-16 w-full max-w-[1180px] items-center justify-between px-5 md:px-8">
         <Link
           href="/"

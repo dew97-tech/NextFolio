@@ -8,7 +8,7 @@ export function Hero() {
   return (
     <section
       aria-label="Introduction"
-      className="paper-canvas border-b border-border"
+      className="paper-canvas band-invert border-b border-border"
     >
       <div className="hero-seq mx-auto w-full max-w-[1180px] px-5 pb-16 pt-16 md:px-8 md:pb-24 md:pt-24">
         <h1
@@ -18,19 +18,20 @@ export function Hero() {
           {personal.name}
         </h1>
 
-        <p data-seq="2" className="mt-5 text-base text-ink-muted md:text-lg">
-          <TypeLine text={`${personal.role} at ${personal.company}`} />
-        </p>
-
-        <p data-seq="3" className="mt-6 max-w-[54ch] text-ink-muted">
+        <p data-seq="2" className="mt-6 max-w-[54ch] text-ink-muted md:text-lg">
           I build{" "}
           <span className="highlight-marker hero-marker">
             AI-driven SaaS
-          </span>
-          {" "}backends and cloud systems with{" "}
+          </span>{" "}
+          backends with{" "}
           <span className="highlight-marker hero-marker-late">
             Laravel and AWS
-          </span>.
+          </span>
+          , then write about the engineering decisions behind them.
+        </p>
+
+        <p data-seq="3" className="eyebrow mt-4 text-ink-faint">
+          <TypeLine text={`${personal.role} at ${personal.company}`} />
         </p>
 
         <div

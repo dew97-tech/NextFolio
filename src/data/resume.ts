@@ -1,3 +1,33 @@
+export type ProjectOutcome = {
+  value: string;
+  label: string;
+  detail: string;
+};
+
+export type Project = {
+  name: string;
+  description: string;
+  highlight: string;
+  stack: string[];
+  outcomes?: ProjectOutcome[];
+  achievements: string[];
+  href?: string;
+};
+
+export type Promotion = {
+  role: string;
+  date: string;
+};
+
+export type Job = {
+  company: string;
+  location: string;
+  role: string;
+  date: string;
+  promotions: Promotion[];
+  projects: Project[];
+};
+
 export const resumeData = {
   personal: {
     name: "David Dew Mallick",
@@ -47,6 +77,8 @@ export const resumeData = {
           description:
             "AI-driven SEO platform for article generation, backlinks, and contact automation.",
           highlight: "cut generation costs by 95%",
+          href: "/work/bridgebooks",
+          stack: ["Laravel", "React", "AWS"],
           achievements: [
             "Built the AI article generation module from scratch with two teammates over eight weeks.",
             "Moved generation from AWS Lambda to containers, cutting failure rates to 5% in three weeks.",
@@ -72,10 +104,22 @@ export const resumeData = {
           description:
             "Platform for course administration and learning material management.",
           highlight: "without breaking either",
+          stack: ["Laravel", "PHP", "Vue.js"],
+          outcomes: [
+            {
+              value: "3",
+              label: "production fixes and features shipped",
+              detail:
+                "Course upload and course image thumbnail, both fixed after reaching production. UI glitches and a new feature shipped alongside.",
+            },
+          ],
           achievements: [
             "Built course and class assignment modules with instructor availability validation.",
             "Added instructor material upload with student-facing access.",
             "Changed database tables to support legacy and new features without breaking either.",
+            "Fixed a course upload issue that had reached production.",
+            "Fixed the course image thumbnail issue.",
+            "Fixed UI glitches and shipped a new feature.",
           ],
         },
       ],
@@ -97,10 +141,20 @@ export const resumeData = {
           description:
             "French language learning platform with interactive study tools.",
           highlight: "12 interactive exercises",
+          stack: ["Next.js", "MongoDB", "Auth.js"],
+          outcomes: [
+            {
+              value: "12",
+              label: "interactive exercises and games shipped",
+              detail:
+                "Vocabulary and memory practice for Dutch to French, plus video sessions with embedded quizzes.",
+            },
+          ],
           achievements: [
             "Built 12 interactive exercises and games for Dutch to French vocabulary and memory practice.",
             "Integrated video lessons with embedded quizzes.",
             "Built a progress and achievement system for exercises.",
+            "Built a scoreboard and a sound library alongside the video sessions and games.",
           ],
         },
         {
@@ -108,9 +162,19 @@ export const resumeData = {
           description:
             "School management platform for student records, scheduling, and payments.",
           highlight: "automatic credit deduction",
+          href: "/work/augmenta",
+          stack: ["Laravel", "Blade", "PHP"],
+          outcomes: [
+            {
+              value: "4",
+              label: "modules delivered",
+              detail:
+                "Barcode ID cards, schedule-based class assignment, fee slips with credit deduction, and PDF class routines.",
+            },
+          ],
           achievements: [
-            "Designed student ID cards with generated barcodes for identification.",
-            "Built schedule-based class assignment aligned with instructor availability.",
+            "Designed the student ID card UI and generated cards from live platform data.",
+            "Built schedule-based class assignment with dynamic conflict checks so overlapping classes are caught.",
             "Added payment slip issuance tied to student IDs with automatic credit deduction.",
             "Extended the class routine module with PDF generation and download.",
           ],
@@ -119,6 +183,15 @@ export const resumeData = {
           name: "KIMS",
           description: "Inventory management system for retail operations.",
           highlight: "core inventory flows",
+          stack: ["Laravel", "Blade", "PHP"],
+          outcomes: [
+            {
+              value: "9",
+              label: "inventory entity types modelled",
+              detail:
+                "Products, categories, brands, units, suppliers, purchases, orders, customers, and sales.",
+            },
+          ],
           achievements: [
             "Built core inventory flows for products, categories, brands, units, suppliers, purchases, orders, customers, and sales.",
           ],
@@ -152,14 +225,6 @@ export const resumeData = {
       description:
         "Completed the English Presentation Skills course and received the certificate.",
     },
-    {
-      title: "Runner Up Trophy",
-      description: "Runner up at the Inter School Science Fair and Cultural Festival.",
-    },
-    {
-      title: "Attendance Record",
-      description: "Perfect attendance through high school.",
-    },
   ],
   skills: {
     languagesAndFrameworks: [
@@ -187,3 +252,5 @@ export const resumeData = {
     methodologies: ["Agile", "Scrum"],
   },
 };
+
+export const jobs: Job[] = resumeData.experience;

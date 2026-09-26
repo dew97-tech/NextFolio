@@ -1,26 +1,25 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteUrl } from "@/app/lib/site";
 import type { Metadata, Viewport } from "next";
-import { Geist, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import { EB_Garamond, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
-const sourceSerif = Source_Serif_4({
+const ebGaramond = EB_Garamond({
   style: ["normal", "italic"],
-  variable: "--font-source-serif",
+  variable: "--font-heading",
   subsets: ["latin"],
-  axes: ["opsz"],
   display: "swap",
 });
 
@@ -145,7 +144,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
+        className={`${inter.variable} ${geistMono.variable} ${ebGaramond.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"

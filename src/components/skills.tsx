@@ -1,10 +1,6 @@
 import { ArrowSquareOut } from "@phosphor-icons/react/ssr";
 import { Reveal } from "@/components/reveal";
-import {
-  RuleCross,
-  SectionFolio,
-  SectionHeading,
-} from "@/components/section-heading";
+import { RuleCross, SectionHeading } from "@/components/section-heading";
 import { resumeData } from "@/data/resume";
 
 export function Skills() {
@@ -23,7 +19,6 @@ export function Skills() {
       className="band-paper section-rule scroll-mt-20 md:scroll-mt-24"
     >
       <div className="relative mx-auto w-full max-w-[1180px] px-5 py-20 md:px-8 md:py-28">
-        <SectionFolio index={3} />
         <RuleCross />
         <SectionHeading text="Skills" sectionId="skills" />
 
