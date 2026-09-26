@@ -160,7 +160,7 @@ export const resumeData = {
         {
           name: "Augmenta Education",
           description:
-            "School management platform for student records, scheduling, and payments.",
+            "Classroom management system for student records, scheduling, and payments.",
           highlight: "automatic credit deduction",
           href: "/work/augmenta",
           stack: ["Laravel", "Blade", "PHP"],
