@@ -10,7 +10,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const workEntries: MetadataRoute.Sitemap = caseStudies.map((caseStudy) => ({
     url: `${siteUrl}${caseStudy.href}`,
-    lastModified: new Date(),
     changeFrequency: "yearly" as const,
     priority: 0.9,
   }));
@@ -18,15 +17,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     {
       url: siteUrl,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 1,
-    },
-    {
-      url: `${siteUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
     },
     ...workEntries,
   ];
@@ -34,42 +26,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const posts = await prisma.post.findMany({
       where: { published: true },
-      orderBy: { date: "desc" },
+      orderBy: { updatedAt: "desc" },
       select: { slug: true, updatedAt: true },
     });
 
-    const blogEntries = posts.map((post) => ({
-      url: `${siteUrl}/blog/${post.slug}`,
-      lastModified: post.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
-    }));
-
-    const newestUpdate = posts[0]?.updatedAt ?? new Date();
-
-    const revisions: MetadataRoute.Sitemap = workEntries.map((entry) => ({
-      ...entry,
-      lastModified: newestUpdate,
-    }));
+    const newestPostUpdate = posts[0]?.updatedAt;
 
     return [
       {
         url: siteUrl,
-        lastModified: newestUpdate,
-        changeFrequency: "monthly",
+        changeFrequency: "monthly" as const,
         priority: 1,
       },
       {
         url: `${siteUrl}/blog`,
-        lastModified: newestUpdate,
-        changeFrequency: "weekly",
+        lastModified: newestPostUpdate,
+        changeFrequency: "weekly" as const,
         priority: 0.9,
       },
-      ...revisions,
-      ...blogEntries,
+      ...workEntries,
+      ...posts.map((post) => ({
+        url: `${siteUrl}/blog/${post.slug}`,
+        lastModified: post.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      })),
     ];
   } catch (error) {
     console.error("Failed to fetch posts for sitemap, serving static routes only:", error);
-    return staticEntries;
+    return [
+      ...staticEntries,
+      {
+        url: `${siteUrl}/blog`,
+        changeFrequency: "weekly" as const,
+        priority: 0.9,
+      },
+    ];
   }
 }

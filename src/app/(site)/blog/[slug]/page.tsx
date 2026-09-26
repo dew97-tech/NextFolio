@@ -54,10 +54,17 @@ export async function generateMetadata({
       type: "article",
       url: `/blog/${slug}`,
       publishedTime: publishedDate(post).toISOString(),
+      modifiedTime: post.updatedAt.toISOString(),
       authors: ["David Dew Mallick"],
       images: post.thumbnail
         ? [{ url: post.thumbnail }]
         : [{ url: "/og.png", width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images: post.thumbnail ? [post.thumbnail] : ["/og.png"],
     },
   };
 }
@@ -115,28 +122,44 @@ export default async function BlogPostPage({
     .map((entry) => entry.candidate);
 
   const siteUrl = getSiteUrl();
+  const { personal } = resumeData;
+  const articleUrl = `${siteUrl}/blog/${slug}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
     description: post.description,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+    url: articleUrl,
     author: {
       "@type": "Person",
-      name: "David Dew Mallick",
+      name: personal.name,
+      url: siteUrl,
+      sameAs: [personal.github, personal.linkedin],
+    },
+    publisher: {
+      "@type": "Person",
+      name: personal.name,
       url: siteUrl,
     },
     datePublished: publishedDate(post).toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    articleSection: post.tags[0],
+    keywords: post.keywords.join(", "),
     image: post.thumbnail || `${siteUrl}/og.png`,
   };
-
-  const { personal } = resumeData;
 
   return (
     <article className="pb-24 pt-10 md:pt-14">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
       />
 
       <div className="mx-auto w-full max-w-[720px] px-5 md:px-8">
