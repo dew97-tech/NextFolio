@@ -22,7 +22,6 @@ export default async function AdminPage() {
       aiModel: true,
       topic: true,
       keywords: true,
-      indexedAt: true,
     },
   });
 
@@ -44,7 +43,6 @@ export default async function AdminPage() {
           aiModel: p.aiModel,
           topic: p.topic,
           keywords: p.keywords,
-          indexedAt: p.indexedAt ? p.indexedAt.toISOString() : null,
         }))}
       />
     </div>

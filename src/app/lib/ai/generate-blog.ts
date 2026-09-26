@@ -623,7 +623,6 @@ export async function runBlogGeneration(
             topic: draft.topic,
             aiModel: model.id,
             generatedAt: new Date(),
-            indexStatus: "pending",
           },
         });
 

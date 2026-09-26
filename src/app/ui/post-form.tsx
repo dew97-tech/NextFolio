@@ -14,6 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import ImagePromptPanel from "./image-prompt-panel";
 import TiptapEditor from "./tiptap-editor";
 
 interface EditablePost {
@@ -335,7 +336,7 @@ export default function PostForm({ post }: { post?: EditablePost }) {
                     {isUploading ? (
                       <>
                         <CircleNotch size={14} className="animate-spin" aria-hidden="true" />
-                        <span>Uploading\u2026</span>
+                        <span>Uploading…</span>
                       </>
                     ) : (
                       <>
@@ -372,6 +373,13 @@ export default function PostForm({ post }: { post?: EditablePost }) {
                 )}
               </div>
             )}
+
+            <ImagePromptPanel
+              title={title}
+              description={description}
+              tags={tags}
+              content={content}
+            />
           </div>
 
           <div className="space-y-4 rounded-lg border border-border bg-card p-5">

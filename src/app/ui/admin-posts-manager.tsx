@@ -2,7 +2,6 @@
 
 import DeletePostButton from "@/app/ui/delete-post-button";
 import GeneratePostButton from "@/app/ui/generate-post-button";
-import IndexPostButton from "@/app/ui/index-post-button";
 import { cn } from "@/lib/utils";
 import { Eye, MagnifyingGlass, PencilSimple, Plus } from "@phosphor-icons/react";
 import Image from "next/image";
@@ -23,7 +22,6 @@ interface PostItem {
   aiModel?: string | null;
   topic?: string | null;
   keywords?: string[];
-  indexedAt?: string | null;
 }
 
 export default function AdminPostsManager({
@@ -265,13 +263,6 @@ export default function AdminPostsManager({
                           <PencilSimple size={14} aria-hidden="true" />
                           <span>Edit</span>
                         </Link>
-
-                        {post.published && (
-                          <IndexPostButton
-                            postId={post.id}
-                            indexedAt={post.indexedAt}
-                          />
-                        )}
 
                         <DeletePostButton postId={post.id} />
                       </div>

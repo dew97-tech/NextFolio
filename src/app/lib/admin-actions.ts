@@ -1,6 +1,12 @@
 "use server";
 
 import { runBlogGeneration } from "@/app/lib/ai/generate-blog";
+import {
+  buildImagePromptMessages,
+  cleanImagePrompt,
+  fallbackImagePrompt,
+} from "@/app/lib/ai/image-prompt";
+import { chatCompletion, GO_MODELS } from "@/app/lib/ai/opencode-go";
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/auth";
 import { deleteBlobIfUnused } from "@/app/lib/blob";
@@ -280,4 +286,52 @@ export async function triggerGeneration(
   }
 
   return { status: "failed", message: result.error.slice(0, 240) };
+}
+
+export interface ImagePromptActionState {
+  prompt?: string;
+  message?: string;
+}
+
+export async function generateImagePrompt(input: {
+  title: string;
+  description: string;
+  tags: string;
+  content: string;
+}): Promise<ImagePromptActionState> {
+  const session = await auth();
+  if (!session?.user) {
+    return { message: "Unauthorized" };
+  }
+
+  const context = {
+    title: input.title.trim(),
+    description: input.description.trim(),
+    tags: input.tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+    content: input.content,
+  };
+
+  if (context.title.length === 0 && context.description.length === 0) {
+    return { message: "Add a title or summary first" };
+  }
+
+  try {
+    const result = await chatCompletion({
+      model: GO_MODELS[0].id,
+      messages: buildImagePromptMessages(context),
+      sessionId: `portfolio-cover-${Date.now()}`,
+      temperature: 0.8,
+      maxTokens: 1_200,
+      timeoutMs: 40_000,
+      jsonMode: false,
+    });
+
+    const prompt = cleanImagePrompt(result.content);
+    return { prompt: prompt.length >= 120 ? prompt : fallbackImagePrompt(context) };
+  } catch {
+    return { prompt: fallbackImagePrompt(context) };
+  }
 }

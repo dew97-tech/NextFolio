@@ -45,6 +45,7 @@ interface ChatCompletionParams {
   maxTokens?: number;
   reasoningEffort?: ReasoningEffort;
   timeoutMs?: number;
+  jsonMode?: boolean;
 }
 
 export interface ChatCompletionResult {
@@ -101,6 +102,7 @@ export async function chatCompletion({
   maxTokens = 6000,
   reasoningEffort,
   timeoutMs = REQUEST_TIMEOUT_MS,
+  jsonMode = true,
 }: ChatCompletionParams): Promise<ChatCompletionResult> {
   const apiKey = process.env.OPENCODE_GO_API_KEY;
   if (!apiKey) {
@@ -113,7 +115,7 @@ export async function chatCompletion({
     temperature,
     max_tokens: maxTokens,
     stream: false,
-    response_format: { type: "json_object" },
+    ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
   };
 
   let response = await sendRequest(
