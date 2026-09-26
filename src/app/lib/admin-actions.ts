@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/auth";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -39,6 +40,33 @@ type PostFormState =
   | null
   | undefined;
 
+const SLUG_CONFLICT_ERRORS = {
+  slug: ["A post with this slug already exists. Please choose a unique slug."],
+};
+
+function isUniqueConstraintError(error: unknown) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  );
+}
+
+/**
+ * Purges every cached surface a published post can appear on. Without this the
+ * 24h ISR window on /blog/[slug] and the CDN-cached sitemap/feed would keep
+ * serving stale content after an edit.
+ */
+function revalidatePostSurfaces(...slugs: string[]) {
+  revalidatePath("/blog");
+  revalidatePath("/admin");
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/feed.xml");
+
+  for (const slug of slugs) {
+    if (slug) revalidatePath(`/blog/${slug}`);
+  }
+}
+
 export async function createPost(prevState: PostFormState, formData: FormData) {
   const session = await auth();
   if (!session?.user) {
@@ -71,6 +99,18 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
     .map((tag) => normalizeDashes(tag.trim()))
     .filter(Boolean);
 
+  const existingPost = await prisma.post.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
+
+  if (existingPost) {
+    return {
+      errors: SLUG_CONFLICT_ERRORS,
+      message: "Slug Conflict: Failed to Create Post.",
+    };
+  }
+
   try {
     await prisma.post.create({
       data: {
@@ -84,12 +124,17 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
         published,
       },
     });
-  } catch {
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return {
+        errors: SLUG_CONFLICT_ERRORS,
+        message: "Slug Conflict: Failed to Create Post.",
+      };
+    }
     return { message: "Database Error: Failed to Create Post." };
   }
 
-  revalidatePath("/blog");
-  revalidatePath("/admin");
+  revalidatePostSurfaces(slug);
   redirect("/admin");
 }
 
@@ -129,6 +174,15 @@ export async function updatePost(
     .map((tag) => normalizeDashes(tag.trim()))
     .filter(Boolean);
 
+  const previous = await prisma.post.findUnique({
+    where: { id },
+    select: { slug: true },
+  });
+
+  if (!previous) {
+    return { message: "Database Error: Failed to Update Post." };
+  }
+
   try {
     await prisma.post.update({
       where: { id },
@@ -143,12 +197,19 @@ export async function updatePost(
         published,
       },
     });
-  } catch {
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return {
+        errors: SLUG_CONFLICT_ERRORS,
+        message: "Slug Conflict: Failed to Update Post.",
+      };
+    }
     return { message: "Database Error: Failed to Update Post." };
   }
 
-  revalidatePath("/blog");
-  revalidatePath("/admin");
+  // Revalidate both the old and the new slug: a renamed post must not leave a
+  // stale page behind at its previous URL.
+  revalidatePostSurfaces(previous.slug, slug);
   redirect("/admin");
 }
 
@@ -158,12 +219,20 @@ export async function deletePost(id: string) {
     return;
   }
 
+  const existing = await prisma.post.findUnique({
+    where: { id },
+    select: { slug: true },
+  });
+
+  if (!existing) {
+    return;
+  }
+
   try {
     await prisma.post.delete({
       where: { id },
     });
-    revalidatePath("/blog");
-    revalidatePath("/admin");
+    revalidatePostSurfaces(existing.slug);
   } catch (error) {
     console.error("Failed to delete post:", error);
   }

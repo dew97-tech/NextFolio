@@ -4,6 +4,11 @@ import AdminNav from "@/app/ui/admin-nav";
 import { ArrowSquareOut, SignOut } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 
+// Every page under /admin reads live data behind an auth check, so the whole
+// segment must render per-request. Declaring it on the layout covers /admin,
+// /admin/new and /admin/edit/[id] in one place.
+export const dynamic = "force-dynamic";
+
 export default function AdminLayout({
   children,
 }: {

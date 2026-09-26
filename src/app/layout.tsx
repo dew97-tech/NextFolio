@@ -1,7 +1,10 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { getSiteUrl } from "@/app/lib/site";
 import type { Metadata, Viewport } from "next";
 import { Geist, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
+
+const siteUrl = getSiteUrl();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +28,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "David Dew Mallick",
-  url: "https://david-dew-mallick.vercel.app",
+  url: siteUrl,
   jobTitle: "Software Engineer",
   sameAs: [
     "https://github.com/dew97-tech",
@@ -38,7 +41,7 @@ const jsonLd = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://david-dew-mallick.vercel.app"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "David Dew Mallick | Software Engineer",
     template: "%s | David Dew Mallick",
@@ -78,7 +81,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://david-dew-mallick.vercel.app",
+    url: siteUrl,
     title: "David Dew Mallick | Software Engineer",
     description:
       "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",

@@ -13,7 +13,11 @@ import {
 import { CURATED_TOPICS, fetchTrends, isBannedTopic, type TrendItem } from "./trends";
 
 export const MAX_AUTO_DRAFTS = 3;
-export const GENERATION_INTERVAL_HOURS = 48;
+// Must be strictly less than the cron period (168h weekly). Two consecutive
+// weekly fires are ~167h58m apart due to scheduler jitter, so an interval of
+// exactly 168 would fail its own check and silently halve the cadence.
+export const GENERATION_INTERVAL_HOURS = 140;
+const RUNNING_LOCK_MINUTES = 15;
 
 const MAX_TOTAL_GENERATION_MS = 215_000;
 const MIN_WORD_COUNT = 900;
@@ -47,7 +51,7 @@ interface ValidatedDraft {
 export type GenerationResult =
   | {
       status: "skipped";
-      reason: "interval" | "draft_cap";
+      reason: "interval" | "draft_cap" | "already_running";
       detail: string;
       drafts?: number;
     }
@@ -409,6 +413,26 @@ async function generateForModel(
 export async function runBlogGeneration(): Promise<GenerationResult> {
   const startedAt = Date.now();
   const sessionId = `portfolio-blog-${new Date().toISOString()}`;
+
+  // Concurrency lock: a run that is still marked "running" within the lock
+  // window means another invocation is in flight (retried cron, duplicate
+  // webhook, manual trigger). Bail out so we never create two posts on the
+  // same topic or burn two sets of model tokens.
+  const activeRun = await prisma.generationRun.findFirst({
+    where: {
+      status: "running",
+      startedAt: { gte: new Date(Date.now() - RUNNING_LOCK_MINUTES * 60 * 1000) },
+    },
+    select: { startedAt: true },
+  });
+
+  if (activeRun) {
+    return {
+      status: "skipped",
+      reason: "already_running",
+      detail: `Another generation run started at ${activeRun.startedAt.toISOString()}; lock window is ${RUNNING_LOCK_MINUTES} minutes`,
+    };
+  }
 
   const lastSuccess = await prisma.generationRun.findFirst({
     where: { status: "success" },

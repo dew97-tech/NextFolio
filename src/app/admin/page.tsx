@@ -6,6 +6,23 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const posts = await prisma.post.findMany({
     orderBy: { date: "desc" },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      published: true,
+      date: true,
+      readTime: true,
+      tags: true,
+      thumbnail: true,
+      source: true,
+      aiModel: true,
+      topic: true,
+      keywords: true,
+      indexedAt: true,
+      indexStatus: true,
+    },
   });
 
   return (

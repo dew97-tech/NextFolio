@@ -2,6 +2,8 @@ import prisma from "@/app/lib/prisma";
 import { getSiteUrl } from "@/app/lib/site";
 import { MetadataRoute } from "next";
 
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
   const posts = await prisma.post.findMany({

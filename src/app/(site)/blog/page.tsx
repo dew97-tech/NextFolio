@@ -45,6 +45,16 @@ export default async function BlogPage({
     orderBy: { date: "desc" },
     skip: (currentPage - 1) * POSTS_PER_PAGE,
     take: POSTS_PER_PAGE,
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      date: true,
+      readTime: true,
+      tags: true,
+      thumbnail: true,
+    },
   });
 
   return (

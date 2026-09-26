@@ -1,10 +1,36 @@
 import prisma from "@/app/lib/prisma";
+import { getSiteUrl } from "@/app/lib/site";
 import BlogReadingProgress from "@/app/ui/blog-reading-progress";
 import { resumeData } from "@/data/resume";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
+
+export const revalidate = 86400;
+
+/**
+ * React.cache() memoizes this lookup for the lifetime of a single render pass.
+ * generateMetadata() and BlogPostPage() both call it, but Prisma issues exactly
+ * one query per request instead of two.
+ */
+const getPostBySlug = cache(async (slug: string) => {
+  return prisma.post.findUnique({
+    where: { slug },
+  });
+});
+
+export async function generateStaticParams() {
+  const posts = await prisma.post.findMany({
+    where: { published: true },
+    select: { slug: true },
+  });
+
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -12,9 +38,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await prisma.post.findUnique({
-    where: { slug },
-  });
+  const post = await getPostBySlug(slug);
 
   if (!post || !post.published) {
     return {
@@ -51,9 +75,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await prisma.post.findUnique({
-    where: { slug },
-  });
+  const post = await getPostBySlug(slug);
 
   if (!post || !post.published) {
     notFound();
@@ -66,7 +88,19 @@ export default async function BlogPostPage({
     },
     take: 2,
     orderBy: { date: "desc" },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      date: true,
+      readTime: true,
+      thumbnail: true,
+      tags: true,
+    },
   });
+
+  const siteUrl = getSiteUrl();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -76,11 +110,10 @@ export default async function BlogPostPage({
     author: {
       "@type": "Person",
       name: "David Dew Mallick",
-      url: "https://david-dew-mallick.vercel.app",
+      url: siteUrl,
     },
     datePublished: post.date.toISOString(),
-    image:
-      post.thumbnail || "https://david-dew-mallick.vercel.app/og.png",
+    image: post.thumbnail || `${siteUrl}/og.png`,
   };
 
   const { personal } = resumeData;
