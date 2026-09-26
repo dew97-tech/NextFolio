@@ -13,6 +13,7 @@ const projects = jobs.flatMap((job) =>
     achievements: project.achievements,
     stack: project.stack,
     outcomes: project.outcomes,
+    href: project.href,
     company: job.company,
     date: job.date,
   })),
@@ -161,6 +162,20 @@ export function Projects() {
                             </div>
                           ))}
                         </dl>
+                      ) : null}
+                      {project.href ? (
+                        <Link
+                          href={project.href}
+                          className="link-draw group mt-5 inline-flex items-center gap-2 text-sm text-clay-text hover:text-ink-brown"
+                        >
+                          Read the {project.name} case study
+                          <span
+                            aria-hidden="true"
+                            className="-translate-x-1 opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                          >
+                            →
+                          </span>
+                        </Link>
                       ) : null}
                     </div>
                   </article>
