@@ -10,11 +10,6 @@ import { cache } from "react";
 
 export const revalidate = 86400;
 
-/**
- * React.cache() memoizes this lookup for the lifetime of a single render pass.
- * generateMetadata() and BlogPostPage() both call it, but Prisma issues exactly
- * one query per request instead of two.
- */
 const getPostBySlug = cache(async (slug: string) => {
   return prisma.post.findUnique({
     where: { slug },

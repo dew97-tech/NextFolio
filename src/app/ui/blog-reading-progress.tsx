@@ -24,7 +24,6 @@ export default function BlogReadingProgress({ title }: { title: string }) {
           url: window.location.href,
         });
       } catch {
-        // dismissed
       }
     } else {
       await handleCopyLink();

@@ -5,10 +5,6 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody;
 
-  // Only the client-token step is user-initiated and carries a session cookie.
-  // The upload-completed callback arrives as a server-to-server webhook with no
-  // session, so it must not be gated here. Auth failures are reported as 401 so
-  // they stay distinguishable from malformed requests.
   if (body.type === "blob.generate-client-token") {
     const session = await auth();
     if (!session?.user) {

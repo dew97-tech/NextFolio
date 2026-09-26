@@ -13,9 +13,6 @@ import {
 import { CURATED_TOPICS, fetchTrends, isBannedTopic, type TrendItem } from "./trends";
 
 export const MAX_AUTO_DRAFTS = 3;
-// Must be strictly less than the cron period (168h weekly). Two consecutive
-// weekly fires are ~167h58m apart due to scheduler jitter, so an interval of
-// exactly 168 would fail its own check and silently halve the cadence.
 export const GENERATION_INTERVAL_HOURS = 140;
 const RUNNING_LOCK_MINUTES = 15;
 
@@ -414,10 +411,6 @@ export async function runBlogGeneration(): Promise<GenerationResult> {
   const startedAt = Date.now();
   const sessionId = `portfolio-blog-${new Date().toISOString()}`;
 
-  // Concurrency lock: a run that is still marked "running" within the lock
-  // window means another invocation is in flight (retried cron, duplicate
-  // webhook, manual trigger). Bail out so we never create two posts on the
-  // same topic or burn two sets of model tokens.
   const activeRun = await prisma.generationRun.findFirst({
     where: {
       status: "running",

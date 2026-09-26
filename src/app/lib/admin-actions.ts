@@ -57,11 +57,6 @@ function isUniqueConstraintError(error: unknown) {
   );
 }
 
-/**
- * Purges every cached surface a published post can appear on. Without this the
- * 24h ISR window on /blog/[slug] and the CDN-cached sitemap/feed would keep
- * serving stale content after an edit.
- */
 function revalidatePostSurfaces(...slugs: string[]) {
   revalidatePath("/blog");
   revalidatePath("/admin");
@@ -202,16 +197,9 @@ export async function updatePost(
     .map((tag) => normalizeDashes(tag.trim()))
     .filter(Boolean);
 
-  // One read of the current row supplies the old slug (for revalidation), the
-  // previous thumbnail (blob cleanup) and the prior publish/index state.
   const previous = await prisma.post.findUnique({
     where: { id },
-    select: {
-      slug: true,
-      thumbnail: true,
-      published: true,
-      indexStatus: true,
-    },
+    select: { slug: true, thumbnail: true, published: true, indexStatus: true },
   });
 
   if (!previous) {
@@ -258,8 +246,6 @@ export async function updatePost(
     await submitPostForIndexing(id, slug);
   }
 
-  // Revalidate both the old and the new slug: a renamed post must not leave a
-  // stale page behind at its previous URL.
   revalidatePostSurfaces(previous.slug, slug);
   redirect("/admin");
 }

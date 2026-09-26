@@ -4,9 +4,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   images: {
-    // Only the hosts we actually serve images from: Vercel Blob (uploaded
-    // thumbnails) and Unsplash (a few hand-written posts). A wildcard here
-    // turns the Image Optimizer into an open proxy anyone can bill to us.
     remotePatterns: [
       {
         protocol: "https",
@@ -31,8 +28,6 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Authenticated admin HTML must never be stored by a shared cache,
-        // otherwise an unauthenticated visitor could be served an admin page.
         source: "/admin/:path*",
         headers: [
           {

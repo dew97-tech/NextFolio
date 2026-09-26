@@ -15,13 +15,6 @@ async function getUser(email: string) {
   }
 }
 
-/**
- * Creates the very first admin account, and only when the submitted
- * credentials match ADMIN_EMAIL/ADMIN_PASSWORD from the environment.
- *
- * Without this gate, whoever reached /auth/signin first on a fresh deployment
- * would become the owner of the admin panel.
- */
 async function bootstrapAdmin(email: string, password: string) {
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminPassword = process.env.ADMIN_PASSWORD;
