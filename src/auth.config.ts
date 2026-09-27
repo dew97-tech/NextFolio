@@ -1,3 +1,4 @@
+import { redirectAliasHost } from "@/lib/canonical-host";
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
@@ -5,9 +6,12 @@ export const authConfig = {
     signIn: "/auth/signin",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request }) {
+      const aliasRedirect = redirectAliasHost(request);
+      if (aliasRedirect) return aliasRedirect;
+
       const isLoggedIn = !!auth?.user;
-      const isOnAdmin = nextUrl.pathname.startsWith("/admin");
+      const isOnAdmin = request.nextUrl.pathname.startsWith("/admin");
       if (isOnAdmin) {
         if (isLoggedIn) return true;
         return false;
