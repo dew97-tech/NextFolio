@@ -29,7 +29,7 @@
   --marker-stroke: rgba(35, 35, 35, 0.55);
   --selection: rgba(35, 35, 35, 0.16);
 
-  --canvas-guide: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect width='1' height='1' fill='%2318181b' fill-opacity='0.1'/%3E%3C/svg%3E");
+  --canvas-rail: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect width='1' height='1' fill='%2318181b' fill-opacity='0.1'/%3E%3C/svg%3E");
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -79,7 +79,7 @@
   --marker-stroke: rgba(244, 244, 245, 0.6);
   --selection: rgba(244, 244, 245, 0.22);
 
-  --canvas-guide: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect width='1' height='1' fill='%23fafafa' fill-opacity='0.06'/%3E%3C/svg%3E");
+  --canvas-rail: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect width='1' height='1' fill='%23fafafa' fill-opacity='0.06'/%3E%3C/svg%3E");
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -641,7 +641,7 @@ p {
   .paper-canvas,
   .band-paper,
   .band-surface {
-    background-image: var(--canvas-guide), var(--canvas-guide);
+    background-image: var(--canvas-rail), var(--canvas-rail);
     background-size: 1px 100%;
     background-position: calc(50% - 590px) 0, calc(50% + 590px) 0;
     background-repeat: repeat-y;
