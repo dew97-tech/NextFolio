@@ -53,7 +53,7 @@ Semantic status colors (`--ok`, `--warn`, `--danger`) are functional, not decora
 - Never use pure black or pure white as text color.
 - Body text must hold 4.5:1 against its background; metadata and control boundaries must hold 3:1. Both were verified across every mode.
 - No gradients, glass, neon, glow, or heavy shadows.
-- The only decorative treatments on the public site are text selection, the highlight marker, and the registration crosshairs.
+- The only decorative treatments on the public site are text selection, the highlight marker, the registration crosshairs, and the two vertical guide rails.
 
 ---
 
@@ -91,6 +91,8 @@ Rules do the work: 1px `--rule` for separation, 2px `--rule-strong` for emphasis
 
 - **Charcoal band hero and footer** (`band-invert`), with a light content body between them.
 - Content sections alternate `band-paper` (white) and `band-surface` (soft gray).
+- Page and band surfaces are flat. No texture, grid, or pattern is painted behind content.
+- Two 1px vertical guide rails at 10% run the full height from `xl` up, framing the container 590px either side of centre.
 - Container is 1180px with 20px gutters on mobile and 32px at `md`.
 - Registration crosshair: a 9px `+` in charcoal, centred on the section rule at the container's left edge. Hidden below `md`.
 - Project rows are an asymmetric ledger: title and meta left, detail right at `lg`. No three equal cards.

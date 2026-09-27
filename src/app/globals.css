@@ -29,7 +29,6 @@
   --marker-stroke: rgba(35, 35, 35, 0.55);
   --selection: rgba(35, 35, 35, 0.16);
 
-  --canvas-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M32 0V32M0 32H32' fill='none' stroke='%2318181b' stroke-opacity='0.1'/%3E%3Ccircle cx='0' cy='0' r='1' fill='%2318181b' fill-opacity='0.14'/%3E%3C/svg%3E");
   --canvas-guide: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect width='1' height='1' fill='%2318181b' fill-opacity='0.1'/%3E%3C/svg%3E");
 
   --background: var(--paper);
@@ -80,7 +79,6 @@
   --marker-stroke: rgba(244, 244, 245, 0.6);
   --selection: rgba(244, 244, 245, 0.22);
 
-  --canvas-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M32 0V32M0 32H32' fill='none' stroke='%23fafafa' stroke-opacity='0.06'/%3E%3Ccircle cx='0' cy='0' r='1' fill='%23fafafa' fill-opacity='0.1'/%3E%3C/svg%3E");
   --canvas-guide: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect width='1' height='1' fill='%23fafafa' fill-opacity='0.06'/%3E%3C/svg%3E");
 
   --background: var(--paper);
@@ -631,7 +629,6 @@ p {
   --marker-fill: rgba(244, 244, 245, 0.16);
   --marker-stroke: rgba(244, 244, 245, 0.6);
   --selection: rgba(244, 244, 245, 0.24);
-  --canvas-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M32 0V32M0 32H32' fill='none' stroke='%23f4f4f5' stroke-opacity='0.07'/%3E%3Ccircle cx='0' cy='0' r='1' fill='%23f4f4f5' fill-opacity='0.1'/%3E%3C/svg%3E");
 }
 
 .dark .band-invert {
@@ -640,24 +637,15 @@ p {
   background-color: #27272a;
 }
 
-.paper-canvas,
-.band-paper,
-.band-surface {
-  background-image: var(--canvas-tile);
-  background-size: 32px 32px;
-  background-attachment: fixed;
-}
-
 @media (min-width: 1280px) {
   .paper-canvas,
   .band-paper,
   .band-surface {
-    background-image: var(--canvas-guide), var(--canvas-guide),
-      var(--canvas-tile);
-    background-size: 1px 100%, 1px 100%, 32px 32px;
-    background-position: calc(50% - 590px) 0, calc(50% + 590px) 0, 0 0;
-    background-repeat: repeat-y, repeat-y, repeat;
-    background-attachment: fixed, fixed, fixed;
+    background-image: var(--canvas-guide), var(--canvas-guide);
+    background-size: 1px 100%;
+    background-position: calc(50% - 590px) 0, calc(50% + 590px) 0;
+    background-repeat: repeat-y;
+    background-attachment: fixed;
   }
 }
 

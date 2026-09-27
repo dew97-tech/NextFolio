@@ -27,6 +27,8 @@ interface EditablePost {
   published?: boolean | null;
   readTime?: string | null;
   tags?: string[] | null;
+  topic?: string | null;
+  keywords?: string[] | null;
 }
 
 export default function PostForm({ post }: { post?: EditablePost }) {
@@ -377,6 +379,8 @@ export default function PostForm({ post }: { post?: EditablePost }) {
             <ImagePromptPanel
               title={title}
               description={description}
+              topic={post?.topic ?? ""}
+              keywords={post?.keywords ?? []}
               tags={tags}
               content={content}
             />

@@ -296,7 +296,9 @@ export interface ImagePromptActionState {
 export async function generateImagePrompt(input: {
   title: string;
   description: string;
-  tags: string;
+  topic: string;
+  keywords: string[];
+  tags: string[];
   content: string;
 }): Promise<ImagePromptActionState> {
   const session = await auth();
@@ -307,10 +309,9 @@ export async function generateImagePrompt(input: {
   const context = {
     title: input.title.trim(),
     description: input.description.trim(),
-    tags: input.tags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean),
+    topic: input.topic.trim() || null,
+    keywords: input.keywords.map((keyword) => keyword.trim()).filter(Boolean),
+    tags: input.tags.map((tag) => tag.trim()).filter(Boolean),
     content: input.content,
   };
 

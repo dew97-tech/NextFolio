@@ -7,11 +7,15 @@ import { useState, useTransition } from "react";
 export default function ImagePromptPanel({
   title,
   description,
+  topic,
+  keywords,
   tags,
   content,
 }: {
   title: string;
   description: string;
+  topic: string;
+  keywords: string[];
   tags: string[];
   content: string;
 }) {
@@ -28,7 +32,9 @@ export default function ImagePromptPanel({
       const state = await generateImagePrompt({
         title,
         description,
-        tags: tags.join(", "),
+        topic,
+        keywords,
+        tags,
         content,
       });
 
