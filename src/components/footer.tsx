@@ -1,4 +1,5 @@
 import { resumeData } from "@/data/resume";
+import Link from "next/link";
 
 export function Footer() {
   const { personal } = resumeData;
@@ -66,9 +67,37 @@ export function Footer() {
         </div>
 
         <div className="md:col-span-12">
-          <p className="border-t border-border pt-6 font-mono text-sm text-ink-faint">
-            {new Date().getFullYear()} David Dew Mallick
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border pt-6">
+            <p className="font-mono text-sm text-ink-faint">
+              {new Date().getFullYear()} David Dew Mallick
+            </p>
+            <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-sm">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="link-draw text-clay-text hover:text-ink-brown"
+                >
+                  Privacy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="link-draw text-clay-text hover:text-ink-brown"
+                >
+                  Terms
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cookies"
+                  className="link-draw text-clay-text hover:text-ink-brown"
+                >
+                  Cookies
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </footer>

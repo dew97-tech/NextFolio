@@ -25,6 +25,8 @@ const MAX_TITLE_LENGTH = 70;
 const MIN_DESCRIPTION_LENGTH = 70;
 const MAX_DESCRIPTION_LENGTH = 190;
 const REQUIRED_SECONDARY_KEYWORDS = 4;
+const MAX_TAG_WORDS = 3;
+const MAX_TAGS = 4;
 
 const BANNED_PHRASES = [
   "in today's fast-paced",
@@ -345,6 +347,15 @@ function validateDraft(
     );
   }
 
+  const tags = Array.from(
+    new Set(
+      (parsed.tags?.length ? parsed.tags : secondaryKeywords)
+        .map((tag) => tag.trim().toLowerCase().replace(/\s+/g, " "))
+        .filter(Boolean)
+        .map((tag) => tag.split(" ").slice(0, MAX_TAG_WORDS).join(" ")),
+    ),
+  ).slice(0, MAX_TAGS);
+
   const linkTargets = Array.from(
     html.matchAll(/href="\/blog\/([a-z0-9-]+)"/g),
     (match) => match[1],
@@ -386,7 +397,7 @@ function validateDraft(
     topic: normalizedTopic.trim(),
     primaryKeyword,
     secondaryKeywords,
-    tags: secondaryKeywords,
+    tags,
     html,
     wordCount,
   };

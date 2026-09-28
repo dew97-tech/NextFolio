@@ -20,8 +20,8 @@ export function ThemeToggle() {
   const mounted = useMounted();
 
   const isDark = resolvedTheme === "dark";
-  const showDark = mounted && isDark;
-  const showLight = mounted && !isDark;
+  const showSun = mounted && isDark;
+  const showMoon = mounted && !isDark;
 
   const currentLabel = mounted ? (isDark ? "Dark" : "Light") : "Theme";
   const nextLabel = mounted ? (isDark ? "light" : "dark") : "the other";
@@ -32,28 +32,26 @@ export function ThemeToggle() {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={`${currentLabel} mode. Switch to ${nextLabel} mode.`}
       title={`${currentLabel} mode. Switch to ${nextLabel} mode.`}
-      className="inline-flex h-11 items-center gap-1.5 rounded text-sm text-ink-brown transition-colors hover:text-clay-text"
+      className="inline-flex h-11 w-11 items-center justify-center rounded text-ink-brown transition-colors hover:text-clay-text"
     >
-      <span className="relative inline-flex h-[15px] w-[15px] items-center justify-center">
+      <span className="relative inline-flex h-[18px] w-[18px] items-center justify-center">
         <Sun
-          size={15}
+          size={18}
           aria-hidden="true"
           className={cn(
             "absolute transition-[transform,opacity] duration-500",
-            showLight ? "rotate-0 opacity-100" : "-rotate-90 opacity-0",
+            showSun ? "rotate-0 opacity-100" : "-rotate-90 opacity-0",
           )}
         />
         <Moon
-          size={15}
+          size={18}
           aria-hidden="true"
           className={cn(
             "absolute transition-[transform,opacity] duration-500",
-            showDark ? "rotate-0 opacity-100" : "rotate-90 opacity-0",
+            showMoon ? "rotate-0 opacity-100" : "rotate-90 opacity-0",
           )}
         />
       </span>
-
-      <span>{currentLabel}</span>
     </button>
   );
 }
