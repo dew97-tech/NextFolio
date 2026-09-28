@@ -1,6 +1,6 @@
 import prisma from "@/app/lib/prisma";
 import { getSiteUrl } from "@/app/lib/site";
-import { getTagSummaries } from "@/app/lib/tags";
+import { loadTagSummaries } from "@/app/lib/tags";
 import { caseStudies } from "@/data/case-studies";
 import { MetadataRoute } from "next";
 
@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const newestPostUpdate = posts[0]?.updatedAt;
 
-    const tagEntries: MetadataRoute.Sitemap = (await getTagSummaries())
+    const tagEntries: MetadataRoute.Sitemap = (await loadTagSummaries())
       .filter((summary) => summary.count >= 3)
       .map((summary) => ({
         url: `${siteUrl}/blog/tag/${summary.slug}`,

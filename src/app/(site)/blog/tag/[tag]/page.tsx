@@ -1,7 +1,7 @@
 import prisma from "@/app/lib/prisma";
 import { publishedDate } from "@/app/lib/post-dates";
 import { getSiteUrl } from "@/app/lib/site";
-import { getTagSummaries, displayTag } from "@/app/lib/tags";
+import { getTagSummaries, loadTagSummaries, displayTag } from "@/app/lib/tags";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,8 +12,10 @@ export const revalidate = 3600;
 const MIN_INDEXABLE_POSTS = 3;
 
 export async function generateStaticParams() {
-  const summaries = await getTagSummaries();
-  return summaries.map((summary) => ({ tag: summary.slug }));
+  const summaries = await loadTagSummaries();
+  return summaries
+    .filter((summary) => summary.count >= MIN_INDEXABLE_POSTS)
+    .map((summary) => ({ tag: summary.slug }));
 }
 
 export async function generateMetadata({

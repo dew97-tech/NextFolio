@@ -1,4 +1,5 @@
 import prisma from "@/app/lib/prisma";
+import { cache } from "react";
 import { slugify } from "./slug";
 
 const MAX_TAG_WORDS = 3;
@@ -28,7 +29,7 @@ export type TagSummary = {
   lastModified?: Date;
 };
 
-export async function getTagSummaries(): Promise<TagSummary[]> {
+export async function loadTagSummaries(): Promise<TagSummary[]> {
   const posts = await prisma.post.findMany({
     where: { published: true },
     select: { tags: true, updatedAt: true },
@@ -84,3 +85,5 @@ export async function getTagSummaries(): Promise<TagSummary[]> {
     })
     .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 }
+
+export const getTagSummaries = cache(loadTagSummaries);
