@@ -2,7 +2,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteUrl } from "@/app/lib/site";
 import { resumeData } from "@/data/resume";
 import type { Metadata, Viewport } from "next";
-import { EB_Garamond, Geist_Mono, Inter } from "next/font/google";
+import { EB_Garamond, Geist_Mono, Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
@@ -25,6 +25,13 @@ const geistMono = Geist_Mono({
 const ebGaramond = EB_Garamond({
   style: ["normal", "italic"],
   variable: "--font-heading",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  style: ["normal", "italic"],
+  variable: "--font-reading",
   subsets: ["latin"],
   display: "swap",
 });
@@ -183,7 +190,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${geistMono.variable} ${ebGaramond.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
+        className={`${inter.variable} ${geistMono.variable} ${ebGaramond.variable} ${newsreader.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"

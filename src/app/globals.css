@@ -820,9 +820,9 @@ body::after {
 
 .article-content {
   color: var(--ink);
-  font-family: var(--font-serif);
+  font-family: var(--font-reading, Georgia, "Times New Roman", serif);
   font-size: 1.1875rem;
-  line-height: 1.7;
+  line-height: 1.75;
   word-break: break-word;
 }
 
@@ -1123,9 +1123,9 @@ body::after {
   outline: none;
   min-height: 320px;
   color: var(--foreground);
-  font-family: var(--font-serif);
+  font-family: var(--font-reading, Georgia, "Times New Roman", serif);
   font-size: 1.1875rem;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

@@ -63,9 +63,10 @@ Semantic status colors (`--ok`, `--warn`, `--danger`) are functional, not decora
 | --- | --- | --- |
 | Display and headings | **EB Garamond** 400/500 | Medium weight, tight tracking, `#18181B` |
 | Body and UI | **Inter** 400/500/600 | 16px minimum, line-height 1.65 |
+| Article body | **Newsreader** 400/600 + italic | 19px, line-height 1.75, 60 to 75ch measure |
 | Labels, meta, tags, code | **Geist Mono** 400/500 | Uppercase for labels, tabular figures for numbers |
 
-Scale: name `clamp(2.75rem, 6.5vw, 5.25rem)`; section title `clamp(1.75rem, 3vw, 2.25rem)`; case-study title `clamp(2.5rem, 5.5vw, 4rem)`; metric value `3xl` to `4xl`; entry title `1.25rem` Inter 600; body `1.125rem`; small `0.875rem`.
+Scale: name `clamp(2.75rem, 6.5vw, 5.25rem)`; section title `clamp(1.75rem, 3vw, 2.25rem)`; case-study title `clamp(2.5rem, 5.5vw, 4rem)`; metric value `3xl` to `4xl`; entry title `1.25rem` Inter 600; body `1.125rem`; article body `1.1875rem`; small `0.875rem`.
 
 Rules:
 
