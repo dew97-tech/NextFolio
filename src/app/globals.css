@@ -823,6 +823,7 @@ body::after {
   font-family: var(--font-reading, Georgia, "Times New Roman", serif);
   font-size: 1.1875rem;
   line-height: 1.75;
+  font-optical-sizing: auto;
   word-break: break-word;
 }
 
@@ -1126,6 +1127,7 @@ body::after {
   font-family: var(--font-reading, Georgia, "Times New Roman", serif);
   font-size: 1.1875rem;
   line-height: 1.75;
+  font-optical-sizing: auto;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
