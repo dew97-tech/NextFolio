@@ -1,5 +1,6 @@
 import type { CaseStudy, CaseStudySection } from "@/data/case-study";
 import { resumeData } from "@/data/resume";
+import { getSiteUrl } from "@/app/lib/site";
 import Link from "next/link";
 
 function sectionParagraphs(
@@ -15,9 +16,51 @@ function sectionParagraphs(
 
 export function CaseStudyPage({ data }: { data: CaseStudy }) {
   const { personal } = resumeData;
+  const siteUrl = getSiteUrl();
+  const pageUrl = `${siteUrl}${data.href}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${pageUrl}#webpage`,
+        url: pageUrl,
+        name: `${data.title} case study`,
+        description: data.description,
+        inLanguage: "en",
+        isPartOf: { "@id": `${siteUrl}/#website` },
+        author: {
+          "@type": "Person",
+          "@id": `${siteUrl}/#person`,
+          name: personal.name,
+          url: siteUrl,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${pageUrl}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: data.title,
+            item: pageUrl,
+          },
+        ],
+      },
+    ],
+  };
 
   return (
     <article className="mx-auto w-full max-w-[1180px] px-5 pb-24 pt-10 md:px-8 md:pt-14">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <Link
         href="/#projects"
         className="link-draw font-mono text-sm text-clay-text hover:text-ink-brown"

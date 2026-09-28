@@ -28,6 +28,23 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
+    const csp = [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline'${
+        process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""
+      }`,
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "media-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+      "upgrade-insecure-requests",
+    ].join("; ");
+
     return [
       {
         source: "/admin/:path*",
@@ -66,8 +83,16 @@ const nextConfig: NextConfig = {
             value: "camera=(), microphone=(), geolocation=()",
           },
           {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
+          },
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: csp,
           },
         ],
       },
@@ -79,7 +104,20 @@ const nextConfig: NextConfig = {
   },
 
   async redirects() {
-    return [];
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "david-dew-mallick.vercel.app" }],
+        destination: "https://davidmallick.dev/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "portfolio-gilt-beta-15.vercel.app" }],
+        destination: "https://davidmallick.dev/:path*",
+        permanent: true,
+      },
+    ];
   },
 
   async rewrites() {

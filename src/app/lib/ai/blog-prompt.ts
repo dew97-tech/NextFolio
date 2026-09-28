@@ -123,13 +123,15 @@ Return exactly one JSON object and nothing else. No markdown fences, no commenta
   "primaryKeyword": "The main phrase a reader would search for",
   "secondaryKeywords": ["exactly 4 related search phrases"],
   "readTime": "Estimated read time such as '8 min read'",
-  "tags": ["copy of the 4 secondaryKeywords, lowercase"],
+  "tags": ["4 short topic labels, 1 to 3 words each, lowercase, derived from the secondaryKeywords"],
   "html": "The full article as an HTML fragment string"
 }
 
 WRITING FOR READERS
 - Write for an engineer who has a specific problem, not for a search engine. Every structural decision should make the article more useful to them.
 - Open with the concrete payoff: what breaks, what it costs, and what the reader will be able to do about it. Keep the introduction under 100 words.
+- Lead every H2 section with a direct answer of 40 to 60 words that stands on its own if quoted, then expand with detail. Answer engines extract passages, not whole pages.
+- When a section compares options, use the comparison table component instead of long prose.
 - Include at least one thing the reader cannot get from a summary of the documentation: a specific failure mode you can reason about, a trade-off with numbers or limits attached, a debugging sequence, or a comparison that ends in an explicit recommendation.
 - Accuracy over confidence. Explain how a reader can verify a claim themselves. Never fabricate benchmarks, citations, incidents, employers, clients, or metrics.
 - Do not imply David personally built, tested, or operated a system unless the AUTHOR PROFILE directly supports that claim.
@@ -149,7 +151,7 @@ SEARCH BASICS
 LENGTH AND DENSITY
 - Target 1,000 to 1,500 words. Go shorter when the subject is narrow. Never pad a post to reach a word count.
 - Keep sections focused and vary their length to match the material. Avoid repeating the same section pattern in every post.
-- Add an FAQ only when it answers real follow-up questions. Use no more than 3 question and answer pairs, or omit it.
+- Add an FAQ only when it answers real follow-up questions. When you include one, use exactly this structure so the page can emit FAQ structured data: <h2>Frequently asked questions</h2> followed by 2 or 3 <h3>question</h3><p>answer</p> pairs with 40 to 60 word answers. Omit the section entirely otherwise.
 - Every sentence must carry information. If a paragraph's first sentence only restates the heading, delete it.
 - Banned punctuation: never use an em dash or en dash, as characters or as HTML entities. Use a hyphen, a comma, a colon, or split the sentence.
 - Banned filler phrases: "in today's fast-paced world", "in this article", "delve into", "game-changer", "in the ever-evolving", "landscape", "moreover", "furthermore", "it's important to note", "when it comes to", "unlock the power", "revolutionize", "seamless", "robust", "elevate", "empower", "leverage", "journey", "deep dive", "in conclusion", "let's dive in".
@@ -161,6 +163,7 @@ HTML CONTRACT (MUST FOLLOW EXACTLY)
   * Key takeaway: <div class="highlight-box"><strong>Heading</strong><p>...</p></div>
   * Pro tip: <div class="pro-tip"><p>...</p></div>
   * Table: <div class="table-wrapper"><table class="comparison-table">...</table></div>
+  * FAQ: <h2>Frequently asked questions</h2> with 2 or 3 <h3>question</h3><p>answer</p> pairs
   * Code: <pre class="code-snippet"><code>...</code></pre>
   * Standard: <p>, <h2>, <h3>, <h4>, <ul>, <ol>, <li>, <blockquote>, <strong>, <em>, <a>, <hr>, <code>, <table>.
 - Use code snippets when code is central to the explanation, and keep them runnable. Add a table or callout only when it makes a comparison or important caveat clearer. Do not insert components to satisfy a quota.
@@ -205,7 +208,7 @@ REQUIREMENTS
 - Rotate categories relative to the most recent posts when a strong alternative signal exists.
 - Prefer a Search Console query over a generic trend signal when the two are close. Where a query already has a matching published post, go deeper on a specific sub-topic of it rather than restating the same article.
 - Forbidden topics include anything AI/ML/LLM related, even if it appears in the signals above.
-- Before returning, verify: the title is 35 to 50 characters and describes the article accurately; the description is 120 to 155 characters and reads as a summary of this specific page; the primaryKeyword appears in the title and reads naturally in the body with no repetition target; exactly 4 secondaryKeywords are present and the ones you use fit their sentences; at least one internal link points to a published post listed above; code and comparisons are accurate; the word count is useful rather than padded; every link is real.
+- Before returning, verify: the title is 35 to 50 characters and describes the article accurately; the description is 120 to 155 characters and reads as a summary of this specific page; the primaryKeyword appears in the title and reads naturally in the body with no repetition target; exactly 4 secondaryKeywords are present and the ones you use fit their sentences; tags are 1 to 3 word lowercase labels, never full keyword phrases; at least one internal link points to a published post listed above; code and comparisons are accurate; the word count is useful rather than padded; every link is real.
 - Return the single JSON object now.`;
 
   return [

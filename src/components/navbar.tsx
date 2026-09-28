@@ -17,7 +17,7 @@ export function Navbar() {
 
         <RunningHead />
 
-        <div className="hidden items-center gap-7 md:flex">
+        <div className="hidden items-center gap-4 md:flex">
           <NavLinks />
           <ThemeToggle />
         </div>

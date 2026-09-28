@@ -94,6 +94,8 @@ Rules do the work: 1px `--rule` for separation, 2px `--rule-strong` for emphasis
 - Page and band surfaces are flat. No texture, grid, or pattern is painted behind content.
 - Two 1px vertical guide rails at 10% run the full height from `xl` up, framing the container 590px either side of centre.
 - Container is 1180px with 20px gutters on mobile and 32px at `md`.
+- Article pages keep a 720px reading measure and, from `xl`, gain a 300px sticky contents rail inside the same container, so the guide rails frame the pair rather than a half-empty column. Posts with fewer than three headings stay single column.
+- Topic hubs under `/blog/tag` reuse the blog ledger; hubs below three posts stay `noindex` and out of the sitemap.
 - Registration crosshair: a 9px `+` in charcoal, centred on the section rule at the container's left edge. Hidden below `md`.
 - Project rows are an asymmetric ledger: title and meta left, detail right at `lg`. No three equal cards.
 - Hero carries at most four text elements: name, statement, role line, actions. No scroll cue, badge, availability dot, or facts strip.

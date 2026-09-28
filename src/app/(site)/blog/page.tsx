@@ -1,5 +1,7 @@
 import prisma from "@/app/lib/prisma";
 import { publishedDate } from "@/app/lib/post-dates";
+import { getSiteUrl } from "@/app/lib/site";
+import { displayTag } from "@/app/lib/tags";
 import BlogPagination from "@/app/ui/blog-pagination";
 import BlogSearch from "@/app/ui/blog-search";
 import { Metadata } from "next";
@@ -88,8 +90,44 @@ export default async function BlogPage({
     },
   });
 
+  const siteUrl = getSiteUrl();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${siteUrl}/blog#collection`,
+        url: `${siteUrl}/blog`,
+        name: "Blog",
+        description:
+          "Notes on building web applications: Next.js, Laravel, databases, and the automation around them.",
+        inLanguage: "en",
+        isPartOf: { "@id": `${siteUrl}/#website` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${siteUrl}/blog#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Blog",
+            item: `${siteUrl}/blog`,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto w-full max-w-[1180px] px-5 pb-24 pt-16 md:px-8 md:pb-28 md:pt-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <header className="max-w-[54ch]">
         <h1 className="font-serif text-[clamp(2rem,4vw,2.75rem)] leading-tight tracking-[-0.02em] text-ink-brown">
           Blog
@@ -168,8 +206,8 @@ export default async function BlogPage({
                         {post.tags.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-2">
                             {post.tags.slice(0, 3).map((tag: string) => (
-                              <span key={tag} className="blog-tag">
-                                {tag}
+                              <span key={tag} className="blog-tag" title={tag}>
+                                {displayTag(tag)}
                               </span>
                             ))}
                           </div>
@@ -177,7 +215,7 @@ export default async function BlogPage({
                       </div>
 
                       {post.thumbnail && (
-                        <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                        <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded border border-border bg-muted">
                           <Image
                             src={post.thumbnail}
                             alt=""

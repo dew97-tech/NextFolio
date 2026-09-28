@@ -1,5 +1,6 @@
 import prisma from "@/app/lib/prisma";
 import { getSiteUrl } from "@/app/lib/site";
+import { getTagSummaries } from "@/app/lib/tags";
 import { caseStudies } from "@/data/case-studies";
 import { MetadataRoute } from "next";
 
@@ -32,6 +33,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const newestPostUpdate = posts[0]?.updatedAt;
 
+    const tagEntries: MetadataRoute.Sitemap = (await getTagSummaries())
+      .filter((summary) => summary.count >= 3)
+      .map((summary) => ({
+        url: `${siteUrl}/blog/tag/${summary.slug}`,
+        lastModified: summary.lastModified,
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
+      }));
+
     return [
       {
         url: siteUrl,
@@ -51,6 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.8,
       })),
+      ...tagEntries,
     ];
   } catch (error) {
     console.error("Failed to fetch posts for sitemap, serving static routes only:", error);

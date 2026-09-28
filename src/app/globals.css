@@ -826,6 +826,11 @@ body::after {
   word-break: break-word;
 }
 
+.article-content h2,
+.article-content h3 {
+  scroll-margin-top: 6rem;
+}
+
 .article-content h1,
 .article-content h2 {
   font-family: var(--font-serif);

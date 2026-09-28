@@ -1,10 +1,16 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteUrl } from "@/app/lib/site";
+import { resumeData } from "@/data/resume";
 import type { Metadata, Viewport } from "next";
 import { EB_Garamond, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
+const { personal } = resumeData;
+
+const siteTitle = "David Dew Mallick | Software Engineer";
+const siteDescription =
+  "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,28 +31,61 @@ const ebGaramond = EB_Garamond({
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Person",
-  name: "David Dew Mallick",
-  url: siteUrl,
-  jobTitle: "Software Engineer",
-  sameAs: [
-    "https://github.com/dew97-tech",
-    "https://www.linkedin.com/in/david-dew-mallick-618a6223b/",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${siteUrl}/#person`,
+      name: personal.name,
+      url: siteUrl,
+      jobTitle: personal.role,
+      description: siteDescription,
+      sameAs: [personal.github, personal.linkedin],
+      worksFor: {
+        "@type": "Organization",
+        name: personal.company,
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: personal.name,
+      description: siteDescription,
+      inLanguage: "en",
+      publisher: { "@id": `${siteUrl}/#person` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${siteUrl}/blog?query={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: personal.name,
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/android-chrome-512.png`,
+        width: 512,
+        height: 512,
+      },
+      founder: { "@id": `${siteUrl}/#person` },
+      sameAs: [personal.github, personal.linkedin],
+    },
   ],
-  worksFor: {
-    "@type": "Organization",
-    name: "JB Connect Ltd.",
-  },
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "David Dew Mallick | Software Engineer",
+    default: siteTitle,
     template: "%s | David Dew Mallick",
   },
-  description:
-    "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
+  description: siteDescription,
   keywords: [
     "Software Engineer",
     "Next.js",
@@ -57,9 +96,9 @@ export const metadata: Metadata = {
     "Portfolio",
     "David Dew Mallick",
   ],
-  authors: [{ name: "David Dew Mallick" }],
-  creator: "David Dew Mallick",
-  publisher: "David Dew Mallick",
+  authors: [{ name: personal.name }],
+  creator: personal.name,
+  publisher: personal.name,
   alternates: {
     canonical: "/",
     types: {
@@ -81,10 +120,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: siteUrl,
-    title: "David Dew Mallick | Software Engineer",
-    description:
-      "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
-    siteName: "David Dew Mallick",
+    title: siteTitle,
+    description: siteDescription,
+    siteName: personal.name,
     images: [
       {
         url: "/og.png",
@@ -96,9 +134,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "David Dew Mallick | Software Engineer",
-    description:
-      "Software engineer in Dhaka, Bangladesh building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
+    title: siteTitle,
+    description: siteDescription,
     creator: "@dew97_tech",
     images: ["/og.png"],
   },
@@ -111,9 +148,6 @@ export const metadata: Metadata = {
       { url: "/favicon.svg?v=3", type: "image/svg+xml" },
     ],
     apple: [{ url: "/icon.svg?v=3" }],
-  },
-  other: {
-    "application/ld+json": JSON.stringify(jsonLd),
   },
 };
 
@@ -135,12 +169,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=3" />
-        <link rel="alternate icon" href="/icon.svg?v=3" />
-        <link rel="apple-touch-icon" href="/icon.svg?v=3" />
-        <link rel="preconnect" href="https://github.com" />
-        <link rel="preconnect" href="https://linkedin.com" />
-        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
       </head>
       <body
         suppressHydrationWarning

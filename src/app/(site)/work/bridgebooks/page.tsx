@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     type: "article",
     title: "BridgeBooks System case study",
     description: bridgeBooksCaseStudy.ogDescription,
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "David Dew Mallick, Software Engineer",
+      },
+    ],
   },
 };
 
