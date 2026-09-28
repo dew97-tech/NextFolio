@@ -36,7 +36,7 @@ export const resumeData = {
     email: "david.dew.mallick@g.bracu.ac.bd",
     phone: "+880-1836475822",
     github: "https://github.com/dew97-tech",
-    linkedin: "https://www.linkedin.com/in/david-dew-mallick-618a6223b/",
+    linkedin: "https://www.linkedin.com/in/david-dew-mallick/",
     location: "Dhaka, Bangladesh",
     tagline:
       "Software engineer building AI-driven SaaS infrastructure, cloud pipelines, and data-heavy features with Laravel and AWS.",
