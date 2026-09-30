@@ -2,21 +2,24 @@ import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 import { fetchSearchQueries } from "@/app/lib/google/search-console";
 import prisma from "@/app/lib/prisma";
+import { getGenerationSettings } from "@/app/lib/settings";
 import { buildBlogMessages } from "./blog-prompt";
+import { callModel } from "./call-model";
 import { MAX_AUTO_DRAFTS } from "./constants";
 import { buildKeywordCandidates } from "./keywords";
+import { DEFAULT_GENERATION_CHAIN, getModel, type GoModel } from "./models";
 import {
-  chatCompletion,
   extractJsonObject,
-  GO_MODELS,
   type ChatCompletionResult,
   type ChatMessage,
+  type ReasoningEffort,
 } from "./opencode-go";
 import { CURATED_TOPICS, fetchTrends, isBannedTopic, type TrendItem } from "./trends";
 
 const RUNNING_LOCK_MINUTES = 15;
 
 const MAX_TOTAL_GENERATION_MS = 215_000;
+const GENERATION_MAX_TOKENS = 6000;
 const MIN_WORD_COUNT = 900;
 const MAX_WORD_COUNT = 2_600;
 const MAX_TITLE_SIMILARITY = 0.6;
@@ -428,7 +431,8 @@ function normalizeTitle(value: string): string {
 }
 
 async function generateForModel(
-  model: (typeof GO_MODELS)[number],
+  model: GoModel,
+  reasoningEffort: ReasoningEffort,
   messages: ChatMessage[],
   sessionId: string,
   existingTitles: string[],
@@ -444,13 +448,13 @@ async function generateForModel(
       throw new Error("Generation deadline exceeded during self-repair");
     }
 
-    const result = await chatCompletion({
-      model: model.id,
+    const result = await callModel({
+      modelId: model.id,
       messages: attemptMessages,
       sessionId,
       temperature: 0.7,
-      maxTokens: model.maxTokens,
-      reasoningEffort: model.reasoningEffort,
+      maxTokens: GENERATION_MAX_TOKENS,
+      reasoningEffort,
     });
 
     try {
@@ -606,7 +610,10 @@ export async function runBlogGeneration(
     const modelErrors: string[] = [];
     const structuredErrors: { model: string; message: string }[] = [];
 
-    for (const model of GO_MODELS) {
+    const { chain } = await getGenerationSettings();
+    const modelChain = chain.length > 0 ? chain : DEFAULT_GENERATION_CHAIN;
+
+    for (const selection of modelChain) {
       if (Date.now() - startedAt > MAX_TOTAL_GENERATION_MS) {
         lastError = new Error("Generation deadline exceeded before all models were tried");
         structuredErrors.push({
@@ -616,9 +623,19 @@ export async function runBlogGeneration(
         break;
       }
 
+      const model = getModel(selection.modelId);
+      if (!model) {
+        lastModel = selection.modelId;
+        const message = `Unknown model id "${selection.modelId}"`;
+        modelErrors.push(`${selection.modelId}: ${message}`);
+        structuredErrors.push({ model: selection.modelId, message });
+        continue;
+      }
+
       try {
         const { draft, result } = await generateForModel(
           model,
+          selection.reasoningEffort,
           messages,
           sessionId,
           existingTitles,

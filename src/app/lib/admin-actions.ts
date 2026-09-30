@@ -1,12 +1,14 @@
 "use server";
 
 import { runBlogGeneration } from "@/app/lib/ai/generate-blog";
+import { callModel } from "@/app/lib/ai/call-model";
 import {
   buildImagePromptMessages,
   cleanImagePrompt,
   fallbackImagePrompt,
 } from "@/app/lib/ai/image-prompt";
-import { chatCompletion, GO_MODELS } from "@/app/lib/ai/opencode-go";
+import { getModel } from "@/app/lib/ai/models";
+import { getGenerationSettings, getImageSettings } from "@/app/lib/settings";
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/auth";
 import { deleteBlobIfUnused } from "@/app/lib/blob";
@@ -289,9 +291,11 @@ export async function triggerGeneration(
 
   const modelErrors =
     result.errors?.filter((entry) => entry.model !== "deadline") ?? [];
+  const { chain } = await getGenerationSettings();
+  const chainLength = chain.length > 0 ? chain.length : 1;
   const message =
-    modelErrors.length >= GO_MODELS.length
-      ? `Tried all ${GO_MODELS.length} models. None produced a valid draft.`
+    modelErrors.length >= chainLength
+      ? `Tried all ${chainLength} models. None produced a valid draft.`
       : "Generation failed before a draft passed validation.";
   const detail = result.errors?.length
     ? result.errors
@@ -335,14 +339,22 @@ export async function generateImagePrompt(input: {
   }
 
   try {
-    const result = await chatCompletion({
-      model: GO_MODELS[0].id,
+    const imageSettings = await getImageSettings();
+    const model =
+      getModel(imageSettings.modelId) ?? getModel("glm-5.3-flash");
+    if (!model) {
+      return { prompt: fallbackImagePrompt(context) };
+    }
+
+    const result = await callModel({
+      modelId: model.id,
       messages: buildImagePromptMessages(context),
       sessionId: `portfolio-cover-${Date.now()}`,
       temperature: 0.8,
       maxTokens: 1_200,
       timeoutMs: 40_000,
       jsonMode: false,
+      reasoningEffort: imageSettings.reasoningEffort,
     });
 
     const prompt = cleanImagePrompt(result.content);
