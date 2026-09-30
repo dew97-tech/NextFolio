@@ -101,3 +101,9 @@ model GenerationRun {
   @@index([startedAt])
   @@index([status, startedAt(sort: Desc)])
 }
+
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
