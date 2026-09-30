@@ -1,5 +1,6 @@
 import { signOut } from "@/auth";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ToastProvider } from "@/components/ui/toast";
 import AdminNav from "@/app/ui/admin-nav";
 import { ArrowSquareOut, SignOut } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
@@ -61,7 +62,7 @@ export default function AdminLayout({
         id="main-content"
         className="mx-auto w-full max-w-[1180px] flex-1 px-5 py-8 md:px-8 md:py-10"
       >
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </main>
     </div>
   );

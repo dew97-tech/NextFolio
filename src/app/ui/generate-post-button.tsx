@@ -4,18 +4,50 @@ import {
   triggerGeneration,
   type GenerationActionState,
 } from "@/app/lib/admin-actions";
-import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 import { CircleNotch, Sparkle } from "@phosphor-icons/react";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 
 export default function GeneratePostButton() {
   const [state, formAction, pending] = useActionState<
     GenerationActionState | null,
     FormData
   >(triggerGeneration, null);
+  const { toast } = useToast();
+  const handledState = useRef<GenerationActionState | null>(null);
+
+  useEffect(() => {
+    if (!state || state === handledState.current) return;
+    handledState.current = state;
+
+    if (state.status === "success") {
+      toast({
+        variant: "success",
+        label: "Draft created",
+        title: state.message,
+      });
+      return;
+    }
+
+    if (state.status === "skipped") {
+      toast({
+        variant: "info",
+        label: "Generation paused",
+        title: state.message,
+      });
+      return;
+    }
+
+    toast({
+      variant: "error",
+      label: "Generation failed",
+      title: state.message,
+      detail: state.detail,
+    });
+  }, [state, toast]);
 
   return (
-    <form action={formAction} className="flex flex-col items-end gap-1">
+    <form action={formAction}>
       <button
         type="submit"
         disabled={pending}
@@ -29,21 +61,6 @@ export default function GeneratePostButton() {
         )}
         <span>{pending ? "Generating…" : "Generate now"}</span>
       </button>
-
-      {state?.message ? (
-        <span
-          className={cn(
-            "max-w-[260px] text-right text-[11px] leading-tight",
-            state.status === "success"
-              ? "text-ok"
-              : state.status === "failed"
-                ? "text-warn"
-                : "text-ink-faint",
-          )}
-        >
-          {state.message}
-        </span>
-      ) : null}
     </form>
   );
 }

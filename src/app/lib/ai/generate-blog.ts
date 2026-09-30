@@ -88,7 +88,12 @@ export type GenerationResult =
       wordCount: number;
       cost?: number;
     }
-  | { status: "failed"; error: string; model?: string };
+  | {
+      status: "failed";
+      error: string;
+      model?: string;
+      errors?: { model: string; message: string }[];
+    };
 
 const STOP_WORDS = new Set([
   "the",
@@ -599,10 +604,15 @@ export async function runBlogGeneration(
     let lastError: unknown;
     let lastModel: string | undefined;
     const modelErrors: string[] = [];
+    const structuredErrors: { model: string; message: string }[] = [];
 
     for (const model of GO_MODELS) {
       if (Date.now() - startedAt > MAX_TOTAL_GENERATION_MS) {
         lastError = new Error("Generation deadline exceeded before all models were tried");
+        structuredErrors.push({
+          model: "deadline",
+          message: "Generation deadline exceeded before all models were tried",
+        });
         break;
       }
 
@@ -671,6 +681,7 @@ export async function runBlogGeneration(
         const message =
           error instanceof Error ? error.message : "Unknown model error";
         modelErrors.push(`${model.id}: ${message}`);
+        structuredErrors.push({ model: model.id, message });
       }
     }
 
@@ -691,7 +702,7 @@ export async function runBlogGeneration(
       },
     });
 
-    return { status: "failed", error: message, model: lastModel };
+    return { status: "failed", error: message, model: lastModel, errors: structuredErrors };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown orchestrator error";

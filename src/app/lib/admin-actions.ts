@@ -260,6 +260,7 @@ export async function deletePost(id: string) {
 export interface GenerationActionState {
   status: "success" | "skipped" | "failed";
   message: string;
+  detail?: string;
 }
 
 export async function triggerGeneration(
@@ -286,7 +287,20 @@ export async function triggerGeneration(
     return { status: "skipped", message: result.detail };
   }
 
-  return { status: "failed", message: result.error.slice(0, 240) };
+  const modelErrors =
+    result.errors?.filter((entry) => entry.model !== "deadline") ?? [];
+  const message =
+    modelErrors.length >= GO_MODELS.length
+      ? `Tried all ${GO_MODELS.length} models. None produced a valid draft.`
+      : "Generation failed before a draft passed validation.";
+  const detail = result.errors?.length
+    ? result.errors
+        .map((entry) => `${entry.model}: ${entry.message}`)
+        .join("\n")
+        .slice(0, 1500)
+    : result.error.slice(0, 1500);
+
+  return { status: "failed", message, detail };
 }
 
 export interface ImagePromptActionState {
