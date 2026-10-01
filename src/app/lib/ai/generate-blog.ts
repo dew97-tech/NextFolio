@@ -3,7 +3,7 @@ import { z } from "zod";
 import { fetchSearchQueries } from "@/app/lib/google/search-console";
 import prisma from "@/app/lib/prisma";
 import { getGenerationSettings } from "@/app/lib/settings";
-import { buildBlogMessages } from "./blog-prompt";
+import { buildGenerationContext } from "./blog-prompt";
 import { callModel } from "./call-model";
 import { MAX_AUTO_DRAFTS } from "./constants";
 import { buildKeywordCandidates } from "./keywords";
@@ -12,13 +12,19 @@ import {
   extractJsonObject,
   type ChatCompletionResult,
   type ChatMessage,
-  type ReasoningEffort,
 } from "./opencode-go";
+import {
+  getPrompt,
+  PROMPT_KEYS,
+  PROMPT_REGISTRY,
+  renderPrompt,
+} from "./prompts";
 import { CURATED_TOPICS, fetchTrends, isBannedTopic, type TrendItem } from "./trends";
 
 const RUNNING_LOCK_MINUTES = 15;
 
-const MAX_TOTAL_GENERATION_MS = 215_000;
+const MAX_TOTAL_GENERATION_MS = 260_000;
+const GENERATION_REQUEST_TIMEOUT_MS = 120_000;
 const GENERATION_MAX_TOKENS = 6000;
 const MIN_WORD_COUNT = 900;
 const MAX_WORD_COUNT = 2_600;
@@ -432,7 +438,6 @@ function normalizeTitle(value: string): string {
 
 async function generateForModel(
   model: GoModel,
-  reasoningEffort: ReasoningEffort,
   messages: ChatMessage[],
   sessionId: string,
   existingTitles: string[],
@@ -454,7 +459,8 @@ async function generateForModel(
       sessionId,
       temperature: 0.7,
       maxTokens: GENERATION_MAX_TOKENS,
-      reasoningEffort,
+      reasoningEffort: "none",
+      timeoutMs: GENERATION_REQUEST_TIMEOUT_MS,
     });
 
     try {
@@ -589,20 +595,33 @@ export async function runBlogGeneration(
       signals.slice(0, 3).map((signal) => signal.title),
     ).catch(() => ({ keywords: [] as string[], categories: [] as string[] }));
 
-    const messages = buildBlogMessages({
-      trends: signals,
-      recentPosts,
-      today: new Date(),
-      keywordCandidates: keywordCandidates.keywords,
-      categories: keywordCandidates.categories,
-      searchQueries,
-    });
-
     const existingTitles = recentPosts.map((post) => post.title);
     const usedKeywords = new Set(
       recentPosts
         .map((post) => post.keywords[0]?.toLowerCase())
         .filter((keyword): keyword is string => Boolean(keyword)),
+    );
+
+    const availableKeywords = keywordCandidates.keywords.filter(
+      (keyword) => !usedKeywords.has(keyword.toLowerCase()),
+    );
+    const promptKeywords =
+      availableKeywords.length >= 12 ? availableKeywords : keywordCandidates.keywords;
+
+    const generationPrompt = await getPrompt(PROMPT_KEYS.generation);
+    const generationContext = buildGenerationContext({
+      trends: signals,
+      recentPosts,
+      today: new Date(),
+      keywordCandidates: promptKeywords,
+      categories: keywordCandidates.categories,
+      searchQueries,
+      usedKeywords: Array.from(usedKeywords),
+    });
+    const messages = renderPrompt(
+      PROMPT_REGISTRY[PROMPT_KEYS.generation],
+      generationPrompt,
+      generationContext,
     );
 
     let lastError: unknown;
@@ -635,7 +654,6 @@ export async function runBlogGeneration(
       try {
         const { draft, result } = await generateForModel(
           model,
-          selection.reasoningEffort,
           messages,
           sessionId,
           existingTitles,
