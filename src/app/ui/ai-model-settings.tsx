@@ -245,7 +245,12 @@ export default function AiModelSettings({
   const handleSave = () => {
     startSave(async () => {
       const result = await saveAiSettings({
-        generation: { chain },
+        generation: {
+          chain: chain.map((entry) => ({
+            modelId: entry.modelId,
+            reasoningEffort: "none" as const,
+          })),
+        },
         review: {
           modelId: reviewSelection.modelId,
           reasoningEffort: reviewSelection.reasoningEffort,
@@ -331,7 +336,9 @@ export default function AiModelSettings({
           </h2>
           <p className="mt-1 text-sm text-ink-muted">
             Models are tried in order until one returns a draft that passes
-            validation.
+            validation. Generation always runs without reasoning so the full
+            output budget goes to the article. Reasoning is used for review and
+            image prompts.
           </p>
         </header>
 
@@ -353,19 +360,12 @@ export default function AiModelSettings({
               </div>
 
               <div className="flex items-center gap-2">
-                {modelById.get(entry.modelId)?.reasoning ? (
-                  <ReasoningSelect
-                    value={entry.reasoningEffort}
-                    onChange={(reasoningEffort) =>
-                      updateEntry(index, { reasoningEffort })
-                    }
-                    ariaLabel={`Reasoning effort for generation model ${index + 1}`}
-                  />
-                ) : (
-                  <span className="px-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint">
-                    No reasoning
-                  </span>
-                )}
+                <span
+                  className="px-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint"
+                  title="Generation runs without reasoning; the full output budget goes to the article."
+                >
+                  No reasoning
+                </span>
 
                 <IconButton
                   label="Move up"

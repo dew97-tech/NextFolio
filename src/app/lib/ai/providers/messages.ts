@@ -62,10 +62,10 @@ export const messagesProvider: Provider = async ({
     "anthropic-version": "2023-06-01",
   };
 
-  let response: Response | null = null;
+  let lastErrorText = "";
 
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    response = await sendGoRequest({
+    const response = await sendGoRequest({
       path: "/messages",
       sessionId,
       timeoutMs,
@@ -73,62 +73,64 @@ export const messagesProvider: Provider = async ({
       extraHeaders,
     });
 
-    if (response.ok || response.status !== 400) {
-      break;
-    }
+    if (!response.ok) {
+      const errorBody = await readErrorBody(response);
+      lastErrorText = errorBody;
 
-    const errorBody = await readErrorBody(response);
-    let removed = false;
+      if (response.status === 400) {
+        if (body.thinking && /thinking|reasoning/i.test(errorBody)) {
+          delete body.thinking;
+          continue;
+        }
+        if (body.temperature !== undefined && /temperature/i.test(errorBody)) {
+          delete body.temperature;
+          continue;
+        }
+        if (body.system && /system/i.test(errorBody)) {
+          delete body.system;
+          body.messages = [
+            { role: "user", content: system },
+            ...(body.messages as Array<{ role: string; content: string }>),
+          ];
+          continue;
+        }
+      }
 
-    if (body.thinking && /thinking|reasoning/i.test(errorBody)) {
-      delete body.thinking;
-      removed = true;
-    } else if (body.temperature !== undefined && /temperature/i.test(errorBody)) {
-      delete body.temperature;
-      removed = true;
-    } else if (body.system && /system/i.test(errorBody)) {
-      delete body.system;
-      body.messages = [
-        { role: "user", content: system },
-        ...(body.messages as Array<{ role: string; content: string }>),
-      ];
-      removed = true;
-    }
-
-    if (!removed) {
       throw new Error(
-        `OpenCode Go request failed (400) for ${model.id}: ${errorBody.slice(0, 300)}`,
+        `OpenCode Go request failed (${response.status}) for ${model.id}: ${errorBody.slice(0, 300)}`,
       );
     }
-  }
 
-  if (!response || !response.ok) {
-    const bodyText = response ? await readErrorBody(response) : "";
-    throw new Error(
-      `OpenCode Go request failed (${response?.status ?? "unknown"}) for ${model.id}: ${bodyText.slice(0, 300)}`,
+    const data = (await response.json()) as MessagesApiResponse;
+    const contentBlocks = (data.content ?? []).filter(
+      (block) => block.type === "text" && typeof block.text === "string",
     );
+    const content = contentBlocks.map((block) => block.text as string).join("\n");
+    const finishReason = data.stop_reason ?? null;
+
+    if (!content && finishReason === "max_tokens" && body.thinking) {
+      delete body.thinking;
+      continue;
+    }
+
+    requireContent(content, model.id, finishReason, data.error?.message);
+
+    if (finishReason === "max_tokens") {
+      throw new Error(
+        `OpenCode Go response for ${model.id} was cut off before completion (stop_reason=max_tokens)`,
+      );
+    }
+
+    return {
+      content,
+      finishReason,
+      model: data.model ?? model.id,
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+    };
   }
 
-  const data = (await response.json()) as MessagesApiResponse;
-  const content = (data.content ?? [])
-    .filter((block) => block.type === "text" && typeof block.text === "string")
-    .map((block) => block.text as string)
-    .join("\n");
-  const finishReason = data.stop_reason ?? null;
-
-  requireContent(content, model.id, finishReason, data.error?.message);
-
-  if (finishReason === "max_tokens") {
-    throw new Error(
-      `OpenCode Go response for ${model.id} was cut off before completion (stop_reason=max_tokens)`,
-    );
-  }
-
-  return {
-    content,
-    finishReason,
-    model: data.model ?? model.id,
-    inputTokens: data.usage?.input_tokens,
-    outputTokens: data.usage?.output_tokens,
-  };
+  throw new Error(
+    `OpenCode Go request failed for ${model.id}: ${lastErrorText.slice(0, 300) || "retries exhausted"}`,
+  );
 };

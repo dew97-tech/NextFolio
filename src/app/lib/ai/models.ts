@@ -402,9 +402,9 @@ export interface ModelSelection {
 }
 
 export const DEFAULT_GENERATION_CHAIN: ModelSelection[] = [
-  { modelId: "glm-5.3-flash", reasoningEffort: "none" },
   { modelId: "deepseek-v4.1-flash", reasoningEffort: "none" },
   { modelId: "mimo-v2.5", reasoningEffort: "none" },
+  { modelId: "glm-5.3-flash", reasoningEffort: "none" },
 ];
 
 export const DEFAULT_REVIEW_MODEL: ModelSelection = {

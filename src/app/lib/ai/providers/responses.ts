@@ -63,71 +63,74 @@ export const responsesProvider: Provider = async ({
     ...(reasoningEffort ? { reasoning: { effort: reasoningEffort } } : {}),
   };
 
-  let response: Response | null = null;
+  let lastErrorText = "";
 
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    response = await sendGoRequest({
+    const response = await sendGoRequest({
       path: "/responses",
       sessionId,
       timeoutMs,
       body,
     });
 
-    if (response.ok || response.status !== 400) {
-      break;
-    }
+    if (!response.ok) {
+      const errorBody = await readErrorBody(response);
+      lastErrorText = errorBody;
 
-    const errorBody = await readErrorBody(response);
-    let removed = false;
+      if (response.status === 400) {
+        if (body.reasoning && /reasoning/i.test(errorBody)) {
+          delete body.reasoning;
+          continue;
+        }
+        if (body.text && /(text|format|json)/i.test(errorBody)) {
+          delete body.text;
+          continue;
+        }
+        if (body.temperature !== undefined && /temperature/i.test(errorBody)) {
+          delete body.temperature;
+          continue;
+        }
+        if (body.instructions && /instruction/i.test(errorBody)) {
+          delete body.instructions;
+          continue;
+        }
+      }
 
-    if (body.reasoning && /reasoning/i.test(errorBody)) {
-      delete body.reasoning;
-      removed = true;
-    } else if (body.text && /(text|format|json)/i.test(errorBody)) {
-      delete body.text;
-      removed = true;
-    } else if (body.temperature !== undefined && /temperature/i.test(errorBody)) {
-      delete body.temperature;
-      removed = true;
-    } else if (body.instructions && /instruction/i.test(errorBody)) {
-      delete body.instructions;
-      removed = true;
-    }
-
-    if (!removed) {
       throw new Error(
-        `OpenCode Go request failed (400) for ${model.id}: ${errorBody.slice(0, 300)}`,
+        `OpenCode Go request failed (${response.status}) for ${model.id}: ${errorBody.slice(0, 300)}`,
       );
     }
+
+    const data = (await response.json()) as ResponsesApiResponse;
+    const content = extractText(data);
+    const finishReason =
+      data.status === "incomplete"
+        ? (data.incomplete_details?.reason ?? "incomplete")
+        : (data.status ?? null);
+
+    if (!content && finishReason === "max_output_tokens" && body.reasoning) {
+      delete body.reasoning;
+      continue;
+    }
+
+    requireContent(content, model.id, finishReason, data.error?.message);
+
+    if (finishReason === "max_output_tokens") {
+      throw new Error(
+        `OpenCode Go response for ${model.id} was cut off before completion (incomplete: max_output_tokens)`,
+      );
+    }
+
+    return {
+      content,
+      finishReason,
+      model: data.model ?? model.id,
+      inputTokens: data.usage?.input_tokens,
+      outputTokens: data.usage?.output_tokens,
+    };
   }
 
-  if (!response || !response.ok) {
-    const bodyText = response ? await readErrorBody(response) : "";
-    throw new Error(
-      `OpenCode Go request failed (${response?.status ?? "unknown"}) for ${model.id}: ${bodyText.slice(0, 300)}`,
-    );
-  }
-
-  const data = (await response.json()) as ResponsesApiResponse;
-  const content = extractText(data);
-  const finishReason =
-    data.status === "incomplete"
-      ? (data.incomplete_details?.reason ?? "incomplete")
-      : (data.status ?? null);
-
-  requireContent(content, model.id, finishReason, data.error?.message);
-
-  if (finishReason === "max_output_tokens") {
-    throw new Error(
-      `OpenCode Go response for ${model.id} was cut off before completion (incomplete: max_output_tokens)`,
-    );
-  }
-
-  return {
-    content,
-    finishReason,
-    model: data.model ?? model.id,
-    inputTokens: data.usage?.input_tokens,
-    outputTokens: data.usage?.output_tokens,
-  };
+  throw new Error(
+    `OpenCode Go request failed for ${model.id}: ${lastErrorText.slice(0, 300) || "retries exhausted"}`,
+  );
 };
