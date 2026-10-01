@@ -8,6 +8,7 @@ const items = [
   { name: "Articles", href: "/admin" },
   { name: "New post", href: "/admin/new" },
   { name: "AI settings", href: "/admin/settings" },
+  { name: "Prompts", href: "/admin/prompts" },
 ];
 
 export default function AdminNav() {
