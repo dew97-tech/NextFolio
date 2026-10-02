@@ -10,10 +10,10 @@ import {
 import { getModel } from "@/app/lib/ai/models";
 import { getGenerationSettings, getImageSettings } from "@/app/lib/settings";
 import prisma from "@/app/lib/prisma";
+import { revalidatePostSurfaces } from "@/app/lib/post-revalidate";
 import { auth } from "@/auth";
 import { deleteBlobIfUnused } from "@/app/lib/blob";
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -59,18 +59,6 @@ function isUniqueConstraintError(error: unknown) {
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2002"
   );
-}
-
-function revalidatePostSurfaces(...slugs: string[]) {
-  revalidatePath("/blog");
-  revalidatePath("/blog/tag/[tag]", "page");
-  revalidatePath("/admin");
-  revalidatePath("/sitemap.xml");
-  revalidatePath("/feed.xml");
-
-  for (const slug of slugs) {
-    if (slug) revalidatePath(`/blog/${slug}`);
-  }
 }
 
 export async function createPost(prevState: PostFormState, formData: FormData) {

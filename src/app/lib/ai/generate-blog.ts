@@ -192,7 +192,7 @@ function titleSimilarity(a: string, b: string): number {
 const EM_DASH = String.fromCharCode(0x2014);
 const EN_DASH = String.fromCharCode(0x2013);
 
-function normalizeDashes(text: string): string {
+export function normalizeDashes(text: string): string {
   return text
     .replaceAll(` ${EM_DASH} `, ", ")
     .replaceAll(` ${EN_DASH} `, ", ")
@@ -200,7 +200,7 @@ function normalizeDashes(text: string): string {
     .replaceAll(EN_DASH, "-");
 }
 
-function sanitizeGeneratedHtml(html: string): string {
+export function sanitizeGeneratedHtml(html: string): string {
   const clean = sanitizeHtml(html, {
     allowedTags: [
       "h2",
@@ -251,7 +251,7 @@ function sanitizeGeneratedHtml(html: string): string {
   return normalizeDashes(clean);
 }
 
-function clampDescription(value: string, max = 158): string {
+export function clampDescription(value: string, max = 158): string {
   const text = value.trim();
   if (text.length <= max) return text;
 
