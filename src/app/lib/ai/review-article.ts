@@ -10,10 +10,13 @@ import {
 import { buildAuthorProfile } from "./blog-prompt";
 import { callModel } from "./call-model";
 import {
+  BANNED_PHRASES,
   clampDescription,
   countWords,
   normalizeDashes,
   sanitizeGeneratedHtml,
+  slugify,
+  stripHtml,
 } from "./generate-blog";
 import { extractJsonObject } from "./opencode-go";
 import {
@@ -45,6 +48,7 @@ const findingSchema = z.object({
   title: z.string().min(3).max(120),
   detail: z.string().min(10).max(600),
   fix: z.string().max(600).optional(),
+  verifiedBy: z.enum(["code", "model"]).optional(),
 });
 
 const reviewSchema = z.object({
@@ -199,6 +203,224 @@ function buildSearchQueries(post: {
     .slice(0, 3);
 }
 
+const EXTERNAL_DOC_DOMAINS = [
+  "laravel.com",
+  "php.net",
+  "postgresql.org",
+  "developer.mozilla.org",
+  "redis.io",
+  "docker.com",
+];
+
+const EM_DASH = String.fromCharCode(0x2014);
+const EN_DASH = String.fromCharCode(0x2013);
+const DASH_PATTERN = new RegExp(`[${EM_DASH}${EN_DASH}]`, "g");
+
+function runDeterministicChecks(
+  post: {
+    title: string;
+    description: string;
+    content: string;
+    keywords: string[];
+  },
+  publishedSlugs: Set<string>,
+): { findings: ReviewFinding[]; missingLinks: string[] } {
+  const findings: ReviewFinding[] = [];
+  const add = (finding: Omit<ReviewFinding, "verifiedBy">) => {
+    findings.push({ ...finding, verifiedBy: "code" });
+  };
+
+  const blogLinks = Array.from(
+    post.content.matchAll(/href="\/blog\/([a-z0-9-]+)"/g),
+    (match) => match[1],
+  );
+  const missingLinks = Array.from(
+    new Set(blogLinks.filter((slug) => !publishedSlugs.has(slug))),
+  );
+  for (const slug of missingLinks) {
+    add({
+      severity: "error",
+      category: "links",
+      title: "Internal link target is not published",
+      detail: `The article links to "/blog/${slug}", which is not a published post.`,
+      fix: "Fix the link or publish the target.",
+    });
+  }
+
+  const titleLength = post.title.length;
+  if (titleLength < 25 || titleLength > 70) {
+    add({
+      severity: "error",
+      category: "seo",
+      title: "Title length is outside the allowed bounds",
+      detail: `The title is ${titleLength} characters; the page requires 25 to 70.`,
+      fix: "Rewrite the title to 35 to 50 characters.",
+    });
+  }
+
+  const descriptionLength = post.description.length;
+  if (descriptionLength < 70 || descriptionLength > 190) {
+    add({
+      severity: "error",
+      category: "seo",
+      title: "Meta description length is outside the allowed bounds",
+      detail: `The description is ${descriptionLength} characters; write one or two sentences between 120 and 155.`,
+      fix: "Rewrite the description.",
+    });
+  } else if (descriptionLength < 120 || descriptionLength > 155) {
+    add({
+      severity: "warning",
+      category: "seo",
+      title: "Meta description length is not ideal",
+      detail: `The description is ${descriptionLength} characters; the target range is 120 to 155.`,
+      fix: "Tighten or expand the description.",
+    });
+  }
+
+  const primaryKeyword = (post.keywords[0] ?? "").trim().toLowerCase();
+  if (!primaryKeyword) {
+    add({
+      severity: "suggestion",
+      category: "keywords",
+      title: "No primary keyword recorded",
+      detail:
+        "This post stores no keywords, so keyword alignment cannot be checked and future generation cannot avoid colliding with it.",
+      fix: "Add keywords in the editor.",
+    });
+  } else {
+    const keywordSlug = slugify(primaryKeyword);
+    if (keywordSlug && !slugify(post.title).includes(keywordSlug)) {
+      add({
+        severity: "error",
+        category: "keywords",
+        title: "Primary keyword is missing from the title",
+        detail: `The primary keyword "${primaryKeyword}" does not appear in the title.`,
+        fix: "Work the keyword into the title naturally.",
+      });
+    }
+
+    const bodyText = stripHtml(post.content).toLowerCase();
+    if (!bodyText.includes(primaryKeyword)) {
+      add({
+        severity: "error",
+        category: "keywords",
+        title: "Primary keyword is missing from the body",
+        detail: `The primary keyword "${primaryKeyword}" never appears in the article body.`,
+        fix: "Use the keyword where it fits naturally.",
+      });
+    }
+  }
+
+  const dashCount = (post.content.match(DASH_PATTERN) ?? []).length;
+  if (dashCount > 0) {
+    add({
+      severity: "error",
+      category: "structure",
+      title: "Em or en dash found in content",
+      detail: `The article contains ${dashCount} em or en dash characters.`,
+      fix: "Replace them with hyphens, commas, or colons.",
+    });
+  }
+
+  const plainText =
+    `${post.title} ${post.description} ${stripHtml(post.content)}`.toLowerCase();
+  for (const phrase of BANNED_PHRASES) {
+    if (plainText.includes(phrase)) {
+      add({
+        severity: "error",
+        category: "structure",
+        title: "Banned filler phrase found",
+        detail: `The article contains the banned phrase "${phrase}".`,
+        fix: "Replace it with a specific claim.",
+      });
+    }
+  }
+
+  if (/<h1[\s>]/i.test(post.content)) {
+    add({
+      severity: "error",
+      category: "structure",
+      title: "Article contains an h1",
+      detail:
+        "The page template renders the title as the only h1; the article body must start at h2.",
+      fix: "Demote the heading to h2 or remove it.",
+    });
+  }
+
+  if (/<(script|iframe|style)[\s>]/i.test(post.content)) {
+    add({
+      severity: "error",
+      category: "structure",
+      title: "Article contains a forbidden tag",
+      detail: "script, iframe, and style tags are not allowed in article content.",
+      fix: "Remove the tag.",
+    });
+  }
+
+  if (/\son[a-z]+\s*=/i.test(post.content)) {
+    add({
+      severity: "error",
+      category: "structure",
+      title: "Article contains an inline event handler",
+      detail: "on* attributes are not allowed in article content.",
+      fix: "Remove the attribute.",
+    });
+  }
+
+  if (/\sstyle\s*=/i.test(post.content)) {
+    add({
+      severity: "warning",
+      category: "structure",
+      title: "Article contains an inline style attribute",
+      detail: "Inline styles bypass the design system.",
+      fix: "Remove the style attribute and use the allowed component classes.",
+    });
+  }
+
+  const words = countWords(post.content);
+  if (words < 900 || words > 2600) {
+    add({
+      severity: "warning",
+      category: "structure",
+      title: "Article length is outside the target band",
+      detail: `The article is ${words} words; the target is 900 to 2600.`,
+      fix: "Trim padding or expand thin sections.",
+    });
+  }
+
+  const externalLinks = Array.from(
+    post.content.matchAll(/href="(https?:\/\/[^"]+)"/g),
+    (match) => match[1],
+  );
+  const disallowed = Array.from(
+    new Set(
+      externalLinks.filter((url) => {
+        try {
+          const host = new URL(url).hostname.replace(/^www\./, "");
+          return !EXTERNAL_DOC_DOMAINS.some(
+            (domain) => host === domain || host.endsWith(`.${domain}`),
+          );
+        } catch {
+          return true;
+        }
+      }),
+    ),
+  );
+  if (disallowed.length > 0) {
+    add({
+      severity: "suggestion",
+      category: "links",
+      title: "External links outside the documentation allowlist",
+      detail: `Non-documentation links: ${disallowed.slice(0, 4).join(", ")}${
+        disallowed.length > 4 ? ` (+${disallowed.length - 4} more)` : ""
+      }.`,
+      fix: "Prefer official documentation links where they support a claim.",
+    });
+  }
+
+  return { findings, missingLinks };
+}
+
 function postProcessSuggested(
   suggested: ReviewSuggested | undefined,
   publishedSlugs: Set<string>,
@@ -219,6 +441,7 @@ function postProcessSuggested(
         severity: "warning",
         category: "seo",
         title: "Suggested title discarded",
+        verifiedBy: "code",
         detail: `The rewritten title was ${title.length} characters; the page requires 25 to 70 before the site suffix.`,
         fix: "Adjust the title manually or rerun the review.",
       });
@@ -244,6 +467,7 @@ function postProcessSuggested(
         severity: "warning",
         category: "structure",
         title: "Suggested rewrite discarded",
+        verifiedBy: "code",
         detail: `The rewritten article was only ${words} words, so it was not offered for apply.`,
         fix: "Rerun the review or edit the article manually.",
       });
@@ -252,6 +476,7 @@ function postProcessSuggested(
         severity: "warning",
         category: "links",
         title: "Suggested rewrite discarded",
+        verifiedBy: "code",
         detail: `The rewritten article linked to "/blog/${invalidLink}", which is not a published post.`,
         fix: "Fix the internal link and rerun the review.",
       });
@@ -369,7 +594,40 @@ export async function runArticleReview(postId: string): Promise<ReviewResult> {
     throw new Error(message);
   }
 
-  const findings = parsed.findings;
+  const deterministic = runDeterministicChecks(post, publishedSlugs);
+  const missingLinkSet = new Set(deterministic.missingLinks);
+
+  const modelFindings: ReviewFinding[] = parsed.findings.map((finding) => ({
+    ...finding,
+    verifiedBy: finding.verifiedBy ?? "model",
+  }));
+
+  const filteredModelFindings = modelFindings.filter((finding) => {
+    if (finding.category !== "links") {
+      return true;
+    }
+
+    // Code owns link correctness: drop model link findings when code finds
+    // nothing, and drop duplicates when code already flagged the same slug.
+    if (missingLinkSet.size === 0) {
+      return false;
+    }
+
+    return !Array.from(missingLinkSet).some(
+      (slug) => finding.detail.includes(slug) || finding.title.includes(slug),
+    );
+  });
+
+  const severityOrder: Record<string, number> = {
+    error: 0,
+    warning: 1,
+    suggestion: 2,
+  };
+  const findings = [...deterministic.findings, ...filteredModelFindings].sort(
+    (a, b) =>
+      (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3),
+  );
+
   const suggested = postProcessSuggested(
     parsed.suggested,
     publishedSlugs,

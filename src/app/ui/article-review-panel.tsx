@@ -356,6 +356,11 @@ export default function ArticleReviewPanel({
                       <span className="blog-tag text-[10px]">
                         {finding.category}
                       </span>
+                      {finding.verifiedBy === "code" ? (
+                        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-faint">
+                          code verified
+                        </span>
+                      ) : null}
                       <span
                         className={cn(
                           "font-mono text-[10px] uppercase tracking-[0.08em]",

@@ -37,7 +37,7 @@ const REQUIRED_SECONDARY_KEYWORDS = 4;
 const MAX_TAG_WORDS = 3;
 const MAX_TAGS = 4;
 
-const BANNED_PHRASES = [
+export const BANNED_PHRASES = [
   "in today's fast-paced",
   "in this article",
   "delve into",
@@ -145,7 +145,7 @@ const STOP_WORDS = new Set([
   "ultimate",
 ]);
 
-function stripHtml(html: string): string {
+export function stripHtml(html: string): string {
   return html
     .replace(/<[^>]+>/g, " ")
     .replace(/&[a-z#0-9]+;/gi, " ")
