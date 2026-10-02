@@ -107,3 +107,24 @@ model AppSetting {
   value     Json
   updatedAt DateTime @updatedAt
 }
+
+model ArticleReview {
+  id            String    @id @default(cuid())
+  postId        String
+  model         String
+  status        String
+  usedWebSearch Boolean   @default(false)
+  claims        Json?
+  findings      Json?
+  seoNotes      Json?
+  suggested     Json?
+  sources       Json?
+  inputTokens   Int?
+  outputTokens  Int?
+  cost          Float?
+  error         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  appliedAt     DateTime?
+
+  @@index([postId, createdAt(sort: Desc)])
+}
