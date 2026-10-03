@@ -37,14 +37,20 @@ export default function LineChart({
   points,
   labels,
   className,
+  compact = false,
 }: {
   points: LineChartPoint[];
   labels: [string, string];
   className?: string;
+  compact?: boolean;
 }) {
   if (points.length === 0) {
     return (
-      <div className="flex h-56 items-center justify-center rounded border border-border bg-surface text-sm text-ink-muted">
+      <div
+        className={`flex items-center justify-center rounded border border-border bg-surface text-sm text-ink-muted ${
+          compact ? "h-12" : "h-56"
+        }`}
+      >
         No data in this range.
       </div>
     );
@@ -94,7 +100,7 @@ export default function LineChart({
         aria-label={`${labels[0]} and ${labels[1]} from ${shortDate(
           firstLabel,
         )} to ${shortDate(lastLabel)}. Each series is scaled to its own maximum.`}
-        className="h-56 w-full"
+        className={compact ? "h-12 w-full" : "h-56 w-full"}
       >
         <title>
           {`${labels[0]} and ${labels[1]} from ${shortDate(
@@ -143,49 +149,53 @@ export default function LineChart({
         <span>{shortDate(lastLabel)}</span>
       </div>
 
-      <figcaption className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[13px] text-ink-muted">
-        <span className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span
-              aria-hidden="true"
-              className="h-0.5 w-4 rounded bg-[var(--clay)]"
-            />
-            {labels[0]}
+      {compact ? null : (
+        <figcaption className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[13px] text-ink-muted">
+          <span className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5">
+              <span
+                aria-hidden="true"
+                className="h-0.5 w-4 rounded bg-[var(--clay)]"
+              />
+              {labels[0]}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span
+                aria-hidden="true"
+                className="h-0.5 w-4 rounded bg-[var(--ink-faint)]"
+              />
+              {labels[1]}
+            </span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <span
-              aria-hidden="true"
-              className="h-0.5 w-4 rounded bg-[var(--ink-faint)]"
-            />
-            {labels[1]}
+          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-faint">
+            each series scaled to its own max
           </span>
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-faint">
-          each series scaled to its own max
-        </span>
-      </figcaption>
+        </figcaption>
+      )}
 
-      <table className="sr-only">
-        <caption>
-          {`${labels[0]} and ${labels[1]} by date`}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Date</th>
-            <th scope="col">{labels[0]}</th>
-            <th scope="col">{labels[1]}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {points.map((point) => (
-            <tr key={point.label}>
-              <th scope="row">{point.label}</th>
-              <td>{formatNumber(point.a)}</td>
-              <td>{formatNumber(point.b)}</td>
+      {compact ? null : (
+        <table className="sr-only">
+          <caption>
+            {`${labels[0]} and ${labels[1]} by date`}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">{labels[0]}</th>
+              <th scope="col">{labels[1]}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {points.map((point) => (
+              <tr key={point.label}>
+                <th scope="row">{point.label}</th>
+                <td>{formatNumber(point.a)}</td>
+                <td>{formatNumber(point.b)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </figure>
   );
 }

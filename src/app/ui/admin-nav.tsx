@@ -10,6 +10,7 @@ const items = [
   { name: "AI settings", href: "/admin/settings" },
   { name: "Prompts", href: "/admin/prompts" },
   { name: "Search Console", href: "/admin/search-console" },
+  { name: "Keywords", href: "/admin/keywords" },
 ];
 
 export default function AdminNav() {
