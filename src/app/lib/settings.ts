@@ -61,6 +61,7 @@ export const SETTINGS_KEYS = {
   promptAnalysis: "prompts.searchAnalysis",
   gscProperty: "gsc.property",
   keywordsPlanner: "keywords.planner",
+  keywordsLastSyncAt: "keywords.lastSyncAt",
   lastAnalysis: "gsc.lastAnalysis",
   lastIndexSyncAt: "gsc.lastIndexSyncAt",
 } as const;
@@ -173,6 +174,40 @@ export async function getLastAnalysis(): Promise<LastAnalysis | null> {
     lastAnalysisSchema.nullable(),
     null,
   );
+}
+
+const customerIdSchema = z.string().regex(/^\d{10}$/).or(z.literal(""));
+
+export const keywordPlannerSettingsSchema = z.object({
+  customerId: customerIdSchema,
+  loginCustomerId: customerIdSchema,
+  geo: z.string().min(1).max(40),
+  language: z.string().min(1).max(40),
+  network: z.enum(["GOOGLE_SEARCH", "GOOGLE_SEARCH_AND_PARTNERS"]),
+});
+
+export type KeywordPlannerSettings = z.infer<
+  typeof keywordPlannerSettingsSchema
+>;
+
+export const DEFAULT_KEYWORD_PLANNER_SETTINGS: KeywordPlannerSettings = {
+  customerId: "",
+  loginCustomerId: "",
+  geo: "2840",
+  language: "1000",
+  network: "GOOGLE_SEARCH",
+};
+
+export async function getKeywordPlannerSettings(): Promise<KeywordPlannerSettings> {
+  return readSetting(
+    SETTINGS_KEYS.keywordsPlanner,
+    keywordPlannerSettingsSchema,
+    DEFAULT_KEYWORD_PLANNER_SETTINGS,
+  );
+}
+
+export async function getKeywordsLastSyncAt(): Promise<string | null> {
+  return readSetting(SETTINGS_KEYS.keywordsLastSyncAt, z.string().nullable(), null);
 }
 
 export async function setSetting(key: string, value: unknown): Promise<void> {

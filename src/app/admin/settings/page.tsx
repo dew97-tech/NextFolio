@@ -9,11 +9,13 @@ import {
   getGenerationSettings,
   getGscProperty,
   getImageSettings,
+  getKeywordPlannerSettings,
   getReviewSettings,
 } from "@/app/lib/settings";
 import AiModelSettings from "@/app/ui/ai-model-settings";
 import GoogleConnectNotice from "@/app/ui/google-connect-notice";
 import GoogleConnectionCard from "@/app/ui/google-connection-card";
+import KeywordPlannerSettingsCard from "@/app/ui/keyword-planner-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +45,7 @@ export default async function SettingsPage({
         ? "error"
         : undefined;
 
-  const [generation, review, image, analysis, property, connection] =
+  const [generation, review, image, analysis, property, connection, planner] =
     await Promise.all([
       getGenerationSettings(),
       getReviewSettings(),
@@ -51,6 +53,7 @@ export default async function SettingsPage({
       getAnalysisSettings(),
       getGscProperty(),
       getGoogleConnectionSummary(),
+      getKeywordPlannerSettings(),
     ]);
 
   return (
@@ -76,6 +79,13 @@ export default async function SettingsPage({
         property={property}
         encryptionConfigured={isEncryptionConfigured()}
         oauthConfigured={isOAuthConfigured()}
+      />
+
+      <KeywordPlannerSettingsCard
+        settings={planner}
+        developerTokenConfigured={Boolean(
+          process.env.GOOGLE_ADS_DEVELOPER_TOKEN,
+        )}
       />
 
       <AiModelSettings

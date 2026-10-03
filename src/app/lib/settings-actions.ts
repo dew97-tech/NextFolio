@@ -6,9 +6,11 @@ import {
   analysisSettingsSchema,
   generationSettingsSchema,
   imageSettingsSchema,
+  keywordPlannerSettingsSchema,
   reviewSettingsSchema,
   setSetting,
   SETTINGS_KEYS,
+  type KeywordPlannerSettings,
 } from "@/app/lib/settings";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -26,6 +28,38 @@ export type AiSettingsInput = z.infer<typeof settingsInputSchema>;
 export interface SaveSettingsResult {
   ok: boolean;
   error?: string;
+}
+
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "").slice(0, 10);
+}
+
+export async function saveKeywordPlannerSettings(
+  input: KeywordPlannerSettings,
+): Promise<SaveSettingsResult> {
+  const session = await auth();
+  if (!session?.user) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const parsed = keywordPlannerSettingsSchema.safeParse({
+    ...input,
+    customerId: digitsOnly(input.customerId),
+    loginCustomerId: digitsOnly(input.loginCustomerId),
+  });
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error:
+        "Enter a 10-digit customer ID (and login customer ID when using an MCC), plus geo and language targets.",
+    };
+  }
+
+  await setSetting(SETTINGS_KEYS.keywordsPlanner, parsed.data);
+  revalidatePath("/admin/settings");
+  revalidatePath("/admin/keywords");
+  return { ok: true };
 }
 
 export async function saveAiSettings(
