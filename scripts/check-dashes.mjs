@@ -15,6 +15,7 @@ const skipFiles = new Set([
   "package-lock.json",
   "tsconfig.tsbuildinfo",
   "scripts/check-dashes.mjs",
+  "AGENTS.md",
 ]);
 const EM = String.fromCharCode(0x2014);
 const EN = String.fromCharCode(0x2013);
