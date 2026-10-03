@@ -1,32 +1,79 @@
 import { listModels } from "@/app/lib/ai/models";
+import { isEncryptionConfigured } from "@/app/lib/crypto";
+import {
+  getGoogleConnectionSummary,
+  isOAuthConfigured,
+} from "@/app/lib/google/oauth";
 import {
   getGenerationSettings,
+  getGscProperty,
   getImageSettings,
   getReviewSettings,
 } from "@/app/lib/settings";
 import AiModelSettings from "@/app/ui/ai-model-settings";
+import GoogleConnectNotice from "@/app/ui/google-connect-notice";
+import GoogleConnectionCard from "@/app/ui/google-connection-card";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
-  const [generation, review, image] = await Promise.all([
+type SettingsSearchParams = Promise<
+  Record<string, string | string[] | undefined>
+>;
+
+function firstValue(
+  value: string | string[] | undefined,
+): string | undefined {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: SettingsSearchParams;
+}) {
+  const params = await searchParams;
+  const googleParam = firstValue(params.google);
+  const reason = firstValue(params.reason);
+  const googleStatus =
+    googleParam === "connected"
+      ? "connected"
+      : googleParam === "error"
+        ? "error"
+        : undefined;
+
+  const [generation, review, image, property, connection] = await Promise.all([
     getGenerationSettings(),
     getReviewSettings(),
     getImageSettings(),
+    getGscProperty(),
+    getGoogleConnectionSummary(),
   ]);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-serif text-2xl tracking-[-0.01em] text-foreground">
-          AI settings
+          Settings
         </h1>
         <p className="mt-1 text-sm text-ink-muted">
-          Choose the OpenCode Go models used for generation, review, and cover
-          prompts. The generation chain is tried in order until a draft passes
-          validation.
+          Choose the OpenCode Go models used for generation, review, image
+          prompts, and search analysis, and connect the Google account used by
+          the Search Console dashboard.
         </p>
       </div>
+
+      <GoogleConnectNotice status={googleStatus} reason={reason} />
+
+      <GoogleConnectionCard
+        connected={connection.connected}
+        email={connection.email}
+        scope={connection.scope}
+        expiresAt={connection.expiresAt}
+        property={property}
+        encryptionConfigured={isEncryptionConfigured()}
+        oauthConfigured={isOAuthConfigured()}
+      />
 
       <AiModelSettings
         models={listModels()}

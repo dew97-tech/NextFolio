@@ -126,6 +126,13 @@ export async function getAnalysisSettings(): Promise<AnalysisSettings> {
   );
 }
 
+export const DEFAULT_GSC_PROPERTY = "sc-domain:davidmallick.dev";
+
+export async function getGscProperty(): Promise<string> {
+  const fallback = process.env.GSC_PROPERTY?.trim() || DEFAULT_GSC_PROPERTY;
+  return readSetting(SETTINGS_KEYS.gscProperty, z.string().min(1), fallback);
+}
+
 export async function setSetting(key: string, value: unknown): Promise<void> {
   const json = value as Prisma.InputJsonValue;
   await prisma.appSetting.upsert({
