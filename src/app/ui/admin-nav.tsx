@@ -9,6 +9,7 @@ const items = [
   { name: "New post", href: "/admin/new" },
   { name: "AI settings", href: "/admin/settings" },
   { name: "Prompts", href: "/admin/prompts" },
+  { name: "Search Console", href: "/admin/search-console" },
 ];
 
 export default function AdminNav() {
