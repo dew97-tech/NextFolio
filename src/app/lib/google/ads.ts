@@ -64,6 +64,7 @@ interface KeywordIdeaResponse {
 
 interface GoogleAdsErrorDetail {
   reason?: unknown;
+  errors?: unknown;
 }
 
 interface GoogleAdsErrorBody {
@@ -169,34 +170,62 @@ async function parseGoogleAdsError(response: Response): Promise<{
   if (Array.isArray(body.error?.details)) {
     for (const detail of body.error.details) {
       if (typeof detail !== "object" || detail === null) continue;
-      const reason = (detail as GoogleAdsErrorDetail).reason;
-      if (typeof reason === "string" && reason.length > 0) {
-        reasons.push(reason);
+      const record = detail as GoogleAdsErrorDetail;
+      if (typeof record.reason === "string" && record.reason.length > 0) {
+        reasons.push(record.reason);
+      }
+
+      // Google Ads reports typed failures as details[].errors[].errorCode.<field>,
+      // where <field> is one of several hundred error-code fields, for example
+      // authenticationError: "CUSTOMER_NOT_FOUND" or
+      // authorizationError: "DEVELOPER_TOKEN_NOT_APPROVED". Collect every populated
+      // code so the hints below match the error code, not just the prose message.
+      if (Array.isArray(record.errors)) {
+        for (const entry of record.errors) {
+          if (typeof entry !== "object" || entry === null) continue;
+          const errorCode = (entry as { errorCode?: unknown }).errorCode;
+          if (typeof errorCode !== "object" || errorCode === null) continue;
+          for (const value of Object.values(errorCode as Record<string, unknown>)) {
+            if (
+              typeof value === "string" &&
+              value.length > 0 &&
+              value !== "UNSPECIFIED" &&
+              value !== "UNKNOWN"
+            ) {
+              reasons.push(value);
+            }
+          }
+        }
       }
     }
   }
 
   const googleStatus = typeof body.error?.status === "string" ? body.error.status : "";
   const codes = [googleStatus, ...reasons];
+  const hasCode = (fragment: string) =>
+    codes.some((code) => code.includes(fragment));
 
   let hint: string | null = null;
-  if (
-    reasons.some((reason) => reason.includes("DEVELOPER_TOKEN")) ||
-    /developer token/i.test(googleMessage ?? "")
-  ) {
+  if (hasCode("DEVELOPER_TOKEN") || /developer token/i.test(googleMessage ?? "")) {
     hint = "The developer token is missing Basic access.";
-  } else if (codes.includes("CUSTOMER_NOT_FOUND")) {
+  } else if (hasCode("INVALID_LOGIN_CUSTOMER_ID")) {
+    hint = "The login customer ID (MCC) does not match this Ads account.";
+  } else if (hasCode("CUSTOMER_NOT_FOUND") || hasCode("INVALID_CUSTOMER_ID")) {
     hint = "Check the Ads customer ID.";
-  } else if (
-    codes.includes("PERMISSION_DENIED") ||
-    codes.includes("USER_PERMISSION_DENIED")
-  ) {
+  } else if (hasCode("PERMISSION_DENIED") || hasCode("ACCESS_DENIED")) {
     hint = "The connected Google account cannot access this Ads account.";
   } else if (
-    codes.includes("QUOTA_ERROR") ||
-    codes.includes("RESOURCE_EXHAUSTED")
+    hasCode("EXHAUSTED") ||
+    hasCode("QUOTA_ERROR") ||
+    hasCode("RATE_LIMIT")
   ) {
     hint = "Rate limited by Google Ads; retry later.";
+  } else if (
+    hasCode("UNAUTHENTICATED") ||
+    hasCode("OAUTH_TOKEN") ||
+    hasCode("AUTHENTICATION_ERROR")
+  ) {
+    hint = "Reconnect the Google account in settings.";
   }
 
   return { message, hint };
