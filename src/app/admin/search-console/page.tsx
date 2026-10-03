@@ -14,6 +14,7 @@ import {
 } from "@/app/lib/google/search-console";
 import prisma from "@/app/lib/prisma";
 import { getGscProperty, getLastIndexSyncAt } from "@/app/lib/settings";
+import SyncIndexButton from "@/app/ui/sync-index-button";
 import { cn } from "@/lib/utils";
 import {
   ArrowDown,
@@ -903,11 +904,14 @@ export default async function SearchConsolePage({
                     {indexedCount} of {indexRows?.length ?? 0} published posts
                     report as indexed
                   </span>
-                  <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint">
-                    {lastIndexSyncAt
-                      ? `last sync ${lastIndexSyncAt.slice(0, 16).replace("T", " ")} UTC`
-                      : "never synced"}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint">
+                      {lastIndexSyncAt
+                        ? `last sync ${lastIndexSyncAt.slice(0, 16).replace("T", " ")} UTC`
+                        : "never synced"}
+                    </span>
+                    <SyncIndexButton />
+                  </div>
                 </div>
                 <div className="overflow-x-auto border-t border-border">
                   <table className="w-full border-collapse text-left">
