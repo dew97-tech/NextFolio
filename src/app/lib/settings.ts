@@ -140,6 +140,41 @@ export async function getLastIndexSyncAt(): Promise<string | null> {
   return readSetting(SETTINGS_KEYS.lastIndexSyncAt, z.string().nullable(), null);
 }
 
+export const lastAnalysisSchema = z.object({
+  generatedAt: z.string(),
+  model: z.string(),
+  range: z.object({
+    preset: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+  }),
+  analysis: z.object({
+    summary: z.string(),
+    priorities: z.array(
+      z.object({
+        title: z.string(),
+        why: z.string(),
+        action: z.string(),
+        impact: z.enum(["high", "medium", "low"]).catch("medium"),
+      }),
+    ),
+    quickWins: z.array(z.object({ title: z.string(), action: z.string() })),
+  }),
+  inputTokens: z.number().nullish(),
+  outputTokens: z.number().nullish(),
+  cost: z.number().nullish(),
+});
+
+export type LastAnalysis = z.infer<typeof lastAnalysisSchema>;
+
+export async function getLastAnalysis(): Promise<LastAnalysis | null> {
+  return readSetting(
+    SETTINGS_KEYS.lastAnalysis,
+    lastAnalysisSchema.nullable(),
+    null,
+  );
+}
+
 export async function setSetting(key: string, value: unknown): Promise<void> {
   const json = value as Prisma.InputJsonValue;
   await prisma.appSetting.upsert({

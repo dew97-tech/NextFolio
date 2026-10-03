@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import { runSearchAnalysis, type AnalysisBody } from "@/app/lib/google/analysis";
 import { GscAuthError, GscNotConnectedError } from "@/app/lib/google/errors";
 import { inspectUrl, isGscConnected } from "@/app/lib/google/search-console";
 import prisma from "@/app/lib/prisma";
@@ -96,4 +97,76 @@ export async function syncIndexStatus(): Promise<SyncIndexResult> {
     indexed,
     errors: errors.slice(0, 10),
   };
+}
+
+export type AnalyzeSearchResult =
+  | {
+      ok: true;
+      analysis: AnalysisBody;
+      model: string;
+      generatedAt: string;
+      inputTokens?: number;
+      outputTokens?: number;
+      cost?: number;
+    }
+  | { ok: false; error: string };
+
+function isIsoDay(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+export async function analyzeSearchPerformance(range: {
+  preset: string;
+  startDate: string;
+  endDate: string;
+}): Promise<AnalyzeSearchResult> {
+  const session = await auth();
+  if (!session?.user) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  if (!(await isGscConnected())) {
+    return { ok: false, error: "Connect a Google account in settings first." };
+  }
+
+  if (
+    !isIsoDay(range.startDate) ||
+    !isIsoDay(range.endDate) ||
+    range.startDate > range.endDate
+  ) {
+    return { ok: false, error: "Invalid date range." };
+  }
+
+  try {
+    const result = await runSearchAnalysis({
+      startDate: range.startDate,
+      endDate: range.endDate,
+    });
+
+    await setSetting(SETTINGS_KEYS.lastAnalysis, {
+      generatedAt: result.generatedAt,
+      model: result.model,
+      range: {
+        preset: range.preset,
+        startDate: range.startDate,
+        endDate: range.endDate,
+      },
+      analysis: result.analysis,
+      inputTokens: result.inputTokens ?? null,
+      outputTokens: result.outputTokens ?? null,
+      cost: result.cost ?? null,
+    });
+
+    revalidatePath("/admin/search-console");
+
+    return { ok: true, ...result };
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "The search analysis failed.",
+    };
+  }
 }

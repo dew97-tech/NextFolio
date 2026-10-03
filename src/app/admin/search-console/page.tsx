@@ -13,7 +13,13 @@ import {
   type GscTotals,
 } from "@/app/lib/google/search-console";
 import prisma from "@/app/lib/prisma";
-import { getGscProperty, getLastIndexSyncAt } from "@/app/lib/settings";
+import {
+  getGscProperty,
+  getLastAnalysis,
+  getLastIndexSyncAt,
+  type LastAnalysis,
+} from "@/app/lib/settings";
+import SearchAnalysisPanel from "@/app/ui/search-analysis-panel";
 import SyncIndexButton from "@/app/ui/sync-index-button";
 import { cn } from "@/lib/utils";
 import {
@@ -495,6 +501,7 @@ export default async function SearchConsolePage({
   let rows: GscRow[] = [];
   let indexRows: IndexRow[] | null = null;
   let lastIndexSyncAt: string | null = null;
+  let lastAnalysis: LastAnalysis | null = null;
 
   if (!(await isGscConnected())) {
     banner = { kind: "not-connected" };
@@ -525,6 +532,7 @@ export default async function SearchConsolePage({
         fetchedPreviousTotals,
         fetchedIndexRows,
         fetchedLastSync,
+        fetchedLastAnalysis,
       ] = await Promise.all([
         fetchTotals(range),
         fetchTimeseries(range),
@@ -534,6 +542,7 @@ export default async function SearchConsolePage({
         compare ? fetchTotals(previousRange(range)) : Promise.resolve(null),
         tab === "index" ? loadIndexRows() : Promise.resolve(null),
         tab === "index" ? getLastIndexSyncAt() : Promise.resolve(null),
+        getLastAnalysis(),
       ]);
 
       totals = fetchedTotals;
@@ -542,6 +551,7 @@ export default async function SearchConsolePage({
       previousTotals = fetchedPreviousTotals;
       indexRows = fetchedIndexRows;
       lastIndexSyncAt = fetchedLastSync;
+      lastAnalysis = fetchedLastAnalysis;
     } catch (error) {
       if (error instanceof GscNotConnectedError) {
         banner = { kind: "not-connected" };
@@ -996,6 +1006,15 @@ export default async function SearchConsolePage({
               />
             ) : null}
           </section>
+
+          <SearchAnalysisPanel
+            initial={lastAnalysis}
+            range={{
+              preset: range.preset,
+              startDate: range.startDate,
+              endDate: range.endDate,
+            }}
+          />
         </>
       )}
     </div>
