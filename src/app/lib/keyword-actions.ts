@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import { runBlogGeneration } from "@/app/lib/ai/generate-blog";
 import { CATEGORY_KEYWORD_BANK } from "@/app/lib/ai/keywords";
 import { isBannedTopic } from "@/app/lib/ai/trends";
 import {
@@ -326,4 +327,58 @@ export async function refreshKeywordMetrics(
 
   revalidatePath("/admin/keywords");
   return { ok: true, updated };
+}
+
+export interface GenerateKeywordDraftResult {
+  ok: boolean;
+  error?: string;
+  status?: "success" | "skipped" | "failed";
+  detail?: string;
+  postId?: string;
+  slug?: string;
+  model?: string;
+  wordCount?: number;
+}
+
+export async function generateDraftFromKeyword(
+  keywordId: string,
+): Promise<GenerateKeywordDraftResult> {
+  if (!(await requireAdmin())) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const keyword = await prisma.keyword.findUnique({
+    where: { id: keywordId },
+    select: { id: true },
+  });
+  if (!keyword) {
+    return { ok: false, error: "That keyword no longer exists." };
+  }
+
+  const result = await runBlogGeneration({ force: true, keywordId });
+
+  revalidatePath("/admin/keywords");
+
+  if (result.status === "success") {
+    return {
+      ok: true,
+      status: "success",
+      postId: result.postId,
+      slug: result.slug,
+      model: result.model,
+      wordCount: result.wordCount,
+      detail: `${result.wordCount} words with ${result.model}.`,
+    };
+  }
+
+  if (result.status === "skipped") {
+    return { ok: false, status: "skipped", error: result.detail };
+  }
+
+  return {
+    ok: false,
+    status: "failed",
+    error: result.error,
+    detail: result.errors?.map((entry) => entry.message).join(" "),
+  };
 }
