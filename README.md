@@ -91,6 +91,8 @@ There is no default account. While the user table is empty, an admin is created 
 | `CRON_SECRET` | Protects the generation endpoint |
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY` | Search Console reads |
 | `GSC_PROPERTY` | Search Console property, for example `sc-domain:example.com` |
+| `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | OAuth client for the Search Console dashboard and the Keyword Planner |
+| `GOOGLE_ADS_DEVELOPER_TOKEN` | Google Ads developer token with Keyword Planning access |
 
 `DEPLOYMENT.md` covers how each value is obtained.
 

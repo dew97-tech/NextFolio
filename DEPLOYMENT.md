@@ -134,6 +134,43 @@ shared through the database).
 - `redirect_uri_mismatch`: add the exact callback URI to the OAuth client.
 - Data ends 3 days ago by design; Search Console reporting lags.
 
+## Keyword Planner (optional integration)
+
+The keywords dashboard at `/admin/keywords` pulls keyword ideas, search volume,
+competition, and bid ranges from the Google Ads Keyword Planner API. It reuses the
+OAuth connection from the Search Console setup above: one consent requests
+`webmasters.readonly` and `adwords` together.
+
+### 1. Google Ads access
+
+1. Request a **developer token** in the manager account (Tools, API Center).
+   Keyword Planning requires **Basic access** or higher; a test account token
+   returns no real metrics.
+2. Note the **customer ID** (10 digits) of the account to read, and the manager
+   account ID when that account sits under an MCC.
+
+### 2. Environment variable
+
+Add to Vercel (all environments) and to the local `.env`:
+
+```
+GOOGLE_ADS_DEVELOPER_TOKEN=...
+```
+
+Without it, `/admin/keywords` shows the "Keyword Planner is not configured"
+notice and disables syncing and metric refreshes.
+
+### 3. Configure and sync
+
+1. Open `/admin/settings`, Keyword Planner card: customer ID, optional login
+   customer ID (the MCC), geo target (`2840`, United States), language (`1000`,
+   English), and network. Values are stored under the `keywords.planner` setting.
+2. Open `/admin/keywords` and use **Sync ideas**. A sync makes at most three API
+   calls and is refused within 30 seconds of the previous one.
+3. When the connected Google account cannot reach the customer ID, the Google
+   message is shown verbatim with a permission hint. A missing or wrong
+   `login-customer-id` is the usual cause.
+
 ## Post-Deployment Checklist
 - [ ] Database connected successfully
 - [ ] Admin login works at `/auth/signin`
@@ -142,6 +179,7 @@ shared through the database).
 - [ ] Blog posts display correctly
 - [ ] Dark mode works properly
 - [ ] Google Search Console connected at `/admin/settings` and dashboard data loads (optional)
+- [ ] Keyword Planner configured at `/admin/settings` and a sync returns keyword ideas (optional)
 
 ## Troubleshooting
 
