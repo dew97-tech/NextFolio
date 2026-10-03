@@ -13,6 +13,7 @@ import {
   type ReviewResult,
 } from "@/app/lib/ai/review-article";
 import { revalidatePostSurfaces } from "@/app/lib/post-revalidate";
+import { markKeywordsUsedForPost } from "@/app/lib/keyword-usage";
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -123,6 +124,8 @@ export async function applyReview(
     where: { id: review.postId },
     data,
   });
+
+  await markKeywordsUsedForPost(post.id);
 
   await prisma.articleReview.update({
     where: { id: reviewId },

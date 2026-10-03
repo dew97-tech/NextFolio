@@ -11,6 +11,10 @@ import { getModel } from "@/app/lib/ai/models";
 import { getGenerationSettings, getImageSettings } from "@/app/lib/settings";
 import prisma from "@/app/lib/prisma";
 import { revalidatePostSurfaces } from "@/app/lib/post-revalidate";
+import {
+  markKeywordsUsedForPost,
+  resetKeywordsForPost,
+} from "@/app/lib/keyword-usage";
 import { auth } from "@/auth";
 import { deleteBlobIfUnused } from "@/app/lib/blob";
 import { Prisma } from "@prisma/client";
@@ -106,7 +110,7 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
   }
 
   try {
-    await prisma.post.create({
+    const post = await prisma.post.create({
       data: {
         title: normalizeDashes(title),
         slug,
@@ -119,6 +123,7 @@ export async function createPost(prevState: PostFormState, formData: FormData) {
         publishedAt: published ? new Date() : null,
       },
     });
+    await markKeywordsUsedForPost(post.id);
   } catch (error) {
     if (isUniqueConstraintError(error)) {
       return {
@@ -179,7 +184,7 @@ export async function updatePost(
   }
 
   try {
-    await prisma.post.update({
+    const post = await prisma.post.update({
       where: { id },
       data: {
         title: normalizeDashes(title),
@@ -195,6 +200,7 @@ export async function updatePost(
           : {}),
       },
     });
+    await markKeywordsUsedForPost(post.id);
   } catch (error) {
     if (isUniqueConstraintError(error)) {
       return {
@@ -241,6 +247,8 @@ export async function deletePost(id: string): Promise<DeletePostResult> {
     await prisma.post.delete({
       where: { id },
     });
+
+    await resetKeywordsForPost(id);
 
     if (existing.thumbnail) {
       await deleteBlobIfUnused(existing.thumbnail);
