@@ -273,6 +273,7 @@ function validateDraft(
   existingTitles: string[],
   usedKeywords: Set<string>,
   publishedSlugs: Set<string>,
+  forcedKeyword: string | null = null,
 ): ValidatedDraft {
   const parsed = DraftSchema.parse(raw);
   const normalizedTitle = normalizeDashes(parsed.title);
@@ -395,7 +396,13 @@ function validateDraft(
     throw new Error(`Title is too similar to an existing post: "${similarTitle}"`);
   }
 
-  if (usedKeywords.has(primaryKeyword)) {
+  if (forcedKeyword) {
+    if (primaryKeyword !== forcedKeyword.toLowerCase()) {
+      throw new Error(
+        `Primary keyword must be exactly "${forcedKeyword}"; received "${primaryKeyword}"`,
+      );
+    }
+  } else if (usedKeywords.has(primaryKeyword)) {
     throw new Error(`Primary keyword "${primaryKeyword}" was already used recently`);
   }
 
@@ -444,6 +451,7 @@ async function generateForModel(
   usedKeywords: Set<string>,
   publishedSlugs: Set<string>,
   deadline: number,
+  forcedKeyword: string | null = null,
 ): Promise<{ draft: ValidatedDraft; result: ChatCompletionResult }> {
   let attemptMessages = messages;
   let lastError: unknown;
@@ -469,6 +477,7 @@ async function generateForModel(
         existingTitles,
         usedKeywords,
         publishedSlugs,
+        forcedKeyword,
       );
       return { draft, result };
     } catch (error) {
@@ -493,7 +502,7 @@ async function generateForModel(
 }
 
 export async function runBlogGeneration(
-  options: { force?: boolean } = {},
+  options: { force?: boolean; keywordId?: string } = {},
 ): Promise<GenerationResult> {
   const startedAt = Date.now();
   const sessionId = `portfolio-blog-${new Date().toISOString()}`;
@@ -512,6 +521,21 @@ export async function runBlogGeneration(
       reason: "already_running",
       detail: `Another generation run started at ${activeRun.startedAt.toISOString()}; lock window is ${RUNNING_LOCK_MINUTES} minutes`,
     };
+  }
+
+  let forcedKeyword: string | null = null;
+  if (options.keywordId) {
+    const keywordRow = await prisma.keyword.findUnique({
+      where: { id: options.keywordId },
+      select: { keyword: true },
+    });
+    if (!keywordRow) {
+      return {
+        status: "failed",
+        error: `Keyword "${options.keywordId}" was not found. Reload the keywords page and try again.`,
+      };
+    }
+    forcedKeyword = keywordRow.keyword;
   }
 
   const draftCount = await prisma.post.count({
@@ -583,16 +607,28 @@ export async function runBlogGeneration(
         .map(normalizeTitle),
     );
 
+    const keywordSeed: TrendItem | null = forcedKeyword
+      ? { title: forcedKeyword, url: "", source: "keyword planner" }
+      : null;
+
     const seedPool = liveTrends.length > 0 ? liveTrends : CURATED_TOPICS;
-    const available = seedPool.filter((seed) => {
-      const title = normalizeTitle(seed.title);
-      return !recentTitles.has(title) && !recentTopics.has(title) && !usedTopics.has(title);
-    });
+    const available = keywordSeed
+      ? [keywordSeed]
+      : seedPool.filter((seed) => {
+          const title = normalizeTitle(seed.title);
+          return (
+            !recentTitles.has(title) &&
+            !recentTopics.has(title) &&
+            !usedTopics.has(title)
+          );
+        });
 
     const signals = (available.length > 0 ? available : CURATED_TOPICS).slice(0, 18);
 
     const keywordCandidates = await buildKeywordCandidates(
-      signals.slice(0, 3).map((signal) => signal.title),
+      forcedKeyword
+        ? [forcedKeyword]
+        : signals.slice(0, 3).map((signal) => signal.title),
     ).catch(() => ({ keywords: [] as string[], categories: [] as string[] }));
 
     const existingTitles = recentPosts.map((post) => post.title);
@@ -601,12 +637,19 @@ export async function runBlogGeneration(
         .map((post) => post.keywords[0]?.toLowerCase())
         .filter((keyword): keyword is string => Boolean(keyword)),
     );
+    if (forcedKeyword) {
+      // The forced keyword is allowed even if a recent post used it.
+      usedKeywords.delete(forcedKeyword.toLowerCase());
+    }
 
     const availableKeywords = keywordCandidates.keywords.filter(
       (keyword) => !usedKeywords.has(keyword.toLowerCase()),
     );
-    const promptKeywords =
-      availableKeywords.length >= 12 ? availableKeywords : keywordCandidates.keywords;
+    const promptKeywords = forcedKeyword
+      ? Array.from(new Set([forcedKeyword, ...availableKeywords])).slice(0, 12)
+      : availableKeywords.length >= 12
+        ? availableKeywords
+        : keywordCandidates.keywords;
 
     const generationPrompt = await getPrompt(PROMPT_KEYS.generation);
     const generationContext = buildGenerationContext({
@@ -617,6 +660,7 @@ export async function runBlogGeneration(
       categories: keywordCandidates.categories,
       searchQueries,
       usedKeywords: Array.from(usedKeywords),
+      forcedKeyword: forcedKeyword ?? undefined,
     });
     const messages = renderPrompt(
       PROMPT_REGISTRY[PROMPT_KEYS.generation],
@@ -660,6 +704,7 @@ export async function runBlogGeneration(
           usedKeywords,
           publishedSlugs,
           startedAt + MAX_TOTAL_GENERATION_MS,
+          forcedKeyword,
         );
 
         const slug = await ensureUniqueSlug(draft.slug);
@@ -682,6 +727,13 @@ export async function runBlogGeneration(
           },
         });
 
+        if (options.keywordId && forcedKeyword) {
+          await prisma.keyword.update({
+            where: { id: options.keywordId },
+            data: { status: "used", postId: post.id, usedAt: new Date() },
+          });
+        }
+
         await prisma.generationRun
           .update({
             where: { id: run.id },
@@ -689,7 +741,7 @@ export async function runBlogGeneration(
               status: "success",
               finishedAt: new Date(),
               model: model.id,
-              topic: draft.topic,
+              topic: forcedKeyword ?? draft.topic,
               postId: post.id,
               cost: result.cost ?? null,
               inputTokens: result.inputTokens ?? null,
@@ -705,7 +757,7 @@ export async function runBlogGeneration(
           postId: post.id,
           slug,
           model: model.id,
-          topic: draft.topic,
+          topic: forcedKeyword ?? draft.topic,
           primaryKeyword: draft.primaryKeyword,
           wordCount: draft.wordCount,
           cost: result.cost,

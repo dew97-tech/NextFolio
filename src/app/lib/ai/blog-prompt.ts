@@ -125,6 +125,15 @@ function formatUsedKeywords(keywords: string[]): string {
   return keywords.map((keyword) => `- ${keyword}`).join("\n");
 }
 
+function formatForcedKeyword(keyword: string): string {
+  return [
+    `FORCED PRIMARY KEYWORD: "${keyword}"`,
+    '- The "primaryKeyword" field must be exactly this phrase, character for character. Do not substitute a different phrase.',
+    '- Use this keyword as the seed topic and return a natural title for it in the "topic" field.',
+    "- secondaryKeywords must be 4 distinct, specific sub-topics of this keyword; they may be new phrases and are not limited to CANDIDATE KEYWORDS.",
+  ].join("\n");
+}
+
 function formatSearchQueries(queries: SearchQuery[]): string {
   if (queries.length === 0) {
     return "No Search Console data for this site yet. Choose a topic from the signals above.";
@@ -153,7 +162,7 @@ export function buildGenerationContext(
     searchQueries: formatSearchQueries(input.searchQueries),
     recentPosts: formatRecentPosts(input.recentPosts),
     authorProfile: buildAuthorProfile(),
-    keyword: input.forcedKeyword ?? "",
+    keyword: input.forcedKeyword ? formatForcedKeyword(input.forcedKeyword) : "",
   };
 }
 
