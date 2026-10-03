@@ -10,6 +10,7 @@ const skipDirs = new Set([
   ".agents",
   ".prisma",
   ".claude",
+  "plans",
 ]);
 const skipFiles = new Set([
   "package-lock.json",

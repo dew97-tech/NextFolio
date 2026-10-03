@@ -28,65 +28,75 @@ import {
 import type { ReviewContextValues } from "./review-prompt";
 
 const claimSchema = z.object({
-  claim: z.string().min(5).max(400),
-  verdict: z.enum(["supported", "contradicted", "unverifiable"]),
-  evidence: z.string().min(3).max(600),
-  sourceTitle: z.string().max(200).optional(),
+  claim: z.string().min(5).max(800),
+  verdict: z
+    .enum(["supported", "contradicted", "unverifiable"])
+    .catch("unverifiable"),
+  evidence: z.string().min(3).max(1000),
+  sourceTitle: z.string().max(300).nullish(),
 });
 
 const findingSchema = z.object({
-  severity: z.enum(["error", "warning", "suggestion"]),
-  category: z.enum([
-    "accuracy",
-    "code",
-    "seo",
-    "structure",
-    "links",
-    "keywords",
-    "freshness",
-  ]),
-  title: z.string().min(3).max(120),
-  detail: z.string().min(10).max(600),
-  fix: z.string().max(600).optional(),
-  verifiedBy: z.enum(["code", "model"]).optional(),
+  severity: z
+    .enum(["error", "warning", "suggestion"])
+    .catch("warning"),
+  category: z
+    .enum([
+      "accuracy",
+      "code",
+      "seo",
+      "structure",
+      "links",
+      "keywords",
+      "freshness",
+    ])
+    .catch("accuracy"),
+  title: z.string().min(3).max(200),
+  detail: z.string().min(10).max(1500),
+  fix: z.string().max(1000).nullish(),
+  verifiedBy: z.enum(["code", "model"]).catch("model").optional(),
 });
 
 const reviewSchema = z.object({
-  claims: z.array(claimSchema).max(15).optional(),
-  findings: z.array(findingSchema).max(20),
+  claims: z.array(claimSchema).optional(),
+  findings: z.array(findingSchema),
   seoNotes: z
     .object({
-      titleSuggestion: z.string().max(200),
-      descriptionSuggestion: z.string().max(300),
-      keywordNotes: z.string().max(600),
+      titleSuggestion: z.string().max(300).nullish(),
+      descriptionSuggestion: z.string().max(500).nullish(),
+      keywordNotes: z.string().max(1000).nullish(),
     })
     .partial()
     .optional(),
   suggested: z
     .object({
-      title: z.string().max(200),
-      description: z.string().max(400),
-      content: z.string().min(200),
+      title: z.string().max(300).nullish(),
+      description: z.string().max(500).nullish(),
+      content: z.string().min(200).nullish(),
     })
     .partial()
     .optional(),
   sources: z
-    .array(z.object({ title: z.string().max(200), url: z.string().url() }))
-    .max(10)
+    .array(
+      z.object({
+        title: z.string().max(300),
+        url: z.string().max(1000),
+      }),
+    )
     .optional(),
 });
 
 export type ReviewClaim = z.infer<typeof claimSchema>;
 export type ReviewFinding = z.infer<typeof findingSchema>;
 export type ReviewSeoNotes = {
-  titleSuggestion?: string;
-  descriptionSuggestion?: string;
-  keywordNotes?: string;
+  titleSuggestion?: string | null;
+  descriptionSuggestion?: string | null;
+  keywordNotes?: string | null;
 };
 export type ReviewSuggested = {
-  title?: string;
-  description?: string;
-  content?: string;
+  title?: string | null;
+  description?: string | null;
+  content?: string | null;
 };
 
 export interface ReviewResult {
@@ -226,7 +236,7 @@ const EM_DASH = String.fromCharCode(0x2014);
 const EN_DASH = String.fromCharCode(0x2013);
 const DASH_PATTERN = new RegExp(`[${EM_DASH}${EN_DASH}]`, "g");
 
-function runDeterministicChecks(
+export function runDeterministicChecks(
   post: {
     title: string;
     description: string;
@@ -607,10 +617,17 @@ export async function runArticleReview(postId: string): Promise<ReviewResult> {
   const deterministic = runDeterministicChecks(post, publishedSlugs);
   const missingLinkSet = new Set(deterministic.missingLinks);
 
-  const modelFindings: ReviewFinding[] = parsed.findings.map((finding) => ({
-    ...finding,
-    verifiedBy: finding.verifiedBy ?? "model",
-  }));
+  const claims = (parsed.claims ?? []).slice(0, 20);
+  const sources = (parsed.sources ?? [])
+    .filter((source) => /^https?:\/\//i.test(source.url))
+    .slice(0, 10);
+
+  const modelFindings: ReviewFinding[] = parsed.findings
+    .slice(0, 30)
+    .map((finding) => ({
+      ...finding,
+      verifiedBy: finding.verifiedBy ?? "model",
+    }));
 
   const filteredModelFindings = modelFindings.filter((finding) => {
     if (finding.category !== "links") {
@@ -650,11 +667,11 @@ export async function runArticleReview(postId: string): Promise<ReviewResult> {
       model: settings.modelId,
       status: "completed",
       usedWebSearch: searchResults.length > 0,
-      claims: (parsed.claims ?? []) as Prisma.InputJsonValue,
+      claims: claims as Prisma.InputJsonValue,
       findings: findings as Prisma.InputJsonValue,
       seoNotes: (parsed.seoNotes ?? null) as Prisma.InputJsonValue,
       suggested: (suggested ?? null) as Prisma.InputJsonValue,
-      sources: (parsed.sources ?? []) as Prisma.InputJsonValue,
+      sources: sources as Prisma.InputJsonValue,
       inputTokens: modelResult.inputTokens ?? null,
       outputTokens: modelResult.outputTokens ?? null,
       cost: modelResult.cost ?? null,
@@ -668,11 +685,11 @@ export async function runArticleReview(postId: string): Promise<ReviewResult> {
     status: "completed",
     usedWebSearch: searchResults.length > 0,
     degradedSearch,
-    claims: parsed.claims ?? [],
+    claims,
     findings,
     seoNotes: parsed.seoNotes ?? null,
     suggested,
-    sources: parsed.sources ?? [],
+    sources,
     inputTokens: modelResult.inputTokens,
     outputTokens: modelResult.outputTokens,
     cost: modelResult.cost,
