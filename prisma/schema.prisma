@@ -120,6 +120,29 @@ model GoogleConnection {
   updatedAt    DateTime @updatedAt
 }
 
+model Keyword {
+  id                     String    @id @default(cuid())
+  keyword                String    @unique
+  geo                    String    @default("2840")
+  language               String    @default("1000")
+  avgMonthlySearches     Int?
+  competition            String?
+  competitionIndex       Int?
+  lowTopOfPageBidMicros  Int?
+  highTopOfPageBidMicros Int?
+  monthlyVolumes         Json?
+  source                 String    @default("keyword_planner") // "keyword_planner" | "manual" | "gsc"
+  status                 String    @default("new") // "new" | "used" | "ignored"
+  postId                 String?
+  usedAt                 DateTime?
+  fetchedAt              DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([status])
+  @@index([avgMonthlySearches(sort: Desc)])
+}
+
 model ArticleReview {
   id            String    @id @default(cuid())
   postId        String
