@@ -217,10 +217,15 @@ export async function updatePost(
   redirect("/admin");
 }
 
-export async function deletePost(id: string) {
+export interface DeletePostResult {
+  ok: boolean;
+  error?: string;
+}
+
+export async function deletePost(id: string): Promise<DeletePostResult> {
   const session = await auth();
   if (!session?.user) {
-    return;
+    return { ok: false, error: "Unauthorized" };
   }
 
   const existing = await prisma.post.findUnique({
@@ -229,7 +234,7 @@ export async function deletePost(id: string) {
   });
 
   if (!existing) {
-    return;
+    return { ok: false, error: "Post not found." };
   }
 
   try {
@@ -242,8 +247,10 @@ export async function deletePost(id: string) {
     }
 
     revalidatePostSurfaces(existing.slug);
+    return { ok: true };
   } catch (error) {
     console.error("Failed to delete post:", error);
+    return { ok: false, error: "Delete failed. Check the server logs." };
   }
 }
 

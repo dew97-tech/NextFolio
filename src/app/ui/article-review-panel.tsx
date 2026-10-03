@@ -62,14 +62,16 @@ export default function ArticleReviewPanel({
   postId,
   current,
   initialHistory,
-  reviewModel,
+  reviewModelLabel,
   webSearchConfigured,
+  onHistoryChange,
 }: {
   postId: string;
   current: { title: string; description: string };
   initialHistory: ReviewHistoryItem[];
-  reviewModel: string;
+  reviewModelLabel: string;
   webSearchConfigured: boolean;
+  onHistoryChange?: (history: ReviewHistoryItem[]) => void;
 }) {
   const { toast } = useToast();
   const [active, setActive] = useState<ReviewResult | null>(null);
@@ -88,6 +90,14 @@ export default function ArticleReviewPanel({
     Boolean(suggested?.title) ||
     Boolean(suggested?.description) ||
     Boolean(suggested?.content);
+
+  const updateHistory = (
+    updater: (prev: ReviewHistoryItem[]) => ReviewHistoryItem[],
+  ) => {
+    const next = updater(history);
+    setHistory(next);
+    onHistoryChange?.(next);
+  };
 
   const handleReview = () => {
     startReview(async () => {
@@ -108,13 +118,19 @@ export default function ArticleReviewPanel({
         description: Boolean(result.review.suggested?.description),
         content: Boolean(result.review.suggested?.content),
       });
-      setHistory((prev) =>
+      updateHistory((prev) =>
         [
           {
             id: result.review.reviewId,
             model: result.review.model,
             status: result.review.status,
             findingCount: result.review.findings.length,
+            errorCount: result.review.findings.filter(
+              (finding) => finding.severity === "error",
+            ).length,
+            warningCount: result.review.findings.filter(
+              (finding) => finding.severity === "warning",
+            ).length,
             createdAt: result.review.createdAt,
           },
           ...prev,
@@ -166,7 +182,7 @@ export default function ArticleReviewPanel({
         return;
       }
 
-      setHistory((prev) =>
+      updateHistory((prev) =>
         prev.map((item) =>
           item.id === active.reviewId ? { ...item, status: "applied" } : item,
         ),
@@ -188,7 +204,7 @@ export default function ArticleReviewPanel({
 
     startApply(async () => {
       await discardReview(active.reviewId);
-      setHistory((prev) =>
+      updateHistory((prev) =>
         prev.map((item) =>
           item.id === active.reviewId ? { ...item, status: "discarded" } : item,
         ),
@@ -233,9 +249,20 @@ export default function ArticleReviewPanel({
             Audits accuracy, code, SEO, and structure, and proposes corrections
             you can apply per field.
           </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint">
-            Reviewer: {reviewModel}. Web search:{" "}
-            {webSearchConfigured ? "connected" : "unavailable, claims stay unverified"}
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-ink-muted">
+            <span>Reviewed by {reviewModelLabel}</span>
+            <span
+              className={cn(
+                "inline-flex items-center rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em]",
+                webSearchConfigured
+                  ? "border-ok/40 text-ok"
+                  : "border-warn/40 text-warn",
+              )}
+            >
+              {webSearchConfigured
+                ? "Web search on"
+                : "No web search, claims are unverified"}
+            </span>
           </p>
         </div>
 

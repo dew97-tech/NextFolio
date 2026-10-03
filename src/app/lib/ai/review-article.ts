@@ -112,6 +112,8 @@ export interface ReviewHistoryItem {
   model: string;
   status: string;
   findingCount: number;
+  errorCount: number;
+  warningCount: number;
   error?: string | null;
   createdAt: string;
 }
@@ -134,16 +136,24 @@ export async function listRecentReviews(
     },
   });
 
-  return reviews.map((review) => ({
-    id: review.id,
-    model: review.model,
-    status: review.status,
-    findingCount: Array.isArray(review.findings)
-      ? review.findings.length
-      : 0,
-    error: review.error,
-    createdAt: review.createdAt.toISOString(),
-  }));
+  return reviews.map((review) => {
+    const findings = Array.isArray(review.findings) ? review.findings : [];
+    const severities = findings.map(
+      (finding) => (finding as { severity?: string }).severity,
+    );
+
+    return {
+      id: review.id,
+      model: review.model,
+      status: review.status,
+      findingCount: findings.length,
+      errorCount: severities.filter((severity) => severity === "error").length,
+      warningCount: severities.filter((severity) => severity === "warning")
+        .length,
+      error: review.error,
+      createdAt: review.createdAt.toISOString(),
+    };
+  });
 }
 
 export async function getStoredReview(

@@ -329,6 +329,41 @@ export default function AiModelSettings({
 
   return (
     <div className="space-y-6">
+      <section className="rounded-lg border border-border bg-card px-6 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "h-2 w-2 rounded-full",
+                apiKeyConfigured ? "bg-ok" : "bg-danger",
+              )}
+            />
+            <span className="text-sm font-medium text-foreground">
+              OpenCode Go connection
+            </span>
+          </div>
+          <span
+            className={cn(
+              "font-mono text-[11px] uppercase tracking-[0.08em]",
+              apiKeyConfigured ? "text-ok" : "text-danger",
+            )}
+          >
+            {apiKeyConfigured ? "Connected" : "Not configured"}
+          </span>
+        </div>
+        {!apiKeyConfigured ? (
+          <p className="mt-2 text-[13px] text-ink-muted">
+            Add the{" "}
+            <code className="rounded border border-border bg-surface px-1 py-0.5 font-mono text-[12px]">
+              OPENCODE_GO_API_KEY
+            </code>{" "}
+            environment variable to enable generation, review, and image
+            prompts.
+          </p>
+        ) : null}
+      </section>
+
       <section className="rounded-lg border border-border bg-card p-6">
         <header>
           <h2 className="font-serif text-xl tracking-[-0.01em] text-foreground">
@@ -559,17 +594,6 @@ export default function AiModelSettings({
           )}
           <span>Refresh model catalog</span>
         </button>
-
-        <p
-          className={cn(
-            "text-[13px]",
-            apiKeyConfigured ? "text-ink-faint" : "text-danger",
-          )}
-        >
-          {apiKeyConfigured
-            ? "OPENCODE_GO_API_KEY is configured."
-            : "OPENCODE_GO_API_KEY is missing. Generation fails until it is set."}
-        </p>
       </div>
     </div>
   );
