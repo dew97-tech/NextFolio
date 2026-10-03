@@ -136,6 +136,10 @@ export async function getGscProperty(): Promise<string> {
   return readSetting(SETTINGS_KEYS.gscProperty, z.string().min(1), fallback);
 }
 
+export async function getLastIndexSyncAt(): Promise<string | null> {
+  return readSetting(SETTINGS_KEYS.lastIndexSyncAt, z.string().nullable(), null);
+}
+
 export async function setSetting(key: string, value: unknown): Promise<void> {
   const json = value as Prisma.InputJsonValue;
   await prisma.appSetting.upsert({
