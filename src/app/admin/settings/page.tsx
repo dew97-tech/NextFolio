@@ -5,6 +5,7 @@ import {
   isOAuthConfigured,
 } from "@/app/lib/google/oauth";
 import {
+  getAnalysisSettings,
   getGenerationSettings,
   getGscProperty,
   getImageSettings,
@@ -42,13 +43,15 @@ export default async function SettingsPage({
         ? "error"
         : undefined;
 
-  const [generation, review, image, property, connection] = await Promise.all([
-    getGenerationSettings(),
-    getReviewSettings(),
-    getImageSettings(),
-    getGscProperty(),
-    getGoogleConnectionSummary(),
-  ]);
+  const [generation, review, image, analysis, property, connection] =
+    await Promise.all([
+      getGenerationSettings(),
+      getReviewSettings(),
+      getImageSettings(),
+      getAnalysisSettings(),
+      getGscProperty(),
+      getGoogleConnectionSummary(),
+    ]);
 
   return (
     <div className="space-y-8">
@@ -80,6 +83,7 @@ export default async function SettingsPage({
         generation={generation}
         review={review}
         image={image}
+        analysis={analysis}
         apiKeyConfigured={Boolean(process.env.OPENCODE_GO_API_KEY)}
       />
     </div>

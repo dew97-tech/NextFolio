@@ -13,6 +13,7 @@ import {
   testModel,
 } from "@/app/lib/settings-actions";
 import type {
+  AnalysisSettings,
   GenerationSettings,
   ImageSettings,
   ReviewSettings,
@@ -151,12 +152,14 @@ export default function AiModelSettings({
   generation,
   review,
   image,
+  analysis,
   apiKeyConfigured,
 }: {
   models: GoModel[];
   generation: GenerationSettings;
   review: ReviewSettings;
   image: ImageSettings;
+  analysis: AnalysisSettings;
   apiKeyConfigured: boolean;
 }) {
   const { toast } = useToast();
@@ -169,6 +172,10 @@ export default function AiModelSettings({
   const [imageSelection, setImageSelection] = useState<Selection>({
     modelId: image.modelId,
     reasoningEffort: image.reasoningEffort,
+  });
+  const [analysisSelection, setAnalysisSelection] = useState<Selection>({
+    modelId: analysis.modelId,
+    reasoningEffort: analysis.reasoningEffort,
   });
   const [isSaving, startSave] = useTransition();
   const [isTesting, startTest] = useTransition();
@@ -186,6 +193,7 @@ export default function AiModelSettings({
 
   const reviewModel = modelById.get(reviewSelection.modelId);
   const imageModel = modelById.get(imageSelection.modelId);
+  const analysisModel = modelById.get(analysisSelection.modelId);
 
   const updateEntry = (index: number, update: Partial<Selection>) => {
     setChain((prev) =>
@@ -257,6 +265,10 @@ export default function AiModelSettings({
           webSearch,
         },
         image: imageSelection,
+        analysis: {
+          modelId: analysisSelection.modelId,
+          reasoningEffort: analysisSelection.reasoningEffort,
+        },
       });
 
       if (result.ok) {
@@ -524,6 +536,46 @@ export default function AiModelSettings({
               );
             })}
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-border bg-card p-6">
+        <header>
+          <h2 className="font-serif text-xl tracking-[-0.01em] text-foreground">
+            Analysis model
+          </h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Runs the Search Console SEO analysis from the dashboard. Defaults
+            to DeepSeek V4.1 Flash without reasoning.
+          </p>
+        </header>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+          <ModelSelect
+            value={analysisSelection.modelId}
+            onChange={(modelId) =>
+              setAnalysisSelection((prev) => {
+                const model = modelById.get(modelId);
+                return {
+                  modelId,
+                  reasoningEffort:
+                    model && !model.reasoning ? "none" : prev.reasoningEffort,
+                };
+              })
+            }
+            models={models}
+            ariaLabel="Analysis model"
+          />
+
+          {analysisModel?.reasoning ? (
+            <ReasoningSelect
+              value={analysisSelection.reasoningEffort}
+              onChange={(reasoningEffort) =>
+                setAnalysisSelection((prev) => ({ ...prev, reasoningEffort }))
+              }
+              ariaLabel="Analysis reasoning effort"
+            />
+          ) : null}
         </div>
       </section>
 

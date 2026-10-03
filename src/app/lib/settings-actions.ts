@@ -3,6 +3,7 @@
 import { callModel } from "@/app/lib/ai/call-model";
 import { getModel, GO_MODEL_CATALOG } from "@/app/lib/ai/models";
 import {
+  analysisSettingsSchema,
   generationSettingsSchema,
   imageSettingsSchema,
   reviewSettingsSchema,
@@ -17,6 +18,7 @@ const settingsInputSchema = z.object({
   generation: generationSettingsSchema,
   review: reviewSettingsSchema,
   image: imageSettingsSchema,
+  analysis: analysisSettingsSchema,
 });
 
 export type AiSettingsInput = z.infer<typeof settingsInputSchema>;
@@ -43,6 +45,7 @@ export async function saveAiSettings(
     ...parsed.data.generation.chain.map((entry) => entry.modelId),
     parsed.data.review.modelId,
     parsed.data.image.modelId,
+    parsed.data.analysis.modelId,
   ];
   const unknown = ids.find((id) => !getModel(id));
   if (unknown) {
@@ -53,6 +56,7 @@ export async function saveAiSettings(
     setSetting(SETTINGS_KEYS.generation, parsed.data.generation),
     setSetting(SETTINGS_KEYS.review, parsed.data.review),
     setSetting(SETTINGS_KEYS.image, parsed.data.image),
+    setSetting(SETTINGS_KEYS.analysis, parsed.data.analysis),
   ]);
 
   revalidatePath("/admin/settings");
