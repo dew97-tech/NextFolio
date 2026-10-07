@@ -1,7 +1,7 @@
 import prisma from "@/app/lib/prisma";
 import { publishedDate } from "@/app/lib/post-dates";
 import { getSiteUrl } from "@/app/lib/site";
-import { getTagSummaries, loadTagSummaries, displayTag } from "@/app/lib/tags";
+import { getTagSummaries, loadTagSummaries, displayTag, MIN_INDEXABLE_POSTS, isIndexableTagSummary } from "@/app/lib/tags";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,12 +9,10 @@ import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
 
-const MIN_INDEXABLE_POSTS = 3;
-
 export async function generateStaticParams() {
   const summaries = await loadTagSummaries();
   return summaries
-    .filter((summary) => summary.count >= MIN_INDEXABLE_POSTS)
+    .filter((summary) => isIndexableTagSummary(summary))
     .map((summary) => ({ tag: summary.slug }));
 }
 
@@ -86,7 +84,7 @@ export default async function BlogTagPage({
   });
 
   const relatedTopics = summaries
-    .filter((entry) => entry.slug !== summary.slug && entry.count >= 2)
+    .filter((entry) => entry.slug !== summary.slug && isIndexableTagSummary(entry))
     .slice(0, 5);
 
   const siteUrl = getSiteUrl();

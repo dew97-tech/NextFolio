@@ -29,6 +29,21 @@ export type TagSummary = {
   lastModified?: Date;
 };
 
+export const MIN_INDEXABLE_POSTS = 3;
+
+export function isIndexableTagSummary(summary: Pick<TagSummary, "count">): boolean {
+  return summary.count >= MIN_INDEXABLE_POSTS;
+}
+
+export async function getIndexableTagSlugs(): Promise<Set<string>> {
+  const summaries = await loadTagSummaries();
+  return new Set(
+    summaries
+      .filter((summary) => isIndexableTagSummary(summary))
+      .map((summary) => summary.slug),
+  );
+}
+
 export async function loadTagSummaries(): Promise<TagSummary[]> {
   const posts = await prisma.post.findMany({
     where: { published: true },

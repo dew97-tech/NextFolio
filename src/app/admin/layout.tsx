@@ -5,7 +5,13 @@ import AdminNav from "@/app/ui/admin-nav";
 import { ArrowSquareOut, SignOut } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AdminLayout({
   children,

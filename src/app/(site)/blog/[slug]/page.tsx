@@ -4,7 +4,7 @@ import { publishedDate } from "@/app/lib/post-dates";
 import { getSiteUrl } from "@/app/lib/site";
 import { withHeadingAnchors } from "@/app/lib/toc";
 import { slugify } from "@/app/lib/slug";
-import { displayTag } from "@/app/lib/tags";
+import { displayTag, getIndexableTagSlugs } from "@/app/lib/tags";
 import ArticleToc from "@/app/ui/article-toc";
 import BlogReadingProgress from "@/app/ui/blog-reading-progress";
 import { resumeData } from "@/data/resume";
@@ -139,6 +139,7 @@ export default async function BlogPostPage({
   const siteUrl = getSiteUrl();
   const { personal } = resumeData;
   const articleUrl = `${siteUrl}/blog/${slug}`;
+  const indexableTagSlugs = await getIndexableTagSlugs();
   const published = publishedDate(post);
   const updatedAt = post.updatedAt;
   const showUpdated = updatedAt.getTime() - published.getTime() > 86_400_000;
@@ -240,16 +241,23 @@ export default async function BlogPostPage({
             <header className="mt-8">
               {post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag: string) => (
-                    <Link
-                      key={tag}
-                      href={`/blog/tag/${slugify(tag)}`}
-                      className="blog-tag"
-                      title={tag}
-                    >
-                      {displayTag(tag)}
-                    </Link>
-                  ))}
+                  {post.tags.map((tag: string) => {
+                    const tagSlug = slugify(tag);
+                    return indexableTagSlugs.has(tagSlug) ? (
+                      <Link
+                        key={tag}
+                        href={`/blog/tag/${tagSlug}`}
+                        className="blog-tag"
+                        title={tag}
+                      >
+                        {displayTag(tag)}
+                      </Link>
+                    ) : (
+                      <span key={tag} className="blog-tag" title={tag}>
+                        {displayTag(tag)}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
 

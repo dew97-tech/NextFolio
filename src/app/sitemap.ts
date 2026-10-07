@@ -22,6 +22,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     ...workEntries,
+    ...(["/privacy", "/terms", "/cookies"].map((path) => ({
+      url: `${siteUrl}${path}`,
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    }))),
   ];
 
   try {
@@ -55,6 +60,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       },
       ...workEntries,
+      ...(["/privacy", "/terms", "/cookies"].map((path) => ({
+        url: `${siteUrl}${path}`,
+        changeFrequency: "yearly" as const,
+        priority: 0.3,
+      }))),
       ...posts.map((post) => ({
         url: `${siteUrl}/blog/${post.slug}`,
         lastModified: post.updatedAt,

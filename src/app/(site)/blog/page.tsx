@@ -1,7 +1,8 @@
 import prisma from "@/app/lib/prisma";
 import { publishedDate } from "@/app/lib/post-dates";
 import { getSiteUrl } from "@/app/lib/site";
-import { displayTag } from "@/app/lib/tags";
+import { displayTag, getIndexableTagSlugs } from "@/app/lib/tags";
+import { slugify } from "@/app/lib/slug";
 import BlogPagination from "@/app/ui/blog-pagination";
 import BlogSearch from "@/app/ui/blog-search";
 import { Metadata } from "next";
@@ -28,7 +29,7 @@ export async function generateMetadata({
       : "Blog";
 
   const canonical = query
-    ? `/blog?query=${encodeURIComponent(query)}`
+    ? "/blog"
     : page > 1
       ? `/blog?page=${page}`
       : "/blog";
@@ -71,6 +72,7 @@ export default async function BlogPage({
 
   const totalPosts = await prisma.post.count({ where });
   const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+  const indexableTagSlugs = await getIndexableTagSlugs();
 
   const posts = await prisma.post.findMany({
     where,
@@ -205,11 +207,23 @@ export default async function BlogPage({
                         </p>
                         {post.tags.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-2">
-                            {post.tags.slice(0, 3).map((tag: string) => (
-                              <span key={tag} className="blog-tag" title={tag}>
-                                {displayTag(tag)}
-                              </span>
-                            ))}
+                            {post.tags.slice(0, 3).map((tag: string) => {
+                              const tagSlug = slugify(tag);
+                              return indexableTagSlugs.has(tagSlug) ? (
+                                <Link
+                                  key={tag}
+                                  href={`/blog/tag/${tagSlug}`}
+                                  className="blog-tag"
+                                  title={tag}
+                                >
+                                  {displayTag(tag)}
+                                </Link>
+                              ) : (
+                                <span key={tag} className="blog-tag" title={tag}>
+                                  {displayTag(tag)}
+                                </span>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
