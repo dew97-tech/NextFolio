@@ -125,6 +125,7 @@ export default function KeywordsManager({
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [draftNotice, setDraftNotice] = useState<{
     keywordId: string;
     postId: string;
@@ -309,26 +310,49 @@ export default function KeywordsManager({
   };
 
   const handleGenerateDraft = (id: string) => {
-    startGenerate(async () => {
-      const result = await generateDraftFromKeyword(id);
-      if (result.ok && result.postId) {
-        setConfirmId(null);
-        setDraftNotice({ keywordId: id, postId: result.postId });
-        toast({
-          variant: "success",
-          label: "Draft ready",
-          title: result.detail ?? "Draft created.",
-        });
-        router.refresh();
-        return;
-      }
+    if (generatingId !== null) {
       toast({
-        variant: "error",
-        label: "Generation failed",
-        title:
-          result.error ?? "The draft was created but the post link is missing.",
-        detail: result.detail ?? undefined,
+        variant: "info",
+        label: "Generation running",
+        title: "A draft is already being generated. Wait for it to finish.",
       });
+      return;
+    }
+
+    setGeneratingId(id);
+    startGenerate(async () => {
+      try {
+        const result = await generateDraftFromKeyword(id);
+        if (result.ok && result.postId) {
+          setConfirmId(null);
+          setDraftNotice({ keywordId: id, postId: result.postId });
+          toast({
+            variant: "success",
+            label: "Draft ready",
+            title: result.detail ?? "Draft created.",
+          });
+          router.refresh();
+          return;
+        }
+        if (result.status === "skipped") {
+          toast({
+            variant: "info",
+            label: "Generation running",
+            title:
+              result.error ?? "Another generation is already running.",
+          });
+          return;
+        }
+        toast({
+          variant: "error",
+          label: "Generation failed",
+          title:
+            result.error ?? "The draft was created but the post link is missing.",
+          detail: result.detail ?? undefined,
+        });
+      } finally {
+        setGeneratingId(null);
+      }
     });
   };
 
@@ -732,7 +756,12 @@ export default function KeywordsManager({
                           type="button"
                           onClick={() => {
                             setExpandedId(expanded ? null : row.id);
-                            setConfirmId(null);
+                            // Never clear the confirm or generation state of a
+                            // row that is still drafting; collapsing must not
+                            // make the Generate button available again.
+                            if (generatingId !== row.id) {
+                              setConfirmId(null);
+                            }
                           }}
                           aria-expanded={expanded}
                           aria-controls={`keyword-detail-${row.id}`}
@@ -858,15 +887,48 @@ export default function KeywordsManager({
 
                             <div>
                               <div className="flex flex-wrap items-center gap-2 lg:flex-col lg:items-stretch">
-                                {canGenerate && !confirming ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => setConfirmId(row.id)}
-                                    className={smallPrimaryButtonClassName}
+                                {generatingId === row.id ? (
+                                  <p
+                                    aria-live="polite"
+                                    className="inline-flex h-9 items-center gap-1.5 rounded border border-border px-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-muted"
                                   >
-                                    <Sparkle size={14} aria-hidden="true" />
-                                    <span>Generate draft</span>
-                                  </button>
+                                    <CircleNotch
+                                      size={14}
+                                      className="animate-spin"
+                                      aria-hidden="true"
+                                    />
+                                    <span>Drafting</span>
+                                  </p>
+                                ) : null}
+                                {canGenerate && !confirming ? (
+                                  generatingId === row.id ? (
+                                    <p
+                                      aria-live="polite"
+                                      className="inline-flex h-9 items-center gap-1.5 rounded border border-border px-3 text-[13px] text-ink-muted"
+                                    >
+                                      <CircleNotch
+                                        size={14}
+                                        className="animate-spin"
+                                        aria-hidden="true"
+                                      />
+                                      <span>Drafting in progress</span>
+                                    </p>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => setConfirmId(row.id)}
+                                      disabled={generatingId !== null}
+                                      title={
+                                        generatingId !== null
+                                          ? "A draft is already being generated"
+                                          : undefined
+                                      }
+                                      className={smallPrimaryButtonClassName}
+                                    >
+                                      <Sparkle size={14} aria-hidden="true" />
+                                      <span>Generate draft</span>
+                                    </button>
+                                  )
                                 ) : null}
 
                                 {row.status === "ignored" ? (
@@ -920,50 +982,69 @@ export default function KeywordsManager({
                               </div>
 
                               {confirming ? (
-                                <div className="mt-4 rounded border border-border bg-surface p-4">
-                                  <p className="text-sm font-medium text-foreground">
-                                    Generate a draft for this keyword?
-                                  </p>
-                                  <p className="mt-1 text-[13px] text-ink-muted">
-                                    Generation can take a few minutes.
-                                  </p>
-                                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => setConfirmId(null)}
-                                      disabled={isGenerating}
-                                      className={smallSecondaryButtonClassName}
+                                generatingId === row.id ? (
+                                  <div className="mt-4 rounded border border-border bg-surface p-4">
+                                    <p
+                                      aria-live="polite"
+                                      className="flex items-center gap-2 text-sm text-foreground"
                                     >
-                                      <span>Cancel</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleGenerateDraft(row.id)
-                                      }
-                                      disabled={isGenerating}
-                                      className={smallPrimaryButtonClassName}
-                                    >
-                                      {isGenerating ? (
-                                        <CircleNotch
-                                          size={14}
-                                          className="animate-spin"
-                                          aria-hidden="true"
-                                        />
-                                      ) : (
-                                        <Sparkle
-                                          size={14}
-                                          aria-hidden="true"
-                                        />
-                                      )}
+                                      <CircleNotch
+                                        size={14}
+                                        className="animate-spin"
+                                        aria-hidden="true"
+                                      />
                                       <span>
-                                        {isGenerating
-                                          ? "Generating..."
-                                          : "Generate"}
+                                        Drafting in progress. Collapsing this
+                                        section keeps the request running.
                                       </span>
-                                    </button>
+                                    </p>
                                   </div>
-                                </div>
+                                ) : (
+                                  <div className="mt-4 rounded border border-border bg-surface p-4">
+                                    <p className="text-sm font-medium text-foreground">
+                                      Generate a draft for this keyword?
+                                    </p>
+                                    <p className="mt-1 text-[13px] text-ink-muted">
+                                      Generation can take a few minutes.
+                                    </p>
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => setConfirmId(null)}
+                                        disabled={isGenerating}
+                                        className={smallSecondaryButtonClassName}
+                                      >
+                                        <span>Cancel</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleGenerateDraft(row.id)
+                                        }
+                                        disabled={isGenerating}
+                                        className={smallPrimaryButtonClassName}
+                                      >
+                                        {isGenerating ? (
+                                          <CircleNotch
+                                            size={14}
+                                            className="animate-spin"
+                                            aria-hidden="true"
+                                          />
+                                        ) : (
+                                          <Sparkle
+                                            size={14}
+                                            aria-hidden="true"
+                                          />
+                                        )}
+                                        <span>
+                                          {isGenerating
+                                            ? "Generating..."
+                                            : "Generate"}
+                                        </span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                )
                               ) : null}
                             </div>
                           </div>
