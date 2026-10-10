@@ -150,6 +150,17 @@ the browser; the UI only receives masked summaries and labels. If that key
 changes, stored accounts must be re-imported. Rotation is manual only; a
 failing account does not switch automatically.
 
+### Keyword Planner identity
+
+Search Console and Keyword Planner may belong to different Google users. By
+default both use the live connection, but one stored account can be flagged
+**Use for Ads** in the same card: Keyword Planner calls then mint their bearer
+from that account's own client pair and refresh token, without touching the
+Search Console connection. Use **Use live connection** to revert. If Ads calls
+fail with "the caller does not have permission", the live Google user lacks
+access to the Ads customer: either grant it in Google Ads (Account access) or
+flag the account that has access.
+
 ### Troubleshooting
 
 - Reconnect banner on the dashboard: the refresh token was revoked or expired;
