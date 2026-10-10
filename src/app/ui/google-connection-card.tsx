@@ -7,6 +7,7 @@ import {
 } from "@/app/lib/google/oauth-actions";
 import { switchGoogleAccount, storeCurrentConnection } from "@/app/lib/google/accounts-actions";
 import type { GoogleAccountSummary } from "@/app/lib/google/accounts";
+import PropertyPicker from "@/app/ui/property-picker";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
@@ -20,11 +21,6 @@ import {
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-
-interface PropertyOption {
-  siteUrl: string;
-  permissionLevel: string;
-}
 
 function shortScope(scope: string): string {
   const prefix = "https://www.googleapis.com/auth/";
@@ -66,7 +62,9 @@ export default function GoogleConnectionCard({
   const router = useRouter();
 
   const [propertyValue, setPropertyValue] = useState(property);
-  const [properties, setProperties] = useState<PropertyOption[]>([]);
+  const [properties, setProperties] = useState<
+    Array<{ siteUrl: string; permissionLevel: string }>
+  >([]);
   const [isListing, startList] = useTransition();
   const [isSaving, startSave] = useTransition();
   const [isDisconnecting, startDisconnect] = useTransition();
@@ -286,8 +284,8 @@ export default function GoogleConnectionCard({
           </div>
 
           <p className="mt-2 text-[13px] text-ink-muted">
-            Update access re-runs consent and refreshes the tokens without
-            disconnecting, for example after adding a scope.
+            Update access re-runs Google consent and refreshes the stored
+            tokens without disconnecting. Use it after a scope change.
           </p>
         </div>
       ) : (
@@ -412,10 +410,10 @@ export default function GoogleConnectionCard({
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             <p className="max-w-prose text-[13px] text-ink-muted">
-              Switching re-seeds the connection from the stored refresh token
-              and aligns the Keyword Planner customer ID. After a browser
-              reconnect (Update access), store the new token so rotation keeps
-              it. Secrets stay server-side.
+              Switching replaces the live connection with the selected
+              account&apos;s stored token and aligns the Keyword Planner
+              customer ID. After reconnecting in the browser, store the new
+              token so future switches keep it. Secrets never leave the server.
             </p>
             <button
               type="button"
@@ -445,25 +443,14 @@ export default function GoogleConnectionCard({
         >
           Search Console property
         </label>
-        <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center">
-          <input
-            id="gsc-property"
-            type="text"
+        <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-start">
+          <PropertyPicker
             value={propertyValue}
-            onChange={(event) => setPropertyValue(event.target.value)}
-            list="gsc-property-options"
-            autoComplete="off"
-            spellCheck={false}
-            placeholder="sc-domain:davidmallick.dev"
-            className="h-11 w-full rounded border border-input bg-surface px-3 font-mono text-sm text-foreground md:max-w-md"
+            onChange={setPropertyValue}
+            options={properties}
+            savedValue={property}
+            disabled={!connected}
           />
-          <datalist id="gsc-property-options">
-            {properties.map((option) => (
-              <option key={option.siteUrl} value={option.siteUrl}>
-                {option.permissionLevel}
-              </option>
-            ))}
-          </datalist>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -493,7 +480,8 @@ export default function GoogleConnectionCard({
           </div>
         </div>
         <p className="mt-2 text-[13px] text-ink-muted">
-          Defaults to GSC_PROPERTY when set, otherwise{" "}
+          When GSC_PROPERTY is set, it is the default. Otherwise the dashboard
+          uses{" "}
           <code className="rounded border border-border bg-surface px-1 py-0.5 font-mono text-[12px]">
             sc-domain:davidmallick.dev
           </code>
