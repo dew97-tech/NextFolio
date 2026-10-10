@@ -64,6 +64,8 @@ export const SETTINGS_KEYS = {
   keywordsLastSyncAt: "keywords.lastSyncAt",
   lastAnalysis: "gsc.lastAnalysis",
   lastIndexSyncAt: "gsc.lastIndexSyncAt",
+  googleAccounts: "google.accounts",
+  googleActiveAccount: "google.activeAccount",
 } as const;
 
 async function readSetting<T>(

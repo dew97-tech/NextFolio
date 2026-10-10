@@ -4,6 +4,7 @@ import {
   getGoogleConnectionSummary,
   isOAuthConfigured,
 } from "@/app/lib/google/oauth";
+import { getGoogleAccountSummaries } from "@/app/lib/google/accounts";
 import {
   getAnalysisSettings,
   getGenerationSettings,
@@ -45,16 +46,25 @@ export default async function SettingsPage({
         ? "error"
         : undefined;
 
-  const [generation, review, image, analysis, property, connection, planner] =
-    await Promise.all([
-      getGenerationSettings(),
-      getReviewSettings(),
-      getImageSettings(),
-      getAnalysisSettings(),
-      getGscProperty(),
-      getGoogleConnectionSummary(),
-      getKeywordPlannerSettings(),
-    ]);
+  const [
+    generation,
+    review,
+    image,
+    analysis,
+    property,
+    connection,
+    planner,
+    accountSet,
+  ] = await Promise.all([
+    getGenerationSettings(),
+    getReviewSettings(),
+    getImageSettings(),
+    getAnalysisSettings(),
+    getGscProperty(),
+    getGoogleConnectionSummary(),
+    getKeywordPlannerSettings(),
+    getGoogleAccountSummaries(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -78,7 +88,8 @@ export default async function SettingsPage({
         expiresAt={connection.expiresAt}
         property={property}
         encryptionConfigured={isEncryptionConfigured()}
-        oauthConfigured={isOAuthConfigured()}
+        oauthConfigured={await isOAuthConfigured()}
+        accounts={accountSet.accounts}
       />
 
       <KeywordPlannerSettingsCard

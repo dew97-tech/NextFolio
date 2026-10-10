@@ -5,9 +5,12 @@ import {
   fetchGscProperties,
   saveGscProperty,
 } from "@/app/lib/google/oauth-actions";
+import { switchGoogleAccount } from "@/app/lib/google/accounts-actions";
+import type { GoogleAccountSummary } from "@/app/lib/google/accounts";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
+  ArrowsLeftRight,
   CircleNotch,
   FloppyDisk,
   LinkSimple,
@@ -48,6 +51,7 @@ export default function GoogleConnectionCard({
   property,
   encryptionConfigured,
   oauthConfigured,
+  accounts,
 }: {
   connected: boolean;
   email: string | null;
@@ -56,6 +60,7 @@ export default function GoogleConnectionCard({
   property: string;
   encryptionConfigured: boolean;
   oauthConfigured: boolean;
+  accounts: GoogleAccountSummary[];
 }) {
   const { toast } = useToast();
   const router = useRouter();
@@ -65,6 +70,10 @@ export default function GoogleConnectionCard({
   const [isListing, startList] = useTransition();
   const [isSaving, startSave] = useTransition();
   const [isDisconnecting, startDisconnect] = useTransition();
+  const [isSwitching, startSwitch] = useTransition();
+  const [switchPendingLabel, setSwitchPendingLabel] = useState<string | null>(
+    null,
+  );
 
   const canConnect = encryptionConfigured && oauthConfigured;
   const scopes = scope ? scope.split(" ").filter(Boolean) : [];
@@ -140,6 +149,31 @@ export default function GoogleConnectionCard({
           label: "Disconnect failed",
           title: result.error ?? "Could not disconnect Google.",
         });
+      }
+    });
+  };
+
+  const handleSwitch = (label: string) => {
+    setSwitchPendingLabel(label);
+    startSwitch(async () => {
+      try {
+        const result = await switchGoogleAccount(label);
+        if (result.ok) {
+          toast({
+            variant: "success",
+            label: "Account switched",
+            title: "The connection and planner customer were updated.",
+          });
+          router.refresh();
+          return;
+        }
+        toast({
+          variant: "error",
+          label: "Switch failed",
+          title: result.error ?? "Could not switch the Google account.",
+        });
+      } finally {
+        setSwitchPendingLabel(null);
       }
     });
   };
@@ -298,6 +332,70 @@ export default function GoogleConnectionCard({
           ) : null}
         </div>
       )}
+
+      {accounts.length > 0 ? (
+        <div className="mt-5 border-t border-border pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="eyebrow text-ink-faint">Account rotation</span>
+            <span className="text-[12px] text-ink-faint">
+              {accounts.length} stored account{accounts.length === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          <ul className="mt-3 space-y-2">
+            {accounts.map((account) => (
+              <li
+                key={account.label}
+                className="flex flex-wrap items-center justify-between gap-3 rounded border border-border bg-surface px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-foreground">
+                    {account.googleAccount || account.label}
+                    {account.isActive ? (
+                      <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.08em] text-ok">
+                        active
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint">
+                    customer {account.customerIdMasked}
+                    {account.loginCustomerIdMasked !== "not set"
+                      ? ` | login ${account.loginCustomerIdMasked}`
+                      : ""}
+                    {` | ${account.status}`}
+                  </p>
+                </div>
+
+                {account.isActive ? null : (
+                  <button
+                    type="button"
+                    onClick={() => handleSwitch(account.label)}
+                    disabled={!canConnect || isSwitching}
+                    className={secondaryButtonClassName}
+                  >
+                    {switchPendingLabel === account.label ? (
+                      <CircleNotch
+                        size={14}
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <ArrowsLeftRight size={14} aria-hidden="true" />
+                    )}
+                    <span>Switch</span>
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-2 text-[13px] text-ink-muted">
+            Switching re-seeds the connection from the stored refresh token and
+            aligns the Keyword Planner customer ID. Secrets stay server-side;
+            manage the set from the local handover file.
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-5 border-t border-border pt-4">
         <label

@@ -1,0 +1,200 @@
+import { z } from "zod";
+import { decryptSecret, encryptSecret } from "@/app/lib/crypto";
+import {
+  getKeywordPlannerSettings,
+  getSetting,
+  setSetting,
+  SETTINGS_KEYS,
+} from "@/app/lib/settings";
+
+/**
+ * Stored Google account set used for rotation. The whole array is encrypted
+ * with SETTINGS_ENCRYPTION_KEY before it touches the database, and it never
+ * leaves the server: the UI only ever receives masked summaries.
+ */
+export const storedGoogleAccountSchema = z.object({
+  label: z.string().min(1),
+  googleAccount: z.string().default(""),
+  customerId: z.string().default(""),
+  loginCustomerId: z.string().default(""),
+  developerToken: z.string().default(""),
+  clientId: z.string().min(1),
+  clientSecret: z.string().min(1),
+  refreshToken: z.string().min(1),
+  refreshTokenStatus: z.string().default("unknown"),
+});
+
+export type StoredGoogleAccount = z.infer<typeof storedGoogleAccountSchema>;
+
+const storedAccountsSchema = z.array(storedGoogleAccountSchema);
+
+export interface GoogleAccountSummary {
+  label: string;
+  googleAccount: string;
+  customerIdMasked: string;
+  loginCustomerIdMasked: string;
+  status: string;
+  isActive: boolean;
+}
+
+function maskId(value: string): string {
+  return value.length <= 4 ? "not set" : `****${value.slice(-4)}`;
+}
+
+export async function getStoredGoogleAccounts(): Promise<StoredGoogleAccount[]> {
+  const raw = await getSetting<string | null>(
+    SETTINGS_KEYS.googleAccounts,
+    z.string().nullable(),
+    null,
+  );
+  if (!raw) return [];
+
+  try {
+    const parsed = storedAccountsSchema.safeParse(
+      JSON.parse(decryptSecret(raw)),
+    );
+    return parsed.success ? parsed.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function saveStoredGoogleAccounts(
+  accounts: StoredGoogleAccount[],
+): Promise<void> {
+  await setSetting(
+    SETTINGS_KEYS.googleAccounts,
+    encryptSecret(JSON.stringify(accounts)),
+  );
+}
+
+export async function getActiveGoogleAccountLabel(): Promise<string | null> {
+  const label = await getSetting<string | null>(
+    SETTINGS_KEYS.googleActiveAccount,
+    z.string().nullable(),
+    null,
+  );
+  return label && label.length > 0 ? label : null;
+}
+
+export async function getActiveGoogleAccount(): Promise<StoredGoogleAccount | null> {
+  const [accounts, label] = await Promise.all([
+    getStoredGoogleAccounts(),
+    getActiveGoogleAccountLabel(),
+  ]);
+  if (accounts.length === 0) return null;
+
+  if (label) {
+    const found = accounts.find((account) => account.label === label);
+    if (found) return found;
+  }
+
+  return (
+    accounts.find(
+      (account) => account.refreshTokenStatus.toLowerCase() === "active",
+    ) ??
+    accounts[0] ??
+    null
+  );
+}
+
+export async function getGoogleAccountSummaries(): Promise<{
+  accounts: GoogleAccountSummary[];
+  activeLabel: string | null;
+}> {
+  const [accounts, active] = await Promise.all([
+    getStoredGoogleAccounts(),
+    getActiveGoogleAccount(),
+  ]);
+
+  return {
+    activeLabel: active?.label ?? null,
+    accounts: accounts.map((account) => ({
+      label: account.label,
+      googleAccount: account.googleAccount,
+      customerIdMasked: maskId(account.customerId),
+      loginCustomerIdMasked: maskId(account.loginCustomerId),
+      status: account.refreshTokenStatus,
+      isActive: account.label === active?.label,
+    })),
+  };
+}
+
+/**
+ * Credential resolution order: the active stored account, then the env pair.
+ * Both are server-only; values never reach the client.
+ */
+export async function resolveOAuthCredentials(): Promise<{
+  clientId: string;
+  clientSecret: string;
+} | null> {
+  const active = await getActiveGoogleAccount();
+  if (active && active.clientId.length > 0 && active.clientSecret.length > 0) {
+    return { clientId: active.clientId, clientSecret: active.clientSecret };
+  }
+
+  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return null;
+  return { clientId, clientSecret };
+}
+
+export async function resolveDeveloperToken(): Promise<string | null> {
+  const active = await getActiveGoogleAccount();
+  if (active && active.developerToken.trim().length > 0) {
+    return active.developerToken.trim();
+  }
+
+  const token = process.env.GOOGLE_ADS_DEVELOPER_TOKEN?.trim();
+  return token && token.length > 0 ? token : null;
+}
+
+export interface ActivateAccountResult {
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * Switches the active account: re-seeds GoogleConnection from the account's
+ * refresh token (forcing a real refresh so the stored access token is
+ * genuine), aligns keywords.planner, then records the active label.
+ */
+export async function activateGoogleAccount(
+  label: string,
+): Promise<ActivateAccountResult> {
+  const accounts = await getStoredGoogleAccounts();
+  const account = accounts.find((entry) => entry.label === label);
+  if (!account) {
+    return { ok: false, error: "That account is not in the stored set." };
+  }
+  if (!account.refreshToken) {
+    return { ok: false, error: "That account has no refresh token stored." };
+  }
+
+  const { seedConnectionFromRefreshToken } = await import("./oauth");
+
+  try {
+    await seedConnectionFromRefreshToken({
+      refreshToken: account.refreshToken,
+      email: account.googleAccount || null,
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? `Google rejected the refresh token: ${error.message}`
+          : "Google rejected the refresh token.",
+    };
+  }
+
+  const planner = await getKeywordPlannerSettings();
+  await setSetting(SETTINGS_KEYS.keywordsPlanner, {
+    ...planner,
+    customerId: account.customerId,
+    loginCustomerId: account.loginCustomerId,
+  });
+
+  await setSetting(SETTINGS_KEYS.googleActiveAccount, label);
+  return { ok: true };
+}

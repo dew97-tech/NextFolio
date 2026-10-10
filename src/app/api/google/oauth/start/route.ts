@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(settingsUrl);
   }
 
-  if (!isOAuthConfigured()) {
+  if (!(await isOAuthConfigured())) {
     settingsUrl.searchParams.set("google", "error");
     settingsUrl.searchParams.set("reason", "config");
     return NextResponse.redirect(settingsUrl);
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   const state = generateOAuthState();
   const verifier = generateOAuthVerifier();
 
-  const authUrl = buildAuthUrl({
+  const authUrl = await buildAuthUrl({
     state,
     codeChallenge: challengeFor(verifier),
     redirectUri: new URL("/api/google/oauth/callback", request.url).toString(),

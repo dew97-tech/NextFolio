@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { decryptSecret, encryptSecret } from "@/app/lib/crypto";
 import prisma from "@/app/lib/prisma";
+import { resolveOAuthCredentials } from "./accounts";
 import { GscApiError, GscAuthError, GscNotConnectedError } from "./errors";
 
 export const GOOGLE_PROVIDER = "google";
@@ -50,15 +51,15 @@ export interface GoogleTokens {
   email: string | null;
 }
 
-export function oauthCredentials(): { clientId: string; clientSecret: string } | null {
-  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
-  return { clientId, clientSecret };
+export async function oauthCredentials(): Promise<{
+  clientId: string;
+  clientSecret: string;
+} | null> {
+  return resolveOAuthCredentials();
 }
 
-export function isOAuthConfigured(): boolean {
-  return oauthCredentials() !== null;
+export async function isOAuthConfigured(): Promise<boolean> {
+  return (await resolveOAuthCredentials()) !== null;
 }
 
 export function generateOAuthState(): string {
@@ -73,12 +74,12 @@ export function challengeFor(verifier: string): string {
   return createHash("sha256").update(verifier).digest("base64url");
 }
 
-export function buildAuthUrl(input: {
+export async function buildAuthUrl(input: {
   state: string;
   codeChallenge: string;
   redirectUri: string;
-}): string {
-  const credentials = oauthCredentials();
+}): Promise<string> {
+  const credentials = await oauthCredentials();
   if (!credentials) {
     throw new GscAuthError("Google OAuth client credentials are not configured.");
   }
@@ -142,7 +143,7 @@ export async function exchangeCodeForTokens(input: {
   codeVerifier: string;
   redirectUri: string;
 }): Promise<GoogleTokens> {
-  const credentials = oauthCredentials();
+  const credentials = await oauthCredentials();
   if (!credentials) {
     throw new GscAuthError(
       "Google OAuth client credentials are not configured. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET.",
@@ -186,7 +187,7 @@ async function refreshAccessToken(refreshToken: string): Promise<{
   expiresIn: number;
   scope: string | null;
 }> {
-  const credentials = oauthCredentials();
+  const credentials = await oauthCredentials();
   if (!credentials) {
     throw new GscAuthError(
       "Google OAuth client credentials are not configured. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET.",
@@ -263,6 +264,57 @@ export async function storeConnection(tokens: GoogleTokens): Promise<void> {
       scope: tokens.scope,
     },
   });
+}
+
+/**
+ * Replaces the stored connection with a refresh token, forcing a real refresh
+ * so the persisted access token is genuine. Used by the seeding/rotation path.
+ */
+export async function seedConnectionFromRefreshToken(input: {
+  refreshToken: string;
+  email?: string | null;
+}): Promise<{ email: string | null }> {
+  await storeConnection({
+    accessToken: "seed-placeholder",
+    refreshToken: input.refreshToken,
+    expiresIn: 0,
+    scope: GOOGLE_OAUTH_SCOPES.join(" "),
+    email: input.email ?? null,
+  });
+
+  const accessToken = await getAccessToken();
+
+  let email = input.email ?? null;
+  if (!email) {
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          cache: "no-store",
+          signal: AbortSignal.timeout(8_000),
+        },
+      );
+      if (response.ok) {
+        const profile = (await response.json()) as { email?: unknown };
+        email =
+          typeof profile.email === "string" && profile.email.length > 0
+            ? profile.email
+            : null;
+      }
+    } catch {
+      // The email is optional; the connection stays usable without it.
+    }
+  }
+
+  if (email) {
+    await prisma.googleConnection.update({
+      where: { provider: GOOGLE_PROVIDER },
+      data: { email },
+    });
+  }
+
+  return { email };
 }
 
 export async function getGoogleConnectionSummary(): Promise<GoogleConnectionSummary> {

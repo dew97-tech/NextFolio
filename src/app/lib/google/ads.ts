@@ -1,5 +1,6 @@
 import { getKeywordPlannerSettings } from "@/app/lib/settings";
 import type { KeywordPlannerSettings } from "@/app/lib/settings";
+import { resolveDeveloperToken } from "./accounts";
 import { getAccessToken } from "./oauth";
 
 // Pinned at implementation time (v25 as of 2026-10-03). Re-verify the current
@@ -92,10 +93,10 @@ export async function resolveKeywordPlannerConfig(): Promise<{
   settings: KeywordPlannerSettings;
   developerToken: string;
 }> {
-  const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN?.trim() ?? "";
+  const developerToken = (await resolveDeveloperToken()) ?? "";
   if (developerToken.length === 0) {
     throw new GoogleAdsConfigError(
-      "The Google Ads developer token is missing. Set GOOGLE_ADS_DEVELOPER_TOKEN.",
+      "The Google Ads developer token is missing. Set GOOGLE_ADS_DEVELOPER_TOKEN or store an account with a developer token.",
     );
   }
 
