@@ -5,7 +5,7 @@ import {
   fetchGscProperties,
   saveGscProperty,
 } from "@/app/lib/google/oauth-actions";
-import { switchGoogleAccount } from "@/app/lib/google/accounts-actions";
+import { switchGoogleAccount, storeCurrentConnection } from "@/app/lib/google/accounts-actions";
 import type { GoogleAccountSummary } from "@/app/lib/google/accounts";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
@@ -71,6 +71,7 @@ export default function GoogleConnectionCard({
   const [isSaving, startSave] = useTransition();
   const [isDisconnecting, startDisconnect] = useTransition();
   const [isSwitching, startSwitch] = useTransition();
+  const [isStoring, startStore] = useTransition();
   const [switchPendingLabel, setSwitchPendingLabel] = useState<string | null>(
     null,
   );
@@ -175,6 +176,26 @@ export default function GoogleConnectionCard({
       } finally {
         setSwitchPendingLabel(null);
       }
+    });
+  };
+
+  const handleStoreConnection = () => {
+    startStore(async () => {
+      const result = await storeCurrentConnection();
+      if (result.ok) {
+        toast({
+          variant: "success",
+          label: "Token stored",
+          title: "The active account now holds this connection's token.",
+        });
+        router.refresh();
+        return;
+      }
+      toast({
+        variant: "error",
+        label: "Store failed",
+        title: result.error ?? "Could not store the connection token.",
+      });
     });
   };
 
@@ -389,11 +410,31 @@ export default function GoogleConnectionCard({
             ))}
           </ul>
 
-          <p className="mt-2 text-[13px] text-ink-muted">
-            Switching re-seeds the connection from the stored refresh token and
-            aligns the Keyword Planner customer ID. Secrets stay server-side;
-            manage the set from the local handover file.
-          </p>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="max-w-prose text-[13px] text-ink-muted">
+              Switching re-seeds the connection from the stored refresh token
+              and aligns the Keyword Planner customer ID. After a browser
+              reconnect (Update access), store the new token so rotation keeps
+              it. Secrets stay server-side.
+            </p>
+            <button
+              type="button"
+              onClick={handleStoreConnection}
+              disabled={!connected || isStoring}
+              className={secondaryButtonClassName}
+            >
+              {isStoring ? (
+                <CircleNotch
+                  size={14}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <FloppyDisk size={14} aria-hidden="true" />
+              )}
+              <span>Store current token</span>
+            </button>
+          </div>
         </div>
       ) : null}
 

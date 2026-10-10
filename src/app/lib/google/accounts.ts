@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { decryptSecret, encryptSecret } from "@/app/lib/crypto";
+import prisma from "@/app/lib/prisma";
 import {
   getKeywordPlannerSettings,
   getSetting,
@@ -196,5 +197,68 @@ export async function activateGoogleAccount(
   });
 
   await setSetting(SETTINGS_KEYS.googleActiveAccount, label);
+  return { ok: true };
+}
+
+/**
+ * Copies the live GoogleConnection refresh token back into the active stored
+ * account. Run this after a browser re-consent (Update access), so rotation
+ * will not later restore an older token.
+ */
+export async function captureConnectionIntoActiveAccount(): Promise<ActivateAccountResult> {
+  const [row, active] = await Promise.all([
+    prisma.googleConnection.findUnique({ where: { provider: "google" } }),
+    getActiveGoogleAccount(),
+  ]);
+
+  if (!row) {
+    return { ok: false, error: "There is no live Google connection to store." };
+  }
+  if (!active) {
+    return {
+      ok: false,
+      error: "No stored account set. Import the handover file first.",
+    };
+  }
+
+  if (
+    row.email &&
+    active.googleAccount &&
+    row.email.toLowerCase() !== active.googleAccount.toLowerCase()
+  ) {
+    return {
+      ok: false,
+      error: `The live connection belongs to ${row.email}, which differs from the active stored account.`,
+    };
+  }
+
+  let refreshToken: string;
+  try {
+    refreshToken = decryptSecret(row.refreshToken);
+  } catch {
+    return {
+      ok: false,
+      error: "The live refresh token could not be decrypted.",
+    };
+  }
+
+  const accounts = await getStoredGoogleAccounts();
+  const index = accounts.findIndex((account) => account.label === active.label);
+  if (index < 0) {
+    return {
+      ok: false,
+      error: "The active account is no longer in the stored set.",
+    };
+  }
+
+  const next = [...accounts];
+  next[index] = {
+    ...next[index],
+    refreshToken,
+    googleAccount: row.email ?? next[index].googleAccount,
+    refreshTokenStatus: "active",
+  };
+
+  await saveStoredGoogleAccounts(next);
   return { ok: true };
 }

@@ -141,6 +141,9 @@ stored as backups and switched without redoing the browser consent:
    customer ids and a **Switch** button. Switching re-seeds the connection from
    the chosen account's refresh token and aligns the Keyword Planner customer
    id. The previous account stays stored as a backup.
+4. After a browser reconnect (**Update access**), click **Store current token**
+   so the stored account keeps the new refresh token; otherwise a later switch
+   could restore the older token.
 
 Secrets are encrypted at rest with `SETTINGS_ENCRYPTION_KEY` and never sent to
 the browser; the UI only receives masked summaries and labels. If that key
