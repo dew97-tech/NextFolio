@@ -36,6 +36,7 @@ export interface GoogleAccountSummary {
   loginCustomerIdMasked: string;
   status: string;
   isActive: boolean;
+  isAds: boolean;
 }
 
 function maskId(value: string): string {
@@ -102,14 +103,21 @@ export async function getActiveGoogleAccount(): Promise<StoredGoogleAccount | nu
 export async function getGoogleAccountSummaries(): Promise<{
   accounts: GoogleAccountSummary[];
   activeLabel: string | null;
+  adsLabel: string | null;
 }> {
-  const [accounts, active] = await Promise.all([
+  const [accounts, active, adsLabel] = await Promise.all([
     getStoredGoogleAccounts(),
     getActiveGoogleAccount(),
+    getSetting<string | null>(
+      SETTINGS_KEYS.googleAdsAccount,
+      z.string().nullable(),
+      null,
+    ),
   ]);
 
   return {
     activeLabel: active?.label ?? null,
+    adsLabel,
     accounts: accounts.map((account) => ({
       label: account.label,
       googleAccount: account.googleAccount,
@@ -117,14 +125,67 @@ export async function getGoogleAccountSummaries(): Promise<{
       loginCustomerIdMasked: maskId(account.loginCustomerId),
       status: account.refreshTokenStatus,
       isActive: account.label === active?.label,
+      isAds: account.label === adsLabel,
     })),
   };
 }
 
 /**
- * Credential resolution order: the active stored account, then the env pair.
- * Both are server-only; values never reach the client.
+ * Bearer token for Google Ads calls. When a dedicated Ads account is flagged
+ * in settings, it refreshes with that account's own client pair and refresh
+ * token and never touches the live GoogleConnection row (which belongs to
+ * Search Console). Otherwise it falls back to the live connection.
  */
+export async function getAdsAccessToken(): Promise<string> {
+  const adsLabel = await getSetting<string | null>(
+    SETTINGS_KEYS.googleAdsAccount,
+    z.string().nullable(),
+    null,
+  );
+
+  if (adsLabel) {
+    const accounts = await getStoredGoogleAccounts();
+    const account = accounts.find((entry) => entry.label === adsLabel);
+    if (!account) {
+      throw new Error(
+        "The flagged Keyword Planner account is no longer stored. Pick another Ads account in settings.",
+      );
+    }
+
+    const { refreshAccessTokenWith } = await import("./oauth");
+    try {
+      const refreshed = await refreshAccessTokenWith(
+        { clientId: account.clientId, clientSecret: account.clientSecret },
+        account.refreshToken,
+      );
+      return refreshed.accessToken;
+    } catch (error) {
+      throw new Error(
+        `The stored Keyword Planner account could not refresh its token: ${
+          error instanceof Error ? error.message : "unknown error"
+        }. Re-import the handover file or pick another Ads account.`,
+      );
+    }
+  }
+
+  const { getAccessToken } = await import("./oauth");
+  return getAccessToken();
+}
+
+export async function setAdsAccountLabel(
+  label: string | null,
+): Promise<void> {
+  if (!label) {
+    await setSetting(SETTINGS_KEYS.googleAdsAccount, null);
+    return;
+  }
+
+  const accounts = await getStoredGoogleAccounts();
+  if (!accounts.some((account) => account.label === label)) {
+    throw new Error("That account is not in the stored set.");
+  }
+  await setSetting(SETTINGS_KEYS.googleAdsAccount, label);
+}
 export async function resolveOAuthCredentials(): Promise<{
   clientId: string;
   clientSecret: string;

@@ -1,7 +1,6 @@
 import { getKeywordPlannerSettings } from "@/app/lib/settings";
 import type { KeywordPlannerSettings } from "@/app/lib/settings";
-import { resolveDeveloperToken } from "./accounts";
-import { getAccessToken } from "./oauth";
+import { getAdsAccessToken, resolveDeveloperToken } from "./accounts";
 
 // Pinned at implementation time (v25 as of 2026-10-03). Re-verify the current
 // version in Google's REST docs for KeywordPlanIdeaService when the Google Ads
@@ -239,7 +238,7 @@ async function adsRequest<T>(input: {
   operation: string;
   body: unknown;
 }): Promise<T> {
-  const accessToken = await getAccessToken();
+  const accessToken = await getAdsAccessToken();
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,

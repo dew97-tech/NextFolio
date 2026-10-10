@@ -194,6 +194,23 @@ async function refreshAccessToken(refreshToken: string): Promise<{
     );
   }
 
+  return refreshAccessTokenWith(credentials, refreshToken);
+}
+
+/**
+ * Refreshes with an explicit client pair instead of the resolved one. Used by
+ * the dedicated Ads identity, whose stored account carries its own client
+ * credentials. Never touches the live GoogleConnection row.
+ */
+export async function refreshAccessTokenWith(
+  credentials: { clientId: string; clientSecret: string },
+  refreshToken: string,
+): Promise<{
+  accessToken: string;
+  expiresIn: number;
+  scope: string | null;
+}> {
+
   const response = await fetch(TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },

@@ -66,6 +66,7 @@ export const SETTINGS_KEYS = {
   lastIndexSyncAt: "gsc.lastIndexSyncAt",
   googleAccounts: "google.accounts",
   googleActiveAccount: "google.activeAccount",
+  googleAdsAccount: "google.adsAccount",
 } as const;
 
 async function readSetting<T>(

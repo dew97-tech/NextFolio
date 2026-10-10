@@ -5,7 +5,7 @@ import {
   fetchGscProperties,
   saveGscProperty,
 } from "@/app/lib/google/oauth-actions";
-import { switchGoogleAccount, storeCurrentConnection } from "@/app/lib/google/accounts-actions";
+import { switchGoogleAccount, storeCurrentConnection, flagAdsGoogleAccount } from "@/app/lib/google/accounts-actions";
 import type { GoogleAccountSummary } from "@/app/lib/google/accounts";
 import PropertyPicker from "@/app/ui/property-picker";
 import { useToast } from "@/components/ui/toast";
@@ -70,6 +70,8 @@ export default function GoogleConnectionCard({
   const [isDisconnecting, startDisconnect] = useTransition();
   const [isSwitching, startSwitch] = useTransition();
   const [isStoring, startStore] = useTransition();
+  const [isFlaggingAds, startFlagAds] = useTransition();
+  const [adsPendingLabel, setAdsPendingLabel] = useState<string | null>(null);
   const [switchPendingLabel, setSwitchPendingLabel] = useState<string | null>(
     null,
   );
@@ -173,6 +175,33 @@ export default function GoogleConnectionCard({
         });
       } finally {
         setSwitchPendingLabel(null);
+      }
+    });
+  };
+
+  const handleFlagAds = (label: string | null) => {
+    setAdsPendingLabel(label);
+    startFlagAds(async () => {
+      try {
+        const result = await flagAdsGoogleAccount(label);
+        if (result.ok) {
+          toast({
+            variant: "success",
+            label: "Ads identity updated",
+            title: label
+              ? "Keyword Planner calls now use this account's token."
+              : "Keyword Planner calls now use the live connection.",
+          });
+          router.refresh();
+          return;
+        }
+        toast({
+          variant: "error",
+          label: "Update failed",
+          title: result.error ?? "Could not update the Ads identity.",
+        });
+      } finally {
+        setAdsPendingLabel(null);
       }
     });
   };
@@ -375,6 +404,11 @@ export default function GoogleConnectionCard({
                         active
                       </span>
                     ) : null}
+                    {account.isAds ? (
+                      <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-muted">
+                        ads
+                      </span>
+                    ) : null}
                   </p>
                   <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint">
                     customer {account.customerIdMasked}
@@ -385,25 +419,60 @@ export default function GoogleConnectionCard({
                   </p>
                 </div>
 
-                {account.isActive ? null : (
-                  <button
-                    type="button"
-                    onClick={() => handleSwitch(account.label)}
-                    disabled={!canConnect || isSwitching}
-                    className={secondaryButtonClassName}
-                  >
-                    {switchPendingLabel === account.label ? (
-                      <CircleNotch
-                        size={14}
-                        className="animate-spin"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <ArrowsLeftRight size={14} aria-hidden="true" />
-                    )}
-                    <span>Switch</span>
-                  </button>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {account.isAds ? (
+                    <button
+                      type="button"
+                      onClick={() => handleFlagAds(null)}
+                      disabled={isFlaggingAds}
+                      className={secondaryButtonClassName}
+                    >
+                      {adsPendingLabel === null && isFlaggingAds ? (
+                        <CircleNotch
+                          size={14}
+                          className="animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <span>Use live connection</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleFlagAds(account.label)}
+                      disabled={isFlaggingAds}
+                      className={secondaryButtonClassName}
+                    >
+                      {adsPendingLabel === account.label ? (
+                        <CircleNotch
+                          size={14}
+                          className="animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <span>Use for Ads</span>
+                    </button>
+                  )}
+                  {account.isActive ? null : (
+                    <button
+                      type="button"
+                      onClick={() => handleSwitch(account.label)}
+                      disabled={!canConnect || isSwitching}
+                      className={secondaryButtonClassName}
+                    >
+                      {switchPendingLabel === account.label ? (
+                        <CircleNotch
+                          size={14}
+                          className="animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <ArrowsLeftRight size={14} aria-hidden="true" />
+                      )}
+                      <span>Switch</span>
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -412,7 +481,9 @@ export default function GoogleConnectionCard({
             <p className="max-w-prose text-[13px] text-ink-muted">
               Switching replaces the live connection with the selected
               account&apos;s stored token and aligns the Keyword Planner
-              customer ID. After reconnecting in the browser, store the new
+              customer ID. Use for Ads pins one account&apos;s token for
+              Keyword Planner calls without touching the Search Console
+              connection. After reconnecting in the browser, store the new
               token so future switches keep it. Secrets never leave the server.
             </p>
             <button
