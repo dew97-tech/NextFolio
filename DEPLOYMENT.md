@@ -127,6 +127,26 @@ preview origin in the Google Cloud console. The rest of the dashboard works on
 previews only if the connection row already exists (the stored tokens are
 shared through the database).
 
+### Rotating Google accounts
+
+The app uses one Google account at a time, but several prepared accounts can be
+stored as backups and switched without redoing the browser consent:
+
+1. Keep the accounts (client id/secret, refresh token, developer token, customer
+   id, optional MCC) in the local, gitignored handover file.
+2. Import them into the encrypted stored set from the repo root:
+   `npx tsx plans/import-google-accounts.mts` (add `--check` to preview; the
+   script never prints secrets).
+3. In `/admin/settings`, the Google card lists the stored accounts with masked
+   customer ids and a **Switch** button. Switching re-seeds the connection from
+   the chosen account's refresh token and aligns the Keyword Planner customer
+   id. The previous account stays stored as a backup.
+
+Secrets are encrypted at rest with `SETTINGS_ENCRYPTION_KEY` and never sent to
+the browser; the UI only receives masked summaries and labels. If that key
+changes, stored accounts must be re-imported. Rotation is manual only; a
+failing account does not switch automatically.
+
 ### Troubleshooting
 
 - Reconnect banner on the dashboard: the refresh token was revoked or expired;
