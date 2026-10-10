@@ -34,7 +34,6 @@ import type { ReactNode } from "react";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-// Search Console data lags about two days; end every range three days back.
 const LAG_DAYS = 3;
 
 const TABS = [

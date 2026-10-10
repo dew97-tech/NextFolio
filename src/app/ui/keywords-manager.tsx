@@ -756,9 +756,6 @@ export default function KeywordsManager({
                           type="button"
                           onClick={() => {
                             setExpandedId(expanded ? null : row.id);
-                            // Never clear the confirm or generation state of a
-                            // row that is still drafting; collapsing must not
-                            // make the Generate button available again.
                             if (generatingId !== row.id) {
                               setConfirmId(null);
                             }

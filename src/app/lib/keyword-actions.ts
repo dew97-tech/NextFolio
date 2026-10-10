@@ -216,7 +216,6 @@ export async function syncKeywordIdeas(input: {
         source: "keyword_planner",
         ...metrics,
       },
-      // Metrics only: status, postId, and usedAt are never overwritten.
       update: metrics,
     });
 

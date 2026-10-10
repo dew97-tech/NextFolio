@@ -158,10 +158,6 @@ function isoDay(offsetDays: number): string {
   return date.toISOString().slice(0, 10);
 }
 
-/**
- * Legacy generation-prompt export. Uses the service account when configured and
- * never throws: generation is unaffected by OAuth or Search Console problems.
- */
 export async function fetchSearchQueries(limit = 20): Promise<SearchQuery[]> {
   const config = serviceAccountCredentials();
   if (!config) return [];

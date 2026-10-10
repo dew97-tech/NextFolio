@@ -1,9 +1,6 @@
 export interface LineChartPoint {
-  /** ISO date label, e.g. 2026-09-28 */
   label: string;
-  /** First series value, rendered with var(--clay). */
   a: number;
-  /** Second series value, rendered with var(--ink-faint). */
   b: number;
 }
 

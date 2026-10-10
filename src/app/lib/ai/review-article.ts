@@ -634,8 +634,6 @@ export async function runArticleReview(postId: string): Promise<ReviewResult> {
       return true;
     }
 
-    // Code owns link correctness: drop model link findings when code finds
-    // nothing, and drop duplicates when code already flagged the same slug.
     if (missingLinkSet.size === 0) {
       return false;
     }

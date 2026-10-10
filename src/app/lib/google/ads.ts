@@ -2,9 +2,6 @@ import { getKeywordPlannerSettings } from "@/app/lib/settings";
 import type { KeywordPlannerSettings } from "@/app/lib/settings";
 import { getAdsAccessToken, resolveDeveloperToken } from "./accounts";
 
-// Pinned at implementation time (v25 as of 2026-10-03). Re-verify the current
-// version in Google's REST docs for KeywordPlanIdeaService when the Google Ads
-// token arrives, then bump this constant.
 export const GOOGLE_ADS_API_VERSION = "v25";
 
 const ADS_API_BASE = `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}`;
@@ -112,8 +109,6 @@ export async function resolveKeywordPlannerConfig(): Promise<{
       ...stored,
       customerId: stored.customerId.trim(),
       loginCustomerId: stored.loginCustomerId.trim(),
-      // Settings may store the constants with or without their Google prefix;
-      // keep the bare IDs so request building can prepend one canonical prefix.
       geo: withoutPrefix(stored.geo, GEO_TARGET_PREFIX),
       language: withoutPrefix(stored.language, LANGUAGE_PREFIX),
     },
@@ -175,11 +170,6 @@ async function parseGoogleAdsError(response: Response): Promise<{
         reasons.push(record.reason);
       }
 
-      // Google Ads reports typed failures as details[].errors[].errorCode.<field>,
-      // where <field> is one of several hundred error-code fields, for example
-      // authenticationError: "CUSTOMER_NOT_FOUND" or
-      // authorizationError: "DEVELOPER_TOKEN_NOT_APPROVED". Collect every populated
-      // code so the hints below match the error code, not just the prose message.
       if (Array.isArray(record.errors)) {
         for (const entry of record.errors) {
           if (typeof entry !== "object" || entry === null) continue;

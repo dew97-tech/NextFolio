@@ -197,11 +197,6 @@ async function refreshAccessToken(refreshToken: string): Promise<{
   return refreshAccessTokenWith(credentials, refreshToken);
 }
 
-/**
- * Refreshes with an explicit client pair instead of the resolved one. Used by
- * the dedicated Ads identity, whose stored account carries its own client
- * credentials. Never touches the live GoogleConnection row.
- */
 export async function refreshAccessTokenWith(
   credentials: { clientId: string; clientSecret: string },
   refreshToken: string,
@@ -283,10 +278,6 @@ export async function storeConnection(tokens: GoogleTokens): Promise<void> {
   });
 }
 
-/**
- * Replaces the stored connection with a refresh token, forcing a real refresh
- * so the persisted access token is genuine. Used by the seeding/rotation path.
- */
 export async function seedConnectionFromRefreshToken(input: {
   refreshToken: string;
   email?: string | null;

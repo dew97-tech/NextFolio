@@ -638,7 +638,6 @@ export async function runBlogGeneration(
         .filter((keyword): keyword is string => Boolean(keyword)),
     );
     if (forcedKeyword) {
-      // The forced keyword is allowed even if a recent post used it.
       usedKeywords.delete(forcedKeyword.toLowerCase());
     }
 

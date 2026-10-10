@@ -43,8 +43,6 @@ export const DEFAULT_REVIEW_SETTINGS: ReviewSettings = {
 
 export const DEFAULT_IMAGE_SETTINGS: ImageSettings = { ...DEFAULT_IMAGE_MODEL };
 
-// Locked decision 2026-10-03: analysis defaults to deepseek-v4.1-flash with no
-// reasoning, and stays editable in /admin/settings under ai.analysis.
 export const DEFAULT_ANALYSIS_SETTINGS: AnalysisSettings = {
   modelId: "deepseek-v4.1-flash",
   reasoningEffort: "none",

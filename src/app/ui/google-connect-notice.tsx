@@ -49,7 +49,6 @@ export default function GoogleConnectNotice({
       });
     }
 
-    // Drop the query string so the banner and toast do not replay on reload.
     window.history.replaceState(null, "", window.location.pathname);
   }, [status, reason, toast]);
 

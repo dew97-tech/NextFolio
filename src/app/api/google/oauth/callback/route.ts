@@ -10,7 +10,6 @@ import { NextResponse, type NextRequest } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  // /api/google/* is outside the proxy matcher, so the route guards itself.
   const session = await auth();
   if (!session?.user) {
     return NextResponse.redirect(new URL("/auth/signin", request.url));
@@ -39,7 +38,6 @@ export async function GET(request: NextRequest) {
   const cookieState = request.cookies.get(OAUTH_STATE_COOKIE)?.value;
   const verifier = request.cookies.get(OAUTH_VERIFIER_COOKIE)?.value;
 
-  // State is validated before any token exchange.
   if (!code || !state || !cookieState || !verifier || state !== cookieState) {
     return finish("error", "state");
   }

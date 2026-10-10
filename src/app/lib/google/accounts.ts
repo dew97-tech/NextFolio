@@ -8,11 +8,6 @@ import {
   SETTINGS_KEYS,
 } from "@/app/lib/settings";
 
-/**
- * Stored Google account set used for rotation. The whole array is encrypted
- * with SETTINGS_ENCRYPTION_KEY before it touches the database, and it never
- * leaves the server: the UI only ever receives masked summaries.
- */
 export const storedGoogleAccountSchema = z.object({
   label: z.string().min(1),
   googleAccount: z.string().default(""),
@@ -130,12 +125,6 @@ export async function getGoogleAccountSummaries(): Promise<{
   };
 }
 
-/**
- * Bearer token for Google Ads calls. When a dedicated Ads account is flagged
- * in settings, it refreshes with that account's own client pair and refresh
- * token and never touches the live GoogleConnection row (which belongs to
- * Search Console). Otherwise it falls back to the live connection.
- */
 export async function getAdsAccessToken(): Promise<string> {
   const adsLabel = await getSetting<string | null>(
     SETTINGS_KEYS.googleAdsAccount,
@@ -216,11 +205,6 @@ export interface ActivateAccountResult {
   error?: string;
 }
 
-/**
- * Switches the active account: re-seeds GoogleConnection from the account's
- * refresh token (forcing a real refresh so the stored access token is
- * genuine), aligns keywords.planner, then records the active label.
- */
 export async function activateGoogleAccount(
   label: string,
 ): Promise<ActivateAccountResult> {
@@ -261,11 +245,6 @@ export async function activateGoogleAccount(
   return { ok: true };
 }
 
-/**
- * Copies the live GoogleConnection refresh token back into the active stored
- * account. Run this after a browser re-consent (Update access), so rotation
- * will not later restore an older token.
- */
 export async function captureConnectionIntoActiveAccount(): Promise<ActivateAccountResult> {
   const [row, active] = await Promise.all([
     prisma.googleConnection.findUnique({ where: { provider: "google" } }),

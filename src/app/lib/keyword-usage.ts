@@ -4,10 +4,6 @@ function normalizeKeyword(value: string): string {
   return value.trim().toLowerCase();
 }
 
-/**
- * Flips stored keywords that match the post's keyword list to "used" and links
- * them to the post. Rows already linked to another post stay untouched.
- */
 export async function markKeywordsUsedForPost(postId: string): Promise<number> {
   try {
     const post = await prisma.post.findUnique({
@@ -33,9 +29,6 @@ export async function markKeywordsUsedForPost(postId: string): Promise<number> {
   }
 }
 
-/**
- * Resets keywords linked to a deleted post back to "new".
- */
 export async function resetKeywordsForPost(postId: string): Promise<number> {
   try {
     const result = await prisma.keyword.updateMany({

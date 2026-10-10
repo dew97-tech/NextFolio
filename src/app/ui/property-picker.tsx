@@ -41,8 +41,6 @@ export default function PropertyPicker({
           option.siteUrl.toLowerCase().includes(query),
         );
 
-  // Clamp instead of resetting in an effect: the option list can change
-  // under the picker when properties finish loading.
   const activeIndex = Math.min(
     rawActiveIndex,
     Math.max(filtered.length - 1, 0),
@@ -196,7 +194,6 @@ export default function PropertyPicker({
                     role="option"
                     aria-selected={isActive}
                     onMouseDown={(event) => {
-                      // Select before the input loses focus and closes the list.
                       event.preventDefault();
                       choose(option.siteUrl);
                     }}
