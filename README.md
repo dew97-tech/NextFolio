@@ -1,4 +1,4 @@
-# NextFolio
+# Presswork
 
 A portfolio site that runs its own blog pipeline. It drafts articles with selectable AI models, checks them for accuracy, researches keywords, and measures what ranks, all from an admin dashboard wired to live Google data.
 
@@ -36,8 +36,8 @@ MIT licensed. Use it as a portfolio, a blog engine, an AI writing pipeline, or a
 Requires Node.js 20.9 or newer, a PostgreSQL database, and optionally a Google Cloud project.
 
 ```bash
-git clone https://github.com/dew97-tech/NextFolio.git
-cd NextFolio
+git clone https://github.com/dew97-tech/Presswork.git
+cd Presswork
 npm install
 cp .env.example .env
 ```
