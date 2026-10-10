@@ -105,7 +105,10 @@ export default function PostForm({ post }: { post?: EditablePost }) {
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      const message = error instanceof Error ? error.message : "Upload failed";
+      const raw = error instanceof Error ? error.message : "Upload failed";
+      const message = /access denied|valid token/i.test(raw)
+        ? "The Blob store rejected the upload token. Ask the site owner to rotate BLOB_READ_WRITE_TOKEN"
+        : raw;
       toast({
         variant: "error",
         label: "Upload failed",
