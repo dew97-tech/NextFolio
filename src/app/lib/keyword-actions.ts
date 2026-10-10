@@ -97,12 +97,15 @@ async function requireAdmin(): Promise<boolean> {
 }
 
 function metricData(idea: KeywordIdea) {
+  const microsToBigInt = (value: number | null): bigint | null =>
+    value === null ? null : BigInt(Math.round(value));
+
   return {
     avgMonthlySearches: idea.avgMonthlySearches,
     competition: idea.competition,
     competitionIndex: idea.competitionIndex,
-    lowTopOfPageBidMicros: idea.lowTopOfPageBidMicros,
-    highTopOfPageBidMicros: idea.highTopOfPageBidMicros,
+    lowTopOfPageBidMicros: microsToBigInt(idea.lowTopOfPageBidMicros),
+    highTopOfPageBidMicros: microsToBigInt(idea.highTopOfPageBidMicros),
     monthlyVolumes: idea.monthlyVolumes as unknown as Prisma.InputJsonValue,
     fetchedAt: new Date(),
   };

@@ -128,8 +128,8 @@ model Keyword {
   avgMonthlySearches     Int?
   competition            String?
   competitionIndex       Int?
-  lowTopOfPageBidMicros  Int?
-  highTopOfPageBidMicros Int?
+  lowTopOfPageBidMicros  BigInt?
+  highTopOfPageBidMicros BigInt?
   monthlyVolumes         Json?
   source                 String    @default("keyword_planner") // "keyword_planner" | "manual" | "gsc"
   status                 String    @default("new") // "new" | "used" | "ignored"

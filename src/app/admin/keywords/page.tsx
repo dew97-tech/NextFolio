@@ -87,6 +87,10 @@ function ConfigurationNotice({
   );
 }
 
+function microsToNumber(value: bigint | null): number | null {
+  return value === null ? null : Number(value);
+}
+
 export default async function KeywordsPage() {
   const [keywords, planner] = await Promise.all([
     prisma.keyword.findMany({
@@ -105,8 +109,8 @@ export default async function KeywordsPage() {
     avgMonthlySearches: keyword.avgMonthlySearches,
     competition: keyword.competition,
     competitionIndex: keyword.competitionIndex,
-    lowTopOfPageBidMicros: keyword.lowTopOfPageBidMicros,
-    highTopOfPageBidMicros: keyword.highTopOfPageBidMicros,
+    lowTopOfPageBidMicros: microsToNumber(keyword.lowTopOfPageBidMicros),
+    highTopOfPageBidMicros: microsToNumber(keyword.highTopOfPageBidMicros),
     monthlyVolumes: parseMonthlyVolumes(keyword.monthlyVolumes),
     source: keyword.source,
     status: keyword.status,
